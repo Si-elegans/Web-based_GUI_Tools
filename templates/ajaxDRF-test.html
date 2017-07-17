@@ -1,0 +1,181 @@
+{% extends 'base-with-login.html' %}
+{% load staticfiles %}
+
+{% block content %}
+
+    <div class="container">
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <p>Gorka's Tests</p>
+            </div>
+            <div class="panel-body">
+                <input type="submit" name="Shareitem" id="Shareitem" value="OldTest">
+                <input type="submit" name="CloneBehExp" id="CloneBehExp" value="CloneBehExp">
+            </div>
+        </div>
+    
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <p>Rober's Tests</p>
+            </div>
+            <div class="panel-body">            
+                <button type="button" class="btn btn-primary" id="cors_testing">CORS Testing</button>
+                <small>The response from the server will be written here: </small><span id="response_cors" style="color:red"></span>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="text/javascript">
+
+        /***************************************
+            CORS BLOCK START
+        ***************************************/
+
+        function createCORSRequest(method, url) {
+            var xhr = new XMLHttpRequest();
+            if ("withCredentials" in xhr) {        
+                // Check if the XMLHttpRequest object has a "withCredentials" property.
+                // "withCredentials" only exists on XMLHTTPRequest2 objects.
+                xhr.open(method, url, true);
+            } else if (typeof XDomainRequest != "undefined") {
+                // Otherwise, check if XDomainRequest.
+                // XDomainRequest only exists in IE, and is IE's way of making CORS requests.
+                xhr = new XDomainRequest();
+                xhr.open(method, url);
+            } else {
+                // Otherwise, CORS is not supported by the browser.
+                xhr = null;
+            }
+            return xhr;
+        }
+
+        // Make the actual CORS request.
+        function makeCorsRequest() {
+            // All HTML5 Rocks properties support CORS.
+            var url = 'https://150.241.250.4:2730/service/123456';
+
+            var xhr = createCORSRequest('GET', url);
+            if (!xhr) {
+                alert('CORS not supported');
+                return;
+            }
+        
+            // Response handlers.
+            xhr.onload = function() {
+                var text = xhr.responseText;
+                $('#response_cors').text(text);
+            };
+        
+            xhr.onerror = function() {
+                alert('Woops, there was an error making the request.');
+            };
+
+            xhr.send();
+
+        }
+
+
+
+
+
+        $('#cors_testing').click(function(e){
+            //makeCorsRequest();
+            $.ajax({
+                type: "GET",
+                url: "https://150.241.250.4:2730/service/123456",
+                contentType: 'text/plain',
+                xhrFields: {
+                    withCredentials: true
+                },
+                headers: {
+                },
+                success: function(response) {
+                    $('#response_cors').text(response);
+                },
+                error: function() {
+                    $('#response_cors').text('An error occurred.');
+                }
+            });
+        });
+
+        /***************************************
+            CORS BLOCK END
+        ***************************************/
+
+        var sendInfo = {           
+            "directTouchInstrument": "EB",
+            "touchDistance": 6,
+            "touchAngle": 1.0,
+            "appliedForce": 1.0
+        };
+
+
+        $("#Shareitem").click(function(e){
+            e.preventDefault();
+            var csrftoken = $.cookie('csrftoken');
+            $.ajax({
+                url: "https://127.0.0.1:8000/restAPI/directTouchType/1/",
+                cache: false,
+                type: "PUT",//type:"POST"
+                data: JSON.stringify(sendInfo),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    if (msg) {
+                        alert("Element" + " was added in rest !");
+                        location.reload(true);
+                    } else {
+                        alert("Cannot add to rest !");
+                    }
+                },
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-CSRFToken',csrftoken);
+                    //xhr.setRequestHeader('X-CSRFToken', $('meta[name="csrf-token"]').attr('content'));
+                    //xhr.setRequestHeader("Authorization", "Basic " + btoa("admin" + ":" + "admin"));
+                    //xhr.setRequestHeader("Content-Type", "application/json");
+                },
+            });
+        });
+
+
+        var CloneBehExpInfo = {
+            "behaviouralExperiment": 5,
+        };
+
+
+        $("#CloneBehExp").click(function(e){
+            e.preventDefault();
+            var csrftoken = $.cookie('csrftoken');
+            $.ajax({
+                url: "{% url 'behavExp_has_reservation' %}",
+                cache: false,
+                type: "POST",//type:"POST"
+                data: JSON.stringify(CloneBehExpInfo),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                    if (msg) {
+                        console.log("Element" + " was added in rest !");            
+                    } else {
+                        console.log("Cannot add to rest !");
+                    }
+                },
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-CSRFToken',csrftoken);
+                    //xhr.setRequestHeader('X-CSRFToken', $('meta[name="csrf-token"]').attr('content'));
+                    //xhr.setRequestHeader("Authorization", "Basic " + btoa("admin" + ":" + "admin"));
+                    //xhr.setRequestHeader("Content-Type", "application/json");
+                },
+            });
+        });
+
+//});
+//GE: Be careful with the messages saying unique items or so. Check chrome-F12 and Network for message output
+//$(document).ready(function(){   
+//});
+
+    </script>
+
+{% endblock %}

@@ -1,0 +1,2071 @@
+{% extends 'base-with-login.html' %}
+{% load staticfiles %}
+
+{% block title %}SiElegans Model Definition{% endblock %}
+
+{% block content %}
+<div class="panel panel-default" style="margin-left:-15px; margin-right:-15px">
+    <div class="panel-heading">
+        <!--h3>View Component Hierarchy</h3-->
+        <div id="model_info" style="display:inline-block;width:40%;">
+            <input type="Button" id="save_model" value="Save"/>
+            <input type="Button" id="save_model_as" value="Save As"/>
+            <input type="Button" id="open_model" value="Open"/>
+            <input type="Button" id="model_xml" value="Show XML"/>
+        </div>
+        {% if top_tag == 'Cell' %}
+        <div style="display:inline-block;width:40%;">
+            Test Model >
+            <select id="run_synapse_select">
+                {% for synapse in synapses %}
+                <option value="{{ synapse.pk }}" id="job_jlems">{{ synapse }}</option>
+                {% endfor %}
+            </select>
+            <input type="Button" id="run_model" value="Run Model" disabled="disabled"/>
+            <input type="Button" id="run_results" value="View Results" disabled="disabled"/>
+
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="row">
+        <div id="col_0" style="padding-left:20px;padding-right:0px;min-width:27%;max-width:27%;display:inline-block;float:left">
+            <div class="panel panel-default">
+                <div style="height:575px" id="info_panel">
+                    <div id="comp_info_type"></div>
+                    <div id="comp_info_desc"></div>
+                    <div id="comp_info_xml"></div>
+                    <div id="comp_info_dynamics"></div>
+                    <div id="new_sub_type"></div>
+                    <div id="edit_sub_type"></div>
+                    <div id="instance_data"></div>
+                    <div id="create_component_prefab">
+                        <input type="Button" id="create_component_prefab_button" value="Save Component Prefab"/></div>
+                </div>
+            </div>
+        </div>
+        <div id="col_1" style="padding:0px;display:inline-block">
+            <div style="height:600px; overflow:hidden" id="model_stage"></div>
+        </div>
+        <div id="col_2" style="padding-left:0px;padding-right:30px;max-width:200px;display:inline-block;float:right">
+            <div id="headings_row" class="row" style="padding-right:10px;width:195px"><center>
+                Model Components
+            </center></div>
+            <div id="buttons_row" class="row" style="padding-right:10px;width:195px"><center>
+                <input id="comp_btn" type="button" value="Library"/>
+                <input id="custom_btn" type="button" value="Custom"/>
+            </center></div>
+            <div id="tags_row" class="row" style="padding-right:10px;padding-top:5px;width:195px"><center>
+                <label for="tags_select">Filter</label>
+                <select id="tags_select">
+                    {% for tag in tags %}
+                        <option id="{{tag}}">{{tag}}</option>
+                    {% endfor %}
+                </select>
+            </center></div>
+            <div id="stage_row" class="row" style="padding-left:15px;width:195px">
+                <div style="height:575px; overflow:hidden; overflow-y:auto" id="context_stage"></div>
+            </div>  
+        </div>
+    </div>
+</div>
+
+<div id="openModal" class="modal fade">
+    <div class="modal-dialog" style="width:450px">
+        <div class="modal-content"> 
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Open Model</h4>
+            </div>
+            <div class="modal-body">
+                <p>Available Models</p>
+                <select id="model_list" size="5">
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="open_selected_model_btn">Open</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="saveModal" class="modal fade">
+    <div class="modal-dialog" style="width:300px">
+        <div class="modal-content"> 
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Save Model</h4>
+            </div>
+            <div class="modal-body">
+                <table><tr><td>
+                    <label for="model_name">Model Name:</label>
+                </td><td>
+                    <input type="text" id="model_name"/>
+                </td></tr>
+
+                <tr><td>
+                    <label for="model_desc">Description:</label>
+                </td><td>
+                    <textarea id="model_desc" rows="5" cols="22"></textarea>
+                </td></tr>
+
+                <tr><td>
+                    <label for="model_public">Share:</label>
+                </td><td>
+                    <input type="checkbox" id="model_public"/>
+                </td></tr></table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="save_model_as_btn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="create_component_prefab_dialog" class="modal fade">
+    <div class="modal-dialog" style="width:300px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Create Component Prefab</h4>
+            </div>
+            <div class="modal-body">
+                <label for="model_name">Prefab Name:</label>
+                <input type="text" id="create_component_prefab_name"/>
+
+                <label for="model_name">Prefab Tag:</label>
+                <select id="create_component_prefab_tag">
+                {% for tag_name in tags %}
+                    {% if tag_name.tag == "Cell" or tag_name.tag == "Synapse" or tag_name.tag == "components" %}
+                    {% else %}
+                    <option>{{ tag_name.tag }}</option>
+                    {% endif %}
+                {% endfor %}
+                </select>
+
+                <label for="model_name">Share:</label>
+                <input type="checkbox" id="create_component_prefab_public"/>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="create_component_prefab_save">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="dynamicsModal" class="modal fade">
+    <div class="modal-dialog" style="width:500px">
+        <div class="modal-content"> 
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Component Dynamics</h4>
+            </div>
+            <div class="modal-body">
+                <div id="modal-dynamics">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{% static "js/nuig/kinetic-v5.0.1.min.js" %}"></script>
+
+<script>
+//var dividing_line_x = 550
+var model_stage_width = 800
+var stage_height = 600
+var context_stage_width = 195
+var comp_rect_width = 150
+var comp_rect_height = 35
+var model_id = -1
+var sim_id = -1
+var go_after_save = null
+
+function on_load() {
+    window.model_stage = new Kinetic.Stage({
+        container: 'model_stage',
+        width: model_stage_width,
+        height: stage_height
+    })
+
+    window.context_stage = new Kinetic.Stage({
+        container: 'context_stage',
+        width: context_stage_width,
+        height: stage_height
+    })
+
+    create_custom_comps_layer()
+    create_avail_comps_layer()
+
+    create_model_layer()
+    create_model_bg_layer()
+
+    create_context_bg_layer()
+
+    create_sub_comps_layer()
+
+    window.model_stage.draw()
+    window.context_stage.draw()
+
+    $('#save_model').click(save_model_as)
+    $('#save_model_as').click(save_model_as)
+    $('#open_model').click(show_open_model)
+    $('#model_xml').click(model_xml)
+    $('#run_model').click(run_current_model)
+    $('#run_results').click(run_results)
+
+    $('#create_component_prefab_button').click(function(e) {
+        $("#create_component_prefab_dialog").modal('show')
+        return true
+    })
+
+    $('#create_component_prefab_save').click(function(e) {
+        component_prefab_save();
+        return true
+    })
+
+    $('#open_selected_model_btn').click(open_model)
+    $('#save_model_as_btn').click(save_model)
+
+    $('#tags_select').on("change", tag_sel_changed_event)
+
+    $('#custom_btn').click(function() {
+        $(this).css('color', 'mediumblue')
+        $('#comp_btn').css('color', 'black')
+        window.avail_comps_layer.hide()
+        window.custom_comps_layer.show()
+        window.context_stage.draw()
+    })
+
+    $('#comp_btn').click(function() {
+        $(this).css('color', 'mediumblue')
+        $('#custom_btn').css('color', 'black')
+        window.custom_comps_layer.hide()
+        window.avail_comps_layer.show()
+        window.context_stage.draw()
+    })
+
+    {% if open_model != None %}
+    open_model('{{ open_model }}')
+    {% endif %}
+
+    $('#tags_select').val('{{ top_tag }}')
+    tag_sel_changed('{{ top_tag }}')
+}
+
+
+function model_xml() {
+    // First save the model?
+    //save_model()
+
+    // Get xml in another window
+    var url = "{% url 'lems_ui.views.model_to_lems_xml' %}" +
+              "?model_name=" + $('#model_name').val()
+
+    console.log("Trying to open url: " + url)
+    window.open(url, '_blank')
+}
+
+
+function model_xml_component(component_name,prefab_name,description,tag) {
+    // First save the model?
+    //save_model()
+
+    // Get xml in another window
+    var url = "{% url 'lems_ui.views.save_component_to_lems_xml' %}" +
+              "?model_name=" + $('#model_name').val()  + "&component_id=" + component_name + "&prefab_name=" + prefab_name + "&description=" + description + "&tag=" + tag
+
+    console.log("Trying to post url: " + url)
+    // Send to json to server
+    $.ajax({
+        type: "GET",
+        url: url,
+        success: function(data) {
+            console.log(data)
+            $("#create_component_prefab_dialog").modal('hide')
+            $('#create_component_prefab_save').off('click')
+        },
+        async: false
+    })
+}
+
+
+function component_prefab_save(){
+
+    var model_name = $('#model_name').val()
+
+    if( model_name.length == 0) {
+    alert("please save model first");
+    }
+    save_model();
+
+    // Check we have a model name
+    $('#create_component_prefab_name').css({'background-color' : 'white'})
+    var model_name = $('#create_component_prefab_name').val()
+
+    if( model_name.length == 0) {
+        alert('Please enter a name for this component')
+        $('#model_name').css({'background-color' : '#ff8888'})
+        return
+    }
+
+    // Save which item was selected
+    var selected_group = null
+    window.model_stage.find('Group').each(function (this_group) {
+        if(this_group.find('Rect')[0].stroke() == 'red') {
+            selected_group = {'name' : this_group.name(),
+                              'type' : this_group.getAttr('lems_type')}
+        }
+    })
+
+    // Make sure the instance_data html has all current values
+    $('#instance_data').find('input').each(function() {
+        $(this).attr('value', $(this).val())
+    })
+
+    $('#instance_data').find('option:selected').each(function() {
+        $(this).attr('selected', 'selected')
+        $(this).attr('tmp_mark', '')
+    })
+    var componentName = $('#instance_data .id_input:visible').val();
+    model_xml_component(componentName,model_name,"description",$('#create_component_prefab_tag').val());
+
+}
+
+
+function save_model(){
+    // Check we have a model name
+    $('#model_name').css({'background-color' : 'white'})
+    var model_name = $('#model_name').val()
+
+    if( model_name.length == 0) {
+        alert('Please enter a name for this model')
+        $('#model_name').css({'background-color' : '#ff8888'})
+        return
+    }
+
+    console.log('Saving Model')
+
+    // Save which item was selected
+    var selected_group = null
+    window.model_stage.find('Group').each(function (this_group) {
+        if(this_group.find('Rect')[0].stroke() == 'red') {
+            selected_group = {'name' : this_group.name(),
+                      'type' : this_group.getAttr('lems_type')}
+        }
+    })
+
+    // Make sure the instance_data html has all current values
+    $('#instance_data').find('input').each(function() {
+        $(this).attr('value', $(this).val())
+    })
+
+    // Make sure each select box in instance_data has the currently
+    // displayed option marked as selected
+
+    // This is awkward, possibly overkill. We give the actually selected
+    // item a 'selected' attr just in case another also has this attr
+    // we mark the actually selected with a tmp attr. Then we remove the
+    // selected tag from anything without the tmp attr. Then we remove the
+    // tmp attr from all.
+    $('#instance_data').find('option:selected').each(function() {
+        $(this).attr('selected', 'selected')
+        $(this).attr('tmp_mark', '')
+    })
+
+    $('#instance_data').find('option').each(function() {
+        if( $(this).attr('tmp_mark') == undefined ) {
+            $(this).removeAttr('selected')
+        }
+    })
+
+    $('#instance_data').find('option').removeAttr('tmp_mark')
+
+    var inst_data = $('#instance_data').html()
+    console.log(inst_data)
+
+    // Data structure to be stored on the server
+    var data = JSON.stringify({
+        'model_name' : model_name,
+        'model_public' : $('#model_public').is(':checked'),
+        'model_description' : $('#model_desc').val(),
+        'instance_data' : inst_data,
+        'selected_type' : $('#comp_types option:selected').text(),
+        'selected_group' : selected_group,
+        'model_layer' : model_layer_to_json(),
+        'param_data' : build_param_data(),
+        'top_tag' : '{{top_tag}}'
+    })
+
+    var current_synapse = $('#run_synapse_select').val();
+
+    // Send to json to server
+    $.ajax({
+        type: "POST",
+        url: "{% url 'lems_ui.views.save_model' %}",
+        data: {msg: data, synId : current_synapse},
+        success: function(data) {
+            console.log(data)
+            $('#saveModal').modal('hide')
+            $('#save_model').off('click')
+            $('#save_model').click(save_model)
+            $('#run_model').removeAttr('disabled');
+            var dataDecoded =   JSON.parse(data);
+            model_id = dataDecoded.model_id;
+            if(window.go_after_save != null) {
+                window.location.href = window.go_after_save
+            }
+        },
+        async: false
+    })
+}
+
+
+/*
+ *
+ */
+function build_param_data() {
+    var param_data = {}
+
+    param_data.comps = {}
+
+    // for each comp add name, description and dict of params and values
+    $('#instance_data').children('div').each( function() {
+        var id = $(this).attr('id')
+        var type = $(this).attr('lems_type')
+        var name = $(this).find('input').val()
+
+        if( name.toLowerCase().indexOf('default') > -1 ) {
+            param_data.default_syn = id
+        }
+
+        param_data.comps[id] = {'name': name, 'type': type, 'params': {}}
+
+        $(this).find('.params').find('input').each(function() {
+            param_data.comps[id].params[$(this).attr('id')] = {'val': $(this).val()}
+
+            if( $(this).next().is('select') ) {
+                param_data.comps[id].params[$(this).attr('id')]['unit'] = $(this).next().val()
+            }
+            else {
+                param_data.comps[id].params[$(this).attr('id')]['unit'] = ""
+            }
+
+        })
+    })
+
+    return param_data
+}
+
+
+/*
+ * The toJSON method from KineticJS sometimes fails, and it is
+ * difficult to correctly recreate a layer from the resulting json
+ * so we'll convert the layer to json here, including only the
+ * required json data
+ */
+function model_layer_to_json() {
+    var result = []
+
+    var types = ['Group', 'Line']
+    for(i=0; i<types.length; i++) {
+        window.model_layer.find(types[i]).each(function(shape) {
+            result.push(shape.toJSON())
+        })
+    }
+
+    return result
+}
+
+
+function run_results() {
+        window.open('/djlems/results_viewer_ind/?sim_id=neuronModelTest' + sim_id, '_blank')
+}
+
+
+function run_current_model() {
+    var current_synapse = $('#run_synapse_select').val();
+
+    $.get('/djlems/sched_job/?model_id=' + model_id + '&sim_type=0&synapse_id=' + current_synapse,
+          function(data) {
+            console.log(data)
+            if(data.indexOf('<error>') >= 0){
+                alert(data)
+            }
+            //location.reload(true)
+            $('#run_model').attr('disabled','disabled');
+            $('#run_results').removeAttr('disabled');
+            var dataDecoded = JSON.parse(data);
+            sim_id = dataDecoded.sim_id
+          }
+    )
+}
+
+
+/*
+ * Open model modal
+ */
+ function show_open_model(){
+    var first = true
+
+    $.ajax({
+        url: "{% url 'lems_ui.views.model_list' %}/?top_tag={{top_tag}}"
+    })
+    .done(function (data) {
+        data = JSON.parse(data)
+
+        $("#model_list").empty()
+
+        for(i=0; i<data.length; ++i){
+            console.log(data[i])
+
+            var option_val = data[i].name + ':' + data[i].owner
+            var option_html = '<option value="' + option_val + '"'
+            option_html += ' owner="' + data[i].owner + '"'
+            option_html += ' ondblclick="open_model(\'' + option_val + '\')"'
+
+            if(first){
+                option_html += ' selected'
+            }
+
+            option_html += ' >' + data[i].name + ' (owned by ' + data[i].owner + ')</option>'
+
+            $("#model_list").append(option_html)
+
+            first = false
+        }
+        $("#openModal").modal('show')
+    })
+}
+
+
+function save_model_as(){
+    $("#saveModal").modal('show')
+}
+
+
+/*
+ * Retrieve a saved model from the server and load it
+ */
+function open_model(model_name){
+    if(typeof(model_name) != 'string'){
+        model_name = $('#model_list').val()
+    }
+    $("#openModal").modal('hide')
+
+    if( model_name.length == 0) {
+        alert('Please enter the name of the model to open')
+        return
+    }
+
+    $.ajax({
+        url: "{% url 'lems_ui.views.get_model' %}/?model_name=" + model_name
+    })
+    .done(function (data) {
+        var model_data = JSON.parse(data)
+
+        console.log('Retrieved data for model: ' + model_data.model_name)
+
+        $('#instance_data').html(model_data.instance_data)
+        $('.id_input').change(update_ids)
+
+        // Remove all instances and lines from model_layer
+        var shape_types = ['Group', 'Line']
+        for(i=0; i<shape_types.length; i++) {
+            window.model_layer.find(shape_types[i]).each(function(shape) {
+                shape.remove()
+            })
+        }
+
+        // Initialise and add each shape from the json
+        for(i=0; i<model_data.model_layer.length; i++) {
+            var shape = Kinetic.Node.create(model_data.model_layer[i])
+
+            // Add event handlers
+            make_clickable([shape])
+            shape.on('click', comp_click, true)
+            shape.on('dblclick', comp_remove, true)
+            shape.on('dragmove', draw_shape_lines, true)
+
+            window.model_layer.add(shape)
+        }
+        lines_to_back()
+
+        // Set the value in the comp dropdown
+        $('#comp_sel select').val(model_data.selected_type)
+
+        window.model_stage.draw()
+        window.context_stage.draw()
+
+        // Keep the item that was selected highlighted
+        if( model_data.selected_group != null ) {
+            comp_update(model_data.selected_group.name,
+                        model_data.selected_group.type)
+        }
+
+        // Initialise the model_name and public fields in the save_as dialog
+        $('#model_name').val(model_name)
+        $('#model_desc').val(model_data.model_desc)
+        $('#model_public').prop('checked', model_data.model_public)
+
+        // If this is 'my' model then clicking save will save immediately
+        // Otherwise clicking save will 'Save As'
+        var owner = $('option:selected', '#model_list').attr('owner')
+
+        if(owner == '{{user.username}}'){
+            $('#save_model').off('click')
+            $('#save_model').click(save_model)
+        }
+        else {
+            $('#save_model').off('click')
+            $('#save_model').click(save_model_as)
+        }
+    })
+}
+
+
+function create_custom_comps_layer() {
+    window.custom_comps_layer = new Kinetic.Layer()
+    window.context_stage.add(window.custom_comps_layer)
+}
+
+
+function create_avail_comps_layer() {
+    window.avail_comps_layer = new Kinetic.Layer()
+    window.context_stage.add(window.avail_comps_layer)
+}
+
+
+function create_model_layer() {
+    window.model_layer = new Kinetic.Layer()
+    window.model_layer.setDraggable("draggable")
+
+    // a large background rect to make everything draggable
+    var background = new Kinetic.Rect({
+        x: -150,
+        y: -350,
+        width: 2000,
+        height: 2000,
+        //fill: "#e9f2f7",
+        fill: "#B2D1FF",
+        stroke: 'black',
+        strokeWidth: 2
+    })
+
+    window.model_layer.add(background)
+    window.model_stage.add(window.model_layer)
+    window.model_layer.moveToBottom()
+}
+
+
+function create_context_bg_layer() {
+    var curr_y = 5
+    var bg_layer = new Kinetic.Layer()
+
+    window.custom_comps_layer.hide()
+    window.avail_comps_layer.show()
+        $('#comp_btn').css('color', 'mediumblue')
+
+    window.context_stage.add(bg_layer)
+    window.context_stage.draw()
+}
+
+
+function context_change(evt){
+    window.context_stage.find('Text').each( function(shape) {
+        if(shape.getAttr('target_layer')){
+            if(shape == evt.targetNode){
+                shape.getAttr('target_layer').show()
+                shape.setFill('black')
+            }
+            else {
+                shape.getAttr('target_layer').hide()
+                shape.setFill('silver')
+            }
+        }
+    })
+    window.context_stage.draw()
+}
+
+
+function create_model_bg_layer() {
+    var zoom_x = 700
+    var bg_layer = new Kinetic.Layer()
+
+    var zoom_delta = 0.1
+
+    var zoom_pos = new Kinetic.Text({
+        x: zoom_x,
+        y: 10,
+        text: '+',
+        fontSize: 18,
+        fill: 'black',
+        align: 'center',
+        name: "zoom_pos"
+    })
+
+    zoom_pos.on('click', function() {
+        console.log("Zoom In")
+        new_scale = window.model_layer.getScale().x + zoom_delta
+        window.model_layer.setScale({x:new_scale, y:new_scale})
+        window.model_layer.draw()
+    })
+
+    var zoom_neg = new Kinetic.Text({
+        x: zoom_x + 2,
+        y: 25,
+        text: '-',
+        fontSize: 20,
+        fill: 'black',
+        align: 'center',
+        name: "zoom_neg"
+    })
+
+    zoom_neg.on('click', function() {
+        console.log("Zoom Out")
+        new_scale = window.model_layer.getScale().x - zoom_delta
+        window.model_layer.setScale({x:new_scale, y:new_scale})
+        window.model_layer.draw()
+    })
+
+    // inintialise zoomed out
+    new_scale = window.model_layer.getScale().x - (zoom_delta * 2)
+    window.model_layer.setScale({x:new_scale, y:new_scale})
+
+    make_clickable([zoom_pos, zoom_neg])
+
+    bg_layer.add(zoom_pos)
+    bg_layer.add(zoom_neg)
+
+    window.model_stage.add(bg_layer)
+}
+
+
+function create_sub_comps_layer() {
+    sub_comps_offset = 20
+    sub_comps_width = 400
+    sub_comps_height = 550
+    var button_height = 35
+
+    window.sub_comps_layer = new Kinetic.Layer()
+
+    var sub_comps_border = new Kinetic.Rect({
+        x: sub_comps_offset,
+        y: sub_comps_offset,
+        width: sub_comps_width,
+        height: sub_comps_height,
+        fill: "white",
+        stroke: 'black',
+        strokeWidth: 1
+    })
+
+    var sub_comps_heading2 = new Kinetic.Text({
+        x: sub_comps_offset,
+        y: sub_comps_offset + 10,
+        text: "Available Sub Components",
+        fontSize: 12,
+        fill: 'black',
+        width: sub_comps_width,
+        align: 'center',
+        name: "sub_comps_text"
+    })
+
+    var sub_comps_heading = new Kinetic.Text({
+        x: sub_comps_offset,
+        y: sub_comps_offset + 260,
+        text: "Pre-configured Sub Components",
+        fontSize: 12,
+        fill: 'black',
+        width: sub_comps_width,
+        align: 'center',
+        name: "sub_comps_text"
+    })
+
+    var cancel_rect = new Kinetic.Rect({
+        x: sub_comps_offset + 100,
+        y: sub_comps_height - button_height,
+        width: sub_comps_width - 200,
+        height: button_height,
+        fill: "silver",
+        stroke: 'black',
+        strokeWidth: 1
+    })
+
+    var cancel_text = new Kinetic.Text({
+        x: sub_comps_offset + 100,
+        y: sub_comps_height - button_height + 8,
+        text: "Cancel",
+        fontSize: 18,
+        fill: 'black',
+        width: sub_comps_width - 200,
+        align: 'center',
+        name: "cancel_text"
+    })
+
+    cancel_rect.on('click', function() {
+        window.sub_comps_layer.hide()
+    })
+
+    cancel_text.on('click', function() {
+        window.sub_comps_layer.hide()
+    })
+
+    make_clickable([cancel_rect, cancel_text])
+    window.sub_comps_layer.add(sub_comps_border)
+    window.sub_comps_layer.add(sub_comps_heading)
+    window.sub_comps_layer.add(sub_comps_heading2)
+    window.sub_comps_layer.add(cancel_rect)
+    window.sub_comps_layer.add(cancel_text)
+
+    window.model_stage.add(window.sub_comps_layer)
+    window.sub_comps_layer.hide()
+}
+
+
+function get_sub_comp(relationship, name, comp_type) {
+    // Get all possible sub comps for this sub
+    // comp type i.e. all descendants
+    $.ajax({
+        url: "{% url 'lems_ui.views.get_descendants' %}/?name=" + comp_type
+    })
+    .done(function (data) {
+        console.log("descendants: " + data)
+
+        // Get the location of the currently selected instance,
+        // the new component will go just below this one.
+        var shapes = model_layer.find('Rect')
+        var orig_group = null
+
+        for(j=0; j<shapes.length; j++) {
+            if(shapes[j].stroke() == 'red') {
+                orig_group = shapes[j].getParent()
+                break
+            }
+        }
+
+        draw_sub_comps(relationship, name, JSON.parse(data), false, orig_group)
+        $.ajax({
+            url: "{% url 'lems_ui.views.get_descendantscomponents' %}/?name=" + comp_type
+        })
+        .done(function (data) {
+            console.log("descendants: " + data)
+
+            draw_sub_comps(relationship, name, JSON.parse(data), true, orig_group)
+        })
+    })
+}
+
+
+function add_sub_comps_link(relationship, relation_name, sub_comp_list, custom,
+                            orig_group, page, next){
+    var y_val = sub_comps_offset + 13
+
+
+    if( next == true ){
+        var x_val = sub_comps_offset + sub_comps_width - 50
+        var link_text = 'Next'
+        var link_dir = 1
+    }
+    else{
+        var x_val = sub_comps_offset + 50
+        var link_text = 'Prev'
+        var link_dir = -1
+    }
+
+    if( custom == true){
+        y_val += 250
+    }
+
+    var link_shape = new Kinetic.Text({
+        x: x_val,
+        y: y_val,
+        text: link_text,
+        fontSize: 10,
+        fill: 'black',
+        width: 25,
+        align: 'center',
+        name: link_text + custom.toString()
+    })
+
+    link_shape.on('click', function() {
+        draw_sub_comps(relationship, relation_name, sub_comp_list, custom,
+                       orig_group, page + link_dir)
+    })
+
+    make_clickable([link_shape])
+    window.sub_comps_layer.add(link_shape)
+    link_shape.moveToTop()
+}
+
+
+function add_sub_comps_next(relationship, relation_name, sub_comp_list, custom,
+                            orig_group, page){
+    add_sub_comps_link(relationship, relation_name, sub_comp_list, custom,
+                       orig_group, page, true)
+}
+
+
+function add_sub_comps_prev(relationship, relation_name, sub_comp_list, custom,
+                            orig_group, page){
+    add_sub_comps_link(relationship, relation_name, sub_comp_list, custom,
+                       orig_group, page, false)
+}
+
+
+function draw_sub_comps(relationship, relation_name, sub_comp_list, custom,
+                        orig_group, page) {
+    if(typeof(page) == 'undefined') {
+        page=0
+    }
+
+    // the number of items per 'page'
+    var page_size = 8
+
+    // two rows of components
+    var comp_width = 175
+    var comp_height = 35
+    var pad = 20
+
+    // take into account that these will be changed in
+    // first loop below
+    var x_pos = 35 + (comp_width + pad)
+    var y_pos = 60
+    if(custom == true) {
+        y_pos = 310
+    }
+    y_pos = y_pos - (comp_height + pad)
+
+    // find and remove all links
+    var old_comps = window.sub_comps_layer.find('Text')
+    for(i=0; i<old_comps.length; i++){
+        if(old_comps[i].attrs.name == 'Next' + custom.toString() ||
+           old_comps[i].attrs.name == 'Prev' + custom.toString()){
+            old_comps[i].remove()
+        }
+    }
+
+    if(custom == false) {
+        old_comps = window.sub_comps_layer.find('Group')
+        old_comps.each(function(shape) {
+            shape.remove()
+        })
+    }
+
+    // this is not the first page so add a prev link
+    if( page > 0 ){
+        add_sub_comps_prev(relationship, relation_name, sub_comp_list, custom,
+                           orig_group, page)
+    }
+
+    var start_idx = page * page_size
+    var end_idx = start_idx + page_size
+
+    if(end_idx > sub_comp_list.length){
+        end_idx = sub_comp_list.length
+    }
+    else{
+        // this is not the last page so add a next link
+        add_sub_comps_next(relationship, relation_name, sub_comp_list, custom,
+                           orig_group,  page)
+    }
+
+    for(i=start_idx; i<end_idx; i++){
+        if( i % 2 != 0) {
+            x_pos += (comp_width + pad)
+        }
+        else {
+            x_pos -= (comp_width + pad)
+            y_pos += (comp_height + pad)
+        }
+
+        console.log('adding at: ' + x_pos + ' : ' + y_pos)
+        var comp_rect = new Kinetic.Rect({
+            x: x_pos,
+            y: y_pos,
+            width: comp_width,
+            height: comp_height,
+            fill: '#ddd', // 'white',
+            stroke: 'black',
+            strokeWidth: 2,
+            cornerRadius: 10,
+            name: sub_comp_list[i],
+        })
+
+        var comp_text = new Kinetic.Text({
+            x: x_pos,
+            y: y_pos + 10,
+            text: sub_comp_list[i],
+            fontSize: 11,
+            fill: 'black',
+            width: comp_width,
+            align: 'center',
+            name: sub_comp_list[i],
+        })
+
+        var comp_group = new Kinetic.Group({
+            name: sub_comp_list[i],
+        })
+
+        comp_group.on('dblclick', function() {
+            console.log('dblclicked: ' + this.name())
+            if(custom == true){
+                add_sub_comp_component(relationship, relation_name, this.name(), orig_group)
+            }
+            else{
+                add_sub_comp(relationship, relation_name, this.name(), orig_group)
+            }
+        })
+
+        comp_group.on('click', function() {
+            console.log('clicked: ' + this.name())
+            comp_update(this.name(), this.name())
+        })
+
+        make_clickable([comp_group])
+        comp_group.add(comp_rect)
+        comp_group.add(comp_text)
+
+        window.sub_comps_layer.add(comp_group)
+        console.log('Adding sub comp Group: ' + comp_group.name())
+    }
+    // Show the layer
+    window.sub_comps_layer.show()
+    window.sub_comps_layer.draw()
+}
+
+
+/*
+ * When a custom sub comp has been chosen this function draws it
+ * including all of its components on the main model_layer
+ */
+function add_sub_comp_component(relationship, relation_name, sub_comp_name, orig_group) {
+    // Draw the sub comp as if it was placed by the user
+
+    // get the components hierarchy in json
+    $.ajax({
+        url: "{% url 'lems_ui.views.component_hierarchy' %}/?name=" + sub_comp_name,
+        async: false
+    })
+    .done(function (data) {
+        var comp_width = 175
+        var comp_height = 35
+        var pad = 20
+        console.log('TYPE HIERARCHY')
+        console.log(data)
+        hierData = JSON.parse(JSON.parse(data).hierarchy)
+
+        //start with top component
+        function  addComponent(component,xOff,yOff, parent_group,relationship, relation_name) {
+            var name = component.id;
+            var type = component.type;
+            var parameters = component.parameters;
+            console.log('Adding ' + name + ' to ' + parent_group.name())
+
+            var new_inst_name = create_inst_name()
+            var x_pos = parent_group.x();
+            var y_pos = parent_group.y();
+
+            // Create a new group and get references to
+            // the enclosed rect and text
+            var comp_rect = new Kinetic.Rect({
+                x: parent_group.find('Rect')[0].x(),
+                y: parent_group.find('Rect')[0].y(),
+                width: comp_width,
+                height: comp_height,
+                fill: '#ddd', // 'white',
+                stroke: 'black',
+                strokeWidth: 2,
+                cornerRadius: 10,
+                name: new_inst_name,
+            })
+
+            var comp_text = new Kinetic.Text({
+                x: parent_group.find('Text')[0].x(),
+                y: parent_group.find('Text')[0].y(),
+                text: name,
+                fontSize: 11,
+                fill: 'black',
+                width: comp_width,
+                align: 'center',
+                name: new_inst_name,
+            })
+
+            var new_group = new Kinetic.Group({
+                draggable: true,
+                name: new_inst_name,
+            })
+
+
+            new_group.add(comp_rect)
+            new_group.add(comp_text)
+
+
+            var new_rect = new_group.find('Rect')[0]
+            var new_text = new_group.find('Text')[0]
+
+            // Set the name of each to the new name
+            new_rect.name(new_inst_name)
+            new_text.name(new_inst_name)
+            new_group.name(new_inst_name)
+
+            // Change the displayed text
+            new_text.text(name)
+
+            // Place the new shape below the original
+            new_group.y(parent_group.y() + yOff)
+            new_group.x(parent_group.x() + xOff)
+
+            // Set the lems_type and lems_parent
+            new_group.setAttr('lems_type', type)
+            new_group.setAttr('lems_parent', parent_group)
+
+            // Get a reference to the rect in the original group
+            orig_rect = parent_group.find('Rect')[0]
+
+            var lineStroke = 'black'
+
+            if( relationship == 'attachments' ) {
+                lineStroke = 'yellow'
+            }
+
+            // Create a line joining the new and original shapes
+            // The line points are the center of each rect, the actual
+            // co-ords of each rect is the sum of the group
+            // co-ords and the rect co-ords
+            var connecting_line = new Kinetic.Line({
+                points: [orig_rect.x() + parent_group.x() + orig_rect.width()/2,
+                         orig_rect.y() + parent_group.y() + orig_rect.height()/2,
+                         new_rect.x() + new_group.x() + new_rect.width()/2,
+                         new_rect.y() + new_group.y() + orig_rect.height()/2],
+                stroke: lineStroke,
+                strokeWidth: 2,
+                name: create_inst_name()
+            })
+
+            new_group.on('mousedown', comp_click, true)
+            new_group.on('dblclick', comp_remove, true)
+
+            make_clickable([new_group])
+
+            // Give each line a reference to it's 'from' and 'to' groups
+            connecting_line.setAttr('from_shape', parent_group.name())
+            connecting_line.setAttr('to_shape', new_group.name())
+
+            // Give each group a reference to it's 'to' and 'from' lines
+            parent_group.getAttr('from_lines').push(connecting_line.name())
+            new_group.setAttr('from_lines', [])
+            new_group.setAttr('to_lines', [connecting_line.name()])
+
+            // Draw the line and the new group
+            window.model_layer.add(connecting_line)
+            window.model_layer.add(new_group)
+
+            // put the connecting line on the bottom and then
+            // push the background below it
+            connecting_line.moveToBottom()
+            window.model_layer.find('Rect')[0].moveToBottom()
+
+            // Make this shape selected and close the sub_comps dialog
+            comp_update(new_inst_name, type,name,parameters)
+
+            update_inst_relationship(relationship, parent_group.name(),
+                                     relation_name, new_group.name(),
+                                     new_group.getAttr('lems_type'),name)
+
+            Object.keys(component.children_dict).forEach(function(rel_name) {
+                var current_rel = component.children_dict[rel_name]
+                if (Array.isArray(current_rel)) {
+                    for (index = 0; index < current_rel.length; ++index) {
+                        var current_obj = current_rel[index]
+                        addComponent(current_obj[Object.keys(current_obj)[0]],0,0,new_group,'children_list', rel_name)
+                    }
+                } else {
+                    var current_obj = current_rel;
+                    addComponent(current_obj[Object.keys(current_obj)[0]],0,0,new_group,'children_list', rel_name)
+                }
+            }, this);
+            Object.keys(component.child_dict).forEach(function(rel_name) {
+                var current_rel = component.child_dict[rel_name]
+                if (Array.isArray(current_rel)) {
+                    for (index = 0; index < current_rel.length; ++index) {
+                        var current_obj = current_rel[index]
+                        addComponent(current_obj[Object.keys(current_obj)[0]],0,0,new_group,'child_list', rel_name)
+                    }
+                } else {
+                    var current_obj = current_rel;
+                    addComponent(current_obj[Object.keys(current_obj)[0]],0,0,new_group,'child_list', rel_name)
+                }
+            }, this);
+            Object.keys(component.comp_ref_dict).forEach(function(rel_name) {
+                var current_rel = component.comp_ref_dict[rel_name]
+                if (Array.isArray(current_rel)) {
+                    var offsetToLeft = current_rel.length * 30
+                    for (index = 0; index < current_rel.length; ++index) {
+                        var current_obj = current_rel[index]
+                        addComponent(current_obj[Object.keys(current_obj)[0]],offsetToLeft,60,new_group,'comp_refs', rel_name)
+                        offsetToLeft = offsetToLeft + 60
+                    }
+                } else {
+                    var current_obj = current_rel;
+                    addComponent(current_obj[Object.keys(current_obj)[0]],0,60,new_group,'comp_refs', rel_name)
+                }
+            }, this);
+            //div_html += sub_comp_btns('Add Component Reference', 'comp_refs', inst_details.comp_ref_list)
+            //div_html += sub_comp_btns('Add Child', 'child_list', inst_details.child_list)
+            //div_html += sub_comp_btns('Add Children', 'children_list', inst_details.children_list)
+
+            new_group.on('dragmove', draw_shape_lines, true)
+        }
+
+        addComponent(hierData[Object.keys(hierData)[0]],0,80,orig_group,relationship, relation_name)
+    })
+
+    window.sub_comps_layer.hide()
+}
+
+
+/*
+ * When a regular (single component) sub comp has been chosen this function draws it
+ * on the main model_layer
+ */
+function add_sub_comp(relationship, relation_name, sub_comp_name, orig_group) {
+    // Draw the sub comp as if it was placed by the user
+
+    console.log('Adding ' + sub_comp_name + ' to ' + orig_group.name())
+
+    var new_inst_name = create_inst_name()
+
+    // Create a new group and get references to
+    // the enclosed rect and text
+    var new_group = orig_group.clone()
+    var new_rect = new_group.find('Rect')[0]
+    var new_text = new_group.find('Text')[0]
+
+    // Set the name of each to the new name
+    new_rect.name(new_inst_name)
+    new_text.name(new_inst_name)
+    new_group.name(new_inst_name)
+
+    // If the parent text has a "\n[ id ]" then move this down by 5
+    if(new_text.getText().indexOf('\n') >= 0) {
+        new_text.setPosition({ x: new_text.getPosition().x,
+                       y: new_text.getPosition().y + 5 })
+    }
+
+    // Change the displayed text
+    new_text.text(sub_comp_name)
+
+    // Place the new shape below the original
+    new_group.y(new_group.y() + 80)
+
+    // Set the lems_type and lems_parent
+    new_group.setAttr('lems_type', sub_comp_name)
+    new_group.setAttr('lems_parent', orig_group)
+
+    // Get a reference to the rect in the original group
+    orig_rect = orig_group.find('Rect')[0]
+
+    var lineStroke = 'black'
+
+    if( relationship == 'attachments' ) {
+        lineStroke = 'yellow'
+    }
+
+    // Create a line joining the new and original shapes
+    // The line points are the center of each rect, the actual
+    // co-ords of each rect is the sum of the group
+    // co-ords and the rect co-ords
+    var connecting_line = new Kinetic.Line({
+        points: [orig_rect.x() + orig_group.x() + orig_rect.width()/2,
+                 orig_rect.y() + orig_group.y() + orig_rect.height()/2,
+                 new_rect.x() + new_group.x() + new_rect.width()/2,
+                 new_rect.y() + new_group.y() + orig_rect.height()/2],
+        stroke: lineStroke,
+        strokeWidth: 2,
+        name: create_inst_name()
+    })
+
+
+    // Give each line a reference to it's 'from' and 'to' groups
+    connecting_line.setAttr('from_shape', orig_group.name())
+    connecting_line.setAttr('to_shape', new_group.name())
+
+    // Give each group a reference to it's 'to' and 'from' lines
+    orig_group.getAttr('from_lines').push(connecting_line.name())
+    new_group.setAttr('from_lines', [])
+    new_group.setAttr('to_lines', [connecting_line.name()])
+
+    // Draw the line and the new group
+    window.model_layer.add(connecting_line)
+    window.model_layer.add(new_group)
+
+    // put the connecting line on the bottom and then
+    // push the background below it
+    connecting_line.moveToBottom()
+    window.model_layer.find('Rect')[0].moveToBottom()
+
+    // Make this shape selected and close the sub_comps dialog
+    comp_update(new_inst_name, sub_comp_name)
+
+    update_inst_relationship(relationship, orig_group.name(),
+                             relation_name, new_group.name(),
+                             new_group.getAttr('lems_type'))
+
+    window.sub_comps_layer.hide()
+}
+
+
+function update_inst_relationship(relationship, inst_name, relation_name, sub_comp_name, sub_comp_type, comp_name) {
+
+    if (typeof comp_name == 'undefined'){
+        comp_name = sub_comp_type
+    }
+
+    var button = $('#instance_data').find('#' + inst_name).find('.' + relationship).find('#' + relation_name.replace(':', '\\:'))
+
+    var link_prefix = 'link_'
+    var separator = ' : '
+    // can have multiple in children
+    if(relationship != 'children_list' && relationship != 'attachments') {
+        button.hide()
+        separator = ''
+    }
+
+    var link_html = '<a href="#" onclick="sub_link_clicked(\'' + sub_comp_name + '\', \'' + sub_comp_type +
+                    '\');return false;" id="' + link_prefix + sub_comp_name + '" >' + separator + ' ' + comp_name + '</a>'
+    button.after(link_html)
+}
+
+
+function sub_link_clicked(sub_comp_name, sub_comp_type) {
+    comp_update(sub_comp_name, sub_comp_type)
+    return false
+}
+
+
+/*
+ * In the model_layer each group has a list of incoming and outgoing lines
+ * this function is called on each group's dragmove event to redraw these lines
+ * according to the group's new position
+ */
+function draw_shape_lines(evt) {
+    var movementX = evt.movementX
+    var movementY = evt.movementY
+    var to_lines = this.getAttr('to_lines')
+    var from_lines = this.getAttr('from_lines')
+
+    for(var i=0; i<from_lines.length; i++) {
+        var l = find_shape(window.model_layer, 'Line', from_lines[i])
+        var fromShapeName = l.getAttr('to_shape')
+        var fromShape = find_shape(window.model_layer, 'Group', fromShapeName)
+        fromShape.setX(fromShape.x() + movementX);
+        fromShape.setY(fromShape.y() + movementY);
+        fromShape.fire('dragmove',evt)
+        points = l.points()
+
+        l.setPoints([this.x() + this.find('Rect')[0].x() + this.find('Rect')[0].width()/2,
+                     this.y() + this.find('Rect')[0].y() + this.find('Rect')[0].height()/2,
+                     points[2],
+                     points[3] ])
+    }
+
+    for(var i=0; i<to_lines.length; i++) {
+        var l = find_shape(window.model_layer, 'Line', to_lines[i])
+        points = l.points()
+
+        l.setPoints([points[0],
+                     points[1],
+                     this.x() + this.find('Rect')[0].x() + this.find('Rect')[0].width()/2,
+                     this.y() + this.find('Rect')[0].y() + this.find('Rect')[0].height()/2 ])
+    }
+    window.model_layer.draw()
+}
+
+
+function create_comp_group(x, y, comp_name, width, height) {
+    if(width == undefined) {
+        width = window.comp_rect_width
+    }
+    if(height == undefined) {
+        height = window.comp_rect_height
+    }
+
+    var comp_rect = new Kinetic.Rect({
+        x: x,
+        y: y,
+        width: width,
+        height: height,
+        fill: '#ddd', //'white',
+        stroke: 'black',
+        strokeWidth: 2,
+        name: comp_name,
+        cornerRadius: 10
+    })
+
+    var comp_text = new Kinetic.Text({
+        x: x,
+        y: y + 11,
+        text: comp_name,
+        fontSize: 11,
+        fill: 'black',
+        width: width,
+        align: 'center',
+        name: comp_name,
+    })
+
+    var comp_group = new Kinetic.Group({
+        draggable: true,
+        name: comp_name,
+    })
+
+    comp_group.setAttr('to_lines', [])
+    comp_group.setAttr('from_lines', [])
+    comp_group.setAttr('lems_type', comp_name)
+    comp_group.add(comp_rect)
+    comp_group.add(comp_text)
+    comp_group.on('mousedown', comp_click, true)
+    comp_group.on('dblclick', comp_remove, true)
+
+    comp_group.on('dragmove', draw_shape_lines, true)
+
+    make_clickable([comp_group])
+
+    // Allow dragging elements to model_layer
+    comp_group.on('dragstart', function() {
+
+        // If this is the first sub comp on the canvas then it must be of the
+        // required tag
+        if((window.model_layer.find('Group').length == 0) &&
+           (this.getAttr('tags').indexOf('{{top_tag}}') == -1)) {
+            alert('Error, first component must be of type {{top_tag}}')
+            return
+        }
+
+        //FINNK: this is where we need to determine if this is a component rather than a component_type
+        if ((this.getAttr('tags').indexOf('components') == -1))
+        {
+            // Clone the selected group, the clone becomes the
+            // comp type version, the original group becomes the instance
+            // Note that clone() doesn't seem to do a deep copy, so we're creating new
+            // arrays for from_lines and to_lines to avoid multiple references to the same arrays
+            var new_group = this.clone()
+            new_group.setAttr('from_lines', [])
+            new_group.setAttr('to_lines', [])
+
+            // Add the clone in place of the original
+            this.getParent().add(new_group)
+
+            // This line ensures the original doesn't move, sometimes
+            // dragging has already moved it slightly before we get to clone it
+            new_group.setPosition(new_group.getAttr('start_pos'))
+
+            // Show that this is selected
+            comp_update(this.name(), this.getAttr('lems_type'))
+
+            // Change the original to the new instance
+            // We need a unique identifier for all instances
+            var new_name = create_inst_name()
+            this.name(new_name)
+            this.children.each(function(child) {
+                child.name(new_name)
+            })
+
+            // Make it blue while dragging
+            this.find('Rect').stroke('blue')
+            // Move it initially off to the right
+            this.setPosition({x: 2000, y: 2000})
+            this.moveTo(window.model_layer)
+
+        } else {
+            // what to do here?
+            // this is if it's a prefab
+
+            // Nice to have - maybe?
+
+
+        }
+
+    })
+
+    // When dragging is finished, move the group to the model_layer
+    comp_group.on('dragend', function() {
+
+        //Remove the dragstart and dragend event handlers
+        this.off('dragstart')
+        this.off('dragend')
+
+        // Show that this shape is selected
+        comp_update(this.name(), this.getAttr('lems_type'))
+    })
+
+    return comp_group
+}
+
+
+function comp_remove(evt) {
+    console.log('comp_remove')
+    var shape = evt.targetNode.getParent()
+    var comp_type = shape.getAttr('lems_type')
+
+    // only delete if this is an instance
+    if(shape.name() != comp_type) {
+        // Don't delete a parent with children
+        if( shape.getAttr('from_lines').length > 0) {
+            alert("This shape has sub elements, unable to delete")
+            return
+        }
+
+        // Check for confirmation of delete
+        if( confirm('Are you sure you want to remove this component?') == false ) {
+            return
+        }
+
+        console.log('Deleting: ' + shape.name())
+
+        // Remove the details from the 'instances' div
+        $('#' + shape.name()).remove()
+
+        // delete outgoing lines
+        var to_lines = shape.getAttr('to_lines')
+        for(i=0; i<to_lines.length; i++) {
+            // the parent shape also has a reference to this line
+            var this_line = find_shape(window.model_layer, 'Line', to_lines[i])
+            var from_shape_name = this_line.getAttr('from_shape')
+            var from_shape_from_lines = find_shape(window.model_layer, 'Group', from_shape_name).getAttr('from_lines')
+            from_shape_from_lines.splice(from_shape_from_lines.indexOf(to_lines[i]), 1)
+
+            this_line.remove()
+        }
+
+        // Remove in details panel
+        $('#link_' + shape.name()).prev('Button').show()
+        $('#link_' + shape.name()).remove()
+
+        // delete the shape
+        shape.remove()
+
+    }
+
+    // Mark the original type as selected (if it's visible)
+    comp_update(comp_type, comp_type)
+}
+
+
+function comp_click(evt) {
+    console.log('comp_click')
+
+    if(evt.which == 3) {
+        comp_remove(evt)
+    }
+    else {
+        comp_update(evt.targetNode.getParent().name(),
+                    evt.targetNode.getParent().getAttr('lems_type'))
+    }
+}
+
+
+function comp_update(comp_name, lems_type,initial_id,initial_params) {
+    console.log('comp_update: ' + comp_name + " : " +  lems_type)
+
+    // select shapes by type
+    update_colors(window.context_stage.find('Group'), comp_name, lems_type)
+    update_colors(window.model_stage.find('Group'), comp_name, lems_type)
+
+    window.model_stage.draw()
+    window.context_stage.draw()
+
+    is_instance = false
+
+    if(model_layer.find('.' + comp_name).length){
+        is_instance = true
+    }
+    // update the details panel
+    comp_details(comp_name, lems_type, is_instance,initial_id,initial_params)
+}
+
+
+function update_colors(shapes, comp_name, lems_type){
+    // apply colour to nodes in the array
+    shapes.each(function(shape) {
+        rect = shape.find('Rect')[0]
+
+        if( shape.name() == comp_name ) {
+            // Red if currently selected
+            rect.stroke('red')
+        }
+        else if( shape.getAttr('lems_type') == lems_type ) {
+            // Yellow if the same type as the currently selected
+            rect.stroke('yellow')
+        }
+        else {
+            // Black for everything else
+            rect.stroke('black')
+        }
+    })
+}
+
+
+/*
+ * Create and/or show details information for the selected component
+ */
+function comp_details(comp_name, comp_type, is_instance,initial_id,initial_params) {
+    $.ajax({
+        url: "{% url 'lems_ui.views.comp_details' %}?name=" + comp_type
+    })
+    .done(function (data) {
+        // check the object is still in the model_layer
+        // this is to allow for cases where an ajax request is
+        // still pending after an object has been deleted
+        if( is_instance == true &&
+            window.model_layer.find('.' + comp_name).length == 0) {
+            return
+        }
+
+        // escaping xml fields in data
+        data = JSON.parse(data)
+
+        xml = data.xml.replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&apos;');
+
+        xml = xml.replace(new RegExp('&lt;', 'g'), '<br>&lt;').substring(4)
+
+        // display the xml in a text area - mainly for debugging
+        $('#comp_info_type').html('<label>' + comp_type + '</label>')
+        $('#comp_info_desc').html('<a class="comp_info_toggle">Description</a><p>' + data.description + '</p>')
+        $('#comp_info_xml').html('<a class="comp_info_toggle">XML</a><div style="display:none;overflow-y:scroll; height:100px;"><small>' + xml + '</small></div>')
+
+        $('#new_sub_type').html('<a onclick="open_sub_type(\'' + comp_type + '\')" >Create New Sub Type</a>')
+        $('#edit_sub_type').html('<a onclick="open_sub_type(\'' + comp_type + '\', true)" >Clone and Edit Type</a>')
+
+        if(data.dynamics_text != null && data.dynamics_text != '') {
+            dyn_text = data.dynamics_text.replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/\n/g, '<br>')
+                        .replace(/  /g, '&nbsp;&nbsp;')
+                        .replace(/'/g, '&apos;');
+            $('#comp_info_dynamics').html('<a class="comp_info_toggle" id="open_dynamics_link">Dynamics</a>')
+            //<div style="display:none;overflow-y:scroll; height:100px;"><small>' + dyn_text + '</small></div>')
+
+            $('#modal-dynamics').html('<p>' + dyn_text + '</p>')
+            $('#open_dynamics_link').click(function() { $('#dynamicsModal').modal('show') })
+        }
+        else {
+            if(xml.toLowerCase().search('&lt;dynamics&gt;') > 0){
+                start_idx = xml.toLowerCase().search('&lt;dynamics&gt;') + 20
+                end_idx = xml.toLowerCase().search('&lt;/dynamics&gt;')
+                $('#comp_info_dynamics').html('<a class="comp_info_toggle">Dynamics</a><div style="display:none;overflow-y:scroll; height:100px;"><small>' + xml.substring(start_idx, end_idx) + '</small></div>')
+            }
+            else {
+                $('#comp_info_dynamics').html('')
+            }
+        }
+
+
+        $('.comp_info_toggle').on('click', function() {
+            if($(this).next().is(':visible')) {
+                $(this).next().hide()
+            }
+            else {
+                $(this).next().show()
+            }
+        })
+
+        // Hide all instance data, if this is a comp_type just exit
+        $("#instance_data").children().hide()
+        $("#create_component_prefab").hide()
+        if( is_instance == false ) {
+            return
+        }
+
+        // Create and/or show data for this instance
+        if( $("#" + comp_name).length == 0 ){
+            console.log("create_inst_div: " + comp_name + " : " + comp_type)
+            $("#instance_data").append(create_inst_div(comp_name, comp_type, data,initial_id,initial_params))
+            $('.id_input').change(update_ids)
+
+        }
+        $("#" + comp_name).show()
+        $("#create_component_prefab").show()
+
+    })
+}
+
+
+function open_sub_type(comp_type_name, edit) {
+    if(typeof(edit) == 'undefined') {
+        edit = false
+    }
+
+    // build the url to go to
+    var dest = '/djlems/new_comp/' + comp_type_name + '/'
+
+    // add a param to return to this model after the comp type
+    var model_name = $('#model_name').val()
+
+    if( model_name.length != 0) {
+        dest += '?model_name=' + model_name
+    }
+
+    // add param to indicate we are editing a comp type
+    // rather than creating a new one
+    if( edit ) {
+        if( dest.indexOf('?') < 0 ){
+            dest += '?'
+        }
+        else {
+            dest += '&'
+        }
+        dest += 'edit=true'
+    }
+
+    // ask to save this model
+    var r = confirm("Save this model?");
+    if (r == true) {
+        save_model_as()
+        window.go_after_save = dest
+    }
+    else {
+        window.location.href = dest
+    }
+}
+
+
+function update_ids(event){
+    source_comp = $(this).parents('div[lems_type]')
+    textObj = find_shape(window.model_layer, 'Text', source_comp.attr('id'))
+
+    if(textObj.getText().indexOf('\n') < 0) {
+        textObj.setText(textObj.getText() + '\n[' + $(this).val() + ']')
+        textObj.setPosition({ x: textObj.getPosition().x,
+                              y: textObj.getPosition().y - 5})
+    }
+    else {
+        textObj.setText(textObj.getText().substring(0, textObj.getText().indexOf('\n') + 1) +
+                        '[' + $(this).val() + ']')
+    }
+
+    window.model_layer.draw()
+}
+
+
+/*
+ * Create a div for a component instance. This div will contain all the information
+ * specific to that instance e.g. parameter values, child connections etc..
+ */
+function create_inst_div(inst_name, inst_type, inst_details,initial_id,initial_params){
+    var label_start = '<label style="padding: 5px; padding-top: 20px">'
+    var hr = '<hr style="margin: 10px" />'
+
+    var div_html = hr + '<div id="' + inst_name + '" lems_type="' + inst_type + '" >'
+
+    if (typeof initial_id == 'undefined')
+     initial_id = inst_type + '_' + count_lems_type(model_layer, inst_type)
+
+    // Initialise Id with inst_name can be changed by the user
+    div_html += '<div class="inst_id">'
+    div_html += label_start + 'Id:</label><input class="id_input" type="text" value="' + initial_id + '" />' + hr
+    div_html += '</div>'
+
+    // add parameters from inst_details
+    var heading = false
+
+    // Add Input for parameters
+    for(key in inst_details.params) {
+        if(heading == false){
+            div_html += '<div class="params"><label>Parameters</label><br/>'
+            heading = true
+        }
+        if (typeof initial_params != 'undefined'){
+            var regex = /(\d+)/g;
+            div_html += key + ': <input type="text" id="' + key + '" value="'+ initial_params[key].match(regex) + '"/>'
+        }
+        else {
+            div_html += key + ': <input type="text" id="' + key + '" />'
+        }
+
+        // Add each of the possible units
+        // TODO: display power?
+        if(inst_details.params[key].length > 0) {
+            div_html += '<select id="' + key + '_unit' + '" >'
+            for(i=0; i< inst_details.params[key].length; i++) {
+                if (typeof initial_params != 'undefined'){
+                    var quantity = initial_params[key].replace(/\d/g,'')
+                    if (quantity == inst_details.params[key][i].symbol) {
+                        div_html += '<option selected="selected">' + inst_details.params[key][i].symbol + '</option>'
+                    } else
+                    {
+                        div_html += '<option>' + inst_details.params[key][i].symbol + '</option>'
+                    }
+                } else {
+                    div_html += '<option>' + inst_details.params[key][i].symbol + '</option>'
+                }
+            }
+            div_html += '</select>'
+        }
+
+        div_html += '<br/>'
+    }
+    if( heading == true ) {
+        div_html += '</div>' + hr
+    }
+
+
+    // Add Input for Paths
+    // TODO: should really be dropdowns of available paths, e.g. populations for projection
+    // and cells for connection (would be population path specific)
+    heading = false
+    for(key in inst_details.path_list) {
+        if(heading == false){
+            div_html += '<div class="paths"><label>Path</label><br/>'
+            heading = true
+        }
+        div_html += key + ': <input type="text" id="' + key + '" />'
+
+        div_html += '<br/>'
+    }
+    if( heading == true ) {
+        div_html += '</div>' + hr
+    }
+
+
+    div_html += sub_comp_btns('Add Component Reference', 'comp_refs', inst_details.comp_ref_list)
+    div_html += sub_comp_btns('Add Child', 'child_list', inst_details.child_list)
+    div_html += sub_comp_btns('Add Children', 'children_list', inst_details.children_list)
+
+    // No longer add attachments this way
+    //div_html += sub_comp_btns('Add Attachments', 'attachments', inst_details.attachments_list)
+
+    return div_html
+}
+
+
+// Utility for create_inst_div
+function sub_comp_btns(heading, relationship, item_dict) {
+    var hr = '<hr style="margin: 10px" />'
+    var html = ''
+    if(Object.keys(item_dict).length == 0) {
+        return html
+    }
+
+    // Add heading
+    html += '<div class="' + relationship + '"><label>' + heading + '</label><br/>'
+
+    // Add each item
+    for(key in item_dict) {
+        html += key + ': <button id="' + key +
+            '" onclick="get_sub_comp(\'' + relationship + '\', \'' +  key + '\', \'' +
+            item_dict[key] +
+            '\')">' + item_dict[key] + '</button><br/>'
+    }
+    html += '</div>' + hr
+
+    return html
+}
+
+
+function tag_sel_changed_event(evt){
+    tag_sel_changed(evt.target.options[evt.target.selectedIndex].text)
+}
+
+
+function tag_sel_changed(tag_name){
+    tag_changed(tag_name, true)
+    tag_changed(tag_name)
+}
+
+
+// Filter the component type list by tag
+function tag_changed(tag, custom) {
+    if(typeof(custom) == 'undefined') {
+        custom = false
+    }
+
+    console.log('Tag Changed: ' + tag + ' (custom: ' + custom + ')')
+
+    if(tag == undefined || tag.toLowerCase() == 'all'){
+        tag = 'Cell'
+    }
+
+    var url = "{% url 'lems_ui.views.element_list' %}"
+    if(custom == true){
+        url = "{% url 'lems_ui.views.element_list_custom' %}"
+    }
+
+    $.ajax({
+        url: url + "/?tag=" + tag
+    })
+    .done(function (data) {
+        console.log('Elements and Tags')
+        console.log(data)
+        names_tags = JSON.parse(data)
+
+        names = names_tags[0]
+        tags = names_tags[1]
+
+        select_html = '<select class="form-control" id="comp_types" name="comp_types">'
+        for(i=0; i<names.length; i++) {
+            select_html += '<option value="' +
+                            names[i] + '">' +
+                            names[i] + '</option>'
+        }
+        select_html += '</select>'
+
+        $('#comp_types').replaceWith(select_html)
+
+        if(custom == true) {
+            custom_comps(names, tags)
+        }
+        else {
+            available_comps(names, tags)
+        }
+    })
+}
+
+
+function available_comps(comp_names, tags) {
+    var curr_x = 5
+    var curr_y = 10
+    var pad = 5
+
+    window.avail_comps_layer.find('Group').each(function(shape) {
+        shape.remove()
+    })
+
+
+    for(i=0; i<comp_names.length; i++){
+        comp_group = create_comp_group(curr_x, curr_y, comp_names[i])
+
+        window.avail_comps_layer.add(comp_group)
+
+        // save the groups starting position so we can keep it still
+        comp_group.setAttr('start_pos', comp_group.getPosition())
+        comp_group.setAttr('tags', tags[i])
+
+        curr_y += pad + window.comp_rect_height
+    }
+
+    if(curr_y > window.stage_height) {
+        window.context_stage.setHeight(curr_y)
+    }
+    else {
+        window.context_stage.setHeight(window.stage_height)
+    }
+}
+
+
+function custom_comps(comp_names, tags) {
+    var curr_x = 5
+    var curr_y = 10
+    var pad = 5
+
+    window.custom_comps_layer.find('Group').each(function(shape) {
+        shape.remove()
+    })
+
+
+    for(i=0; i<comp_names.length; i++){
+        comp_group2 = create_comp_group(curr_x, curr_y, comp_names[i])
+
+        window.custom_comps_layer.add(comp_group2)
+
+        // save the groups starting position so we can keep it still
+        comp_group2.setAttr('start_pos', comp_group2.getPosition())
+        comp_group2.setAttr('tags', tags[i])
+
+        curr_y += pad + window.comp_rect_height
+    }
+
+    if(curr_y > window.stage_height) {
+        window.context_stage.setHeight(curr_y)
+    }
+    else {
+        window.context_stage.setHeight(window.stage_height)
+    }
+}
+
+
+/*
+ * Change cursor on hover for a list of shapes
+ */
+function make_clickable(comp_list) {
+    comp_list.forEach(function(comp) {
+        // Change cursor to show draggable
+        comp.on('mouseover', function() {
+            document.body.style.cursor = 'pointer'
+        })
+
+        comp.on('mouseout', function() {
+            document.body.style.cursor = 'default'
+        })
+    })
+}
+
+
+/*
+ * Returns a unique name
+ */
+
+function create_inst_name() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+        return v.toString(16);
+    });
+    //return Date.now() / 1000 | 0
+}
+
+
+/*
+ * Find a shape in a layer by type and name
+ */
+function find_shape(layer, type, name){
+    retval = null
+    layer.find(type).each(function(shape){
+        if( shape.name() == name ){
+            retval = shape
+            return
+        }
+    })
+    return retval
+}
+
+
+/*
+ * Count the number of instances of a particular type
+ */
+function count_lems_type(layer, lems_type){
+    count = 0
+    layer.find('Group').each(function(shape) {
+        if(shape.getAttr('lems_type') == lems_type){
+            count++
+        }
+    })
+    return count
+}
+
+
+/*
+ * Send all Lines in model layer to back
+ */
+function lines_to_back() {
+    window.model_layer.find('Line').each(function(shape) {
+        shape.moveToBottom()
+    })
+    window.model_layer.find('Rect')[0].moveToBottom()
+}
+
+
+window.onload = on_load
+</script>
+{% endblock content  %}

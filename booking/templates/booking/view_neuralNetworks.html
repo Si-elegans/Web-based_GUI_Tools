@@ -1,0 +1,205 @@
+{% extends 'base-with-login.html' %}
+{% load js %}
+{% load staticfiles %}
+
+{% block extra_header %}
+
+    {% comment %}
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+    {% endcomment %}
+    <script type="text/javascript" src="{% static "js/jquery.tokeninput.js" %}"></script>
+    <link rel="stylesheet" href="{% static "css/token-input.css" %}" type="text/css" />
+    <link rel="stylesheet" href="{% static "css/token-input-facebook.css" %}" type="text/css" />
+
+{% endblock%}
+
+{% block content %}
+
+    <div class="container-fluid">
+
+        <div class="page-header">
+            <h1>Network Configurations </h1>
+        </div>
+
+          <div class="row" style="margin-bottom: 20px; margin-right: 20px">
+               <form role="form" method="post" action="/djlems/cenet/#nav=2.94,0,5">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary pull-right"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>&nbsp;&nbsp;Create a new Network Configuration</button>
+               </form>
+          </div>
+        <div class="panel panel-primary">
+
+        <div class="panel-heading"><span class="glyphicon glyphicon-user" aria-hidden="true"></span>&nbsp;&nbsp;My Configurations</div>
+
+            <table class="table table-striped" >
+                <!--<form action='{% url 'rb_result_make_public' %}'method='post'>{% csrf_token %}-->
+                     <thead>
+                        <tr>
+                             <th style="width:15%">Configuration Name</th>
+                            <th style="width:40%">Description</th>
+                            <th style="width:15%"></th>
+                            <th style="width:15%">Status</th>
+                            <th style="width:15%"></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for neuronModel in neuralNetworks_my %}
+                                <tr>
+                                   <td>{{ neuronModel.name }}</td>
+                                    <td>
+                                    {{ neuronModel.description }}
+                                    </td>
+                                    <td>
+                                    </td>
+                                    <td id="{{neuronModel.name}}">{{ neuronModel.status }}</td>
+                                    <td><input type="button" class="btn btn-info" onclick="location.href='/djlems/cenet/{{ neuronModel.name }}/#nav=2.94,0,5'" value="Edit" />
+                                            <input type="button" class="btn btn-info" onclick="deleteModel('{{ neuronModel.name }}')" value="Delete" />
+                                    </td>
+                                </tr>
+                    {% endfor %}
+                    </tbody>
+            </table>
+
+        </div> <!-- div panel -->
+
+
+        <div class="panel panel-primary">
+
+        <div class="panel-heading"><span class="glyphicon glyphicon-user" aria-hidden="true"></span>&nbsp;&nbsp;Configurations Shared with Me</div>
+
+            <table class="table table-striped" >
+                <!--<form action='{% url 'rb_result_make_public' %}'method='post'>{% csrf_token %}-->
+                     <thead>
+                        <tr>
+                             <th style="width:15%">Configuration Name</th>
+                            <th style="width:40%">Description</th>
+                            <th style="width:15%">Owner</th>
+                            <th style="width:15%"></th>
+                            <th style="width:15%"></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for neuronModel in share %}
+                              {% if neuronModel.user == request.user %}
+                                <tr>
+                                    <td>
+                                        {{ neuronModel.ceNetwork.name }}
+                                    </td>
+                                    <td>
+                                        {{ neuronModel.ceNetwork.description }}
+                                    </td>
+                                    <td>
+                                        {{ neuronModel.ceNetwork.owner.username }}
+                                    </td>
+                                    <td id="{{neuronModel.ceNetwork.name}}">{{ neuronModel.ceNetwork.status }}</td>
+                                    <td><input type="button" class="btn btn-info" onclick="location.href='/djlems/cenet/{{ neuronModel.ceNetwork.name }}:{{ neuronModel.ceNetwork.owner.username }}/#nav=2.94,0,5'" value="Create Copy Of Model" />
+                                    </td>
+                                </tr>
+                            {% endif %}
+                    {% endfor %}
+                    </tbody>
+            </table>
+
+        </div> <!-- div panel -->
+
+
+        <div class="panel panel-primary">
+
+        <div class="panel-heading"><span class="glyphicon glyphicon-user" aria-hidden="true"></span>&nbsp;&nbsp;Public Curated Configurations</div>
+
+            <table class="table table-striped" id="publicNeurons" >
+                <!--<form action='{% url 'rb_result_make_public' %}'method='post'>{% csrf_token %}-->
+                     <thead>
+                        <tr>
+                             <th style="width:15%">Configuration Name</th>
+                            <th style="width:40%">Description</th>
+                            <th style="width:15%"></th>
+                            <th style="width:15%"></th>
+                            <th style="width:15%"></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for neuronModel in neuralNetworks_curated %}
+                                <tr>
+                                   <td>{{ neuronModel.name }}</td>
+                                    <td>
+                                    {{ neuronModel.description }}
+                                    </td>
+                                    <td>
+                                    </td>
+                                    <td id="{{neuronModel.name}}">{{ neuronModel.status }}</td>
+                                    <td><input type="button" class="btn btn-info" onclick="location.href='/djlems/cenet/{{ neuronModel.name }}:{{ neuronModel.owner.username }}/#nav=2.94,0,5'" value="Create Copy Of Model" />
+                                    </td>
+                                </tr>
+                    {% endfor %}
+                    </tbody>
+            </table>
+
+        </div> <!-- div panel -->
+
+    </div> <!-- div container-fluid-->
+
+
+<script>
+    window.onload = function(){
+        window.refresh_timer = null
+        handle_btns()
+    }
+
+    function handle_btns(){
+        $('.res_btn').hide()
+
+        var refreshing = false
+        $('.res_sel').each(function(){
+            if($(this).val() == 2){
+                $(this).next('button').show()
+            }
+            else if($(this).val() == 0 || $(this).val() == 1){
+                refreshing = true
+            }
+        })
+
+        if(refreshing == true && window.refreshing_timer == null) {
+            console.log('starting auto reload')
+            window.refreshing_timer = setInterval("location.reload()", 10000)
+        }
+        if(refreshing == false && window.refreshing_timer != null) {
+            console.log('stopping auto reload')
+            clearInterval(window.refreshing_timer)
+            window.refreshing_timer = null
+        }
+    }
+
+    function build_net(net_name){
+        $('#' + net_name).text('Queued for build')
+    }
+
+
+    function show_results(model_id) {
+        sim_id = $('#prev_jobs_select_' + model_id).find('option:selected').attr('job_id')
+        console.log('Opening Results for job: ' + sim_id)
+
+        window.open('/djlems/results_viewer/?sim_id=' + sim_id, '_blank')
+    }
+
+    function view_lems(model_name) {
+        var url = "{% url 'lems_ui.views.model_to_lems_xml' %}" +
+                  "?model_name=" + model_name
+
+        console.log("Trying to open url: " + url)
+        window.open(url, '_blank')
+    }
+
+    function deleteModel(model_name) {
+        if (confirm('Are you sure you want to delete this model?')) {
+           if (confirm('Are you really sure?')) {
+                location.href='/djlems/network_model_delete/' + model_name;
+           }
+        }
+    }
+
+</script>
+{% endblock %}

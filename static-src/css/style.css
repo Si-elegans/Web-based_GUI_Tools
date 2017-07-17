@@ -1,0 +1,545 @@
+hvisor
+
+/* VIS */
+
+.vis.timeline .item.green {
+    background-color: greenyellow;
+    border-color: green;
+}
+
+/* create a custom sized dot at the bottom of the red item */
+.vis.timeline .item.red {
+    background-color: red;
+    border-color: darkred;
+    color: white;
+    font-family: monospace;
+    box-shadow: 0 0 10px gray;
+}
+.vis.timeline .item.dot.red {
+    border-radius: 10px;
+    border-width: 10px;
+}
+.vis.timeline .item.line.red {
+    border-width: 5px;
+}
+.vis.timeline .item.box.red {
+    border-radius: 0;
+    border-width: 2px;
+    font-size: 24pt;
+    font-weight: bold;
+}
+
+.vis.timeline .item.orange {
+    background-color: gold;
+    border-color: orange;
+}
+.vis.timeline .item.orange.selected {
+    /* custom colors for selected orange items */
+    background-color: orange;
+    border-color: orangered;
+}
+
+.vis.timeline .item.magenta {
+    background-color: magenta;
+    border-color: purple;
+    color: white;
+}
+
+/* our custom classes overrule the styles for selected events,
+   so lets define a new style for the selected events */
+.vis.timeline .item.selected {
+    background-color: white;
+    border-color: black;
+    color: black;
+    box-shadow: 0 0 10px gray;
+}
+
+/*********************************/
+html{
+    height: 100%;
+}
+body {
+    height: 100%;
+    overflow-y: scroll;
+    margin: 0px;
+    color: #AAAAAA; /*text color*/
+    font: normal  / 1 Arial;
+    
+    /*font: normal normal 11pt / 1 Arial;*/
+}
+.wrap{
+    height: 100%;
+}
+
+.wrap2{
+    height: calc(100% - 51px);
+}
+
+.htimelinebox{
+    height: 168px;
+}
+
+.graph{
+    width: 100%;
+}
+
+@font-face {
+    font-family: Cooper black;
+    src: url(coopbl.ttf);
+}
+
+.heighthead{
+    height: 51px;
+}
+.heightgeneral{
+    height: 100%;
+    /*overflow-x: hidden;*/
+}
+.scrolly{
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.hvisor{
+    height: calc(100% - 170px);
+    //height: 750px;
+    background-color:grey;
+}
+#viewport{
+    height: 100%;
+    width:100%;
+}
+.hcontrols{
+    height:45px;
+}
+.htimeline{
+    height: 168px;
+    
+}
+
+.center{
+    margin:auto;
+}
+
+.penv{
+    margin:10px;
+}
+.block{
+    margin-left:10%;
+}
+.title{
+    font-family: Cooper black; 
+    color:white; 
+    background-color: rgb(79,153,159);
+    margin-top: 10px;
+    margin-bottom: 10px;
+    text-decoration: none;
+}
+.title:hover{
+    text-decoration: none;
+}
+
+.title2{
+    font-family: Cooper black; 
+    color:white;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    text-decoration: none;
+	font-size: 12px;
+}
+.title2:hover{
+    text-decoration: none;
+}
+
+.centered{
+    margin-left: 10px;
+	padding-left: 10px;
+    margin-right: 10px;
+}
+.logo{
+    display: block;
+    width:35%; 
+    height: auto;
+    min-width: 150px;
+}
+.color1{
+    /*background: rgba(200, 224, 226, 0.7);*/
+    background: -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(200,224,226,1) 31%, rgba(200,224,226,1) 100%);
+background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(255,255,255,1)), color-stop(31%, rgba(200,224,226,1)), color-stop(100%, rgba(200,224,226,1)));
+background: -webkit-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(200,224,226,1) 31%, rgba(200,224,226,1) 100%);
+background: -o-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(200,224,226,1) 31%, rgba(200,224,226,1) 100%);
+background: -ms-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(200,224,226,1) 31%, rgba(200,224,226,1) 100%);
+background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(200,224,226,1) 31%, rgba(200,224,226,1) 100%);
+    
+ 
+}
+.color{
+    background: rgba(87, 87, 87, 0.95);
+   
+  
+}
+
+.saving{
+    width: 200px;
+   
+  
+}
+.xyzinput {
+ width: 62px;
+ height: 26px;
+ border:0px;
+ margin:3px;
+ background-color: #FFFFFF;
+}
+.simpleSlider .slider-selection {
+background: #BABABA;
+/*slider color*/
+}
+
+.whitefont{
+    color: #FFFFFF;
+   
+}
+.btn-turquesa {
+  background-color: hsl(185, 75%, 28%) !important;
+  background-image: -khtml-gradient(linear, left top, left bottom, from(#189da9), to(#11747c));
+  background-image: -moz-linear-gradient(top, #189da9, #11747c);
+  background-image: -ms-linear-gradient(top, #189da9, #11747c);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #189da9), color-stop(100%, #11747c));
+  background-image: -webkit-linear-gradient(top, #189da9, #11747c);
+  background-image: -o-linear-gradient(top, #189da9, #11747c);
+  background-image: linear-gradient(#189da9, #11747c);
+  border-color: #11747c #11747c hsl(185, 75%, 25.5%);
+  color: #fff !important;
+ 
+  font-family: Cooper black;
+  font-size: 12px;
+}
+.btn-turquesa2 {
+  background-color: hsl(185, 75%, 28%) !important;
+  background-image: -khtml-gradient(linear, left top, left bottom, from(#189da9), to(#11747c));
+  background-image: -moz-linear-gradient(top, #189da9, #11747c);
+  background-image: -ms-linear-gradient(top, #189da9, #11747c);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #189da9), color-stop(100%, #11747c));
+  background-image: -webkit-linear-gradient(top, #189da9, #11747c);
+  background-image: -o-linear-gradient(top, #189da9, #11747c);
+  background-image: linear-gradient(#189da9, #11747c);
+  border-color: #11747c #11747c hsl(185, 75%, 25.5%);
+  color: #fff;
+ 
+}
+.btn-turquesa3 {
+      display: inline-block;
+  padding: 6px 12px;
+  margin-bottom: 0;
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 1.42857143;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  -ms-touch-action: manipulation;
+      touch-action: manipulation;
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  background-image: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background-color: hsl(185, 75%, 28%) !important;
+  background-image: -khtml-gradient(linear, left top, left bottom, from(#189da9), to(#11747c));
+  background-image: -moz-linear-gradient(top, #189da9, #11747c);
+  background-image: -ms-linear-gradient(top, #189da9, #11747c);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #189da9), color-stop(100%, #11747c));
+  background-image: -webkit-linear-gradient(top, #189da9, #11747c);
+  background-image: -o-linear-gradient(top, #189da9, #11747c);
+  background-image: linear-gradient(#189da9, #11747c);
+  border-color: #11747c #11747c hsl(185, 75%, 25.5%);
+  color: #fff;
+ height: 50px;
+ width: 50px;
+ margin: 10px;
+ padding: 0px;
+}
+
+.static-button{
+  display: inline-block;
+  margin-bottom: 0;
+  font-weight: 400;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  background-image: none;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  padding: 6px 12px;
+  font-size: 14px;
+  line-height: 1.42857143;
+  border-radius: 4px;
+  -webkit-user-select: none;
+}
+
+.div-turquesa4 {
+  background-color: hsl(185, 75%, 28%) !important;
+  background-image: -khtml-gradient(linear, left top, left bottom, from(#189da9), to(#11747c));
+  background-image: -moz-linear-gradient(top, #189da9, #11747c);
+  background-image: -ms-linear-gradient(top, #189da9, #11747c);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #189da9), color-stop(100%, #11747c));
+  background-image: -webkit-linear-gradient(top, #189da9, #11747c);
+  background-image: -o-linear-gradient(top, #189da9, #11747c);
+  background-image: linear-gradient(#189da9, #11747c);
+  border-color: #11747c #11747c hsl(185, 75%, 25.5%);
+  color: #fff;
+ height: 60px;
+ line-height: 60px;
+ width: 60px;
+ margin: 10px;
+ padding: 0px;
+}
+
+.btn-turquesa3:active {
+  border-width: 0px;
+}
+
+
+
+.green-bordered{
+    border-color: rgb(0,155,0);
+    border-width: 2px;
+}
+
+.yellow-bordered{
+    border-color: rgb(155,155,0);
+    border-width: 2px;
+}
+
+.btn-naranja {
+      display: inline-block;
+  padding: 6px 12px;
+  margin-bottom: 0;
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 1.42857143;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  -ms-touch-action: manipulation;
+      touch-action: manipulation;
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  background-image: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background-color: hsl(14, 94%, 73%) !important;
+  background-image: -khtml-gradient(linear, left top, left bottom, from(#BB330B), to(#8A2A0E));
+  background-image: -moz-linear-gradient(top, #BB330B, #8A2A0E);
+  background-image: -ms-linear-gradient(top, #BB330B, #8A2A0E);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #189da9), color-stop(100%, #11747c));
+  background-image: -webkit-linear-gradient(top, #BB330B, #8A2A0E);
+  background-image: -o-linear-gradient(top, #BB330B, #8A2A0E);
+  background-image: linear-gradient(#BB330B, #8A2A0E);
+  /*border-color: #11747c #11747c hsl(185, 75%, 25.5%);*/
+  color: #fff;
+ height: 50px;
+ width: 50px;
+ margin: 10px;
+ padding: 0px;
+}
+.btn-turquesa-disabled{
+/*  background-color: hsl(185, 75%, 28%) !important;
+  background-image: -khtml-gradient(linear, left top, left bottom, from(#189da9), to(#11747c));
+  background-image: -moz-linear-gradient(top, #189da9, #11747c);
+  background-image: -ms-linear-gradient(top, #189da9, #11747c);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #189da9), color-stop(100%, #11747c));
+  background-image: -webkit-linear-gradient(top, #189da9, #11747c);
+  background-image: -o-linear-gradient(top, #189da9, #11747c);
+  background-image: linear-gradient(#189da9, #11747c);
+  border-color: #11747c #11747c hsl(185, 75%, 25.5%);*/
+  background-color: #C8E0E2;
+  color: #fff !important;
+ 
+  font-family: Cooper black;
+}
+
+.btn-menu{
+    color: #E5360C !important;
+    font-family: Cooper black;
+}
+
+.neurons{
+    max-height: 14em;
+    /*overflow: auto;*/ 
+}
+
+#neuronTitles:hover{
+    color:white;
+}
+#neuronTitles:focus{
+    color:white;
+    text-decoration: none;
+}
+
+.translucent{
+    background-color:rgba(255,255,255,0.2);
+}
+
+.timelineCanvas{
+    background-color:rgba(255,255,255,0.0);
+    height: calc(100% - 45px);
+    width: calc(100% - 87px);
+    position: absolute;
+    left: 75px;
+    top: 45px;
+}
+
+.smallmargin{
+	margin-left: 8px;
+}
+
+.visualizationScreen{
+	height: 100px;
+	width: 150px;
+	margin-left: 5px;
+}
+
+.timeSlider{
+	width: 100px;
+	margin-left: 35px;
+}
+
+#timeSliderImplemented{
+	width: 75%;
+	margin-left: 15px;
+}
+
+.visualizationScreenLocomotion{
+	width: 100%;
+	height: 100%;
+}
+.visualizationScreen{
+	width: 100%;
+	height: 300px;
+}
+
+.visualizationTimeline{
+	position: absolute;
+	top: 0px;
+	width: 100%;
+	left: 5px;
+}
+
+.visualizationTimelineLocomotion{
+	position: absolute;
+	top: -330px;
+	width: 100%;
+	left: 5px;
+}
+
+.helpText1{
+	position: absolute;
+	top: 10px;
+	color: #333333;
+}
+
+.helpText2{
+	position: absolute;
+	top: 130px;
+	color: #333333;
+}
+
+.helpText3{
+	position: absolute;
+	top: 10px;
+	color: #333333;
+	font-size: 10px;
+}
+
+
+/*NUIG inserted styles START*/
+/* tell the SVG path to be a thin blue line without any area fill */
+path {
+	stroke-width: 1.2;
+	fill: none;
+}
+
+.axis {
+	shape-rendering: crispEdges;
+}
+
+.x.axis line {
+	stroke: lightgrey;
+}
+
+.x.axis .minor {
+	stroke-opacity: .5;
+}
+
+.x.axis text {
+    	font-family: sans-serif;
+    	font-size: 11px;
+}
+
+.x.axis path {
+	display: none;
+	stroke: #000;
+}
+
+.y.axis line, .y.axis path {
+	fill: none;
+	stroke: #000;
+}
+
+.y.axis text {
+    	font-family: sans-serif;
+    	font-size: 11px;
+}
+
+.x.label {
+	font-family: sans-serif;
+	font-size: 12px;
+   	fill: steelblue;
+	text-anchor: middle;
+}
+
+.y.label  {
+    	font-family: sans-serif;
+    	font-size: 12px;
+	fill: steelblue;
+	text-anchor: middle;
+}
+
+.chart.label  {
+    	font-family: sans-serif;
+    	font-size: 14px;
+	fill: steelblue;
+	text-anchor: middle;
+}
+
+.brush .extent {
+  	stroke: red;
+  	fill: red;
+  	fill-opacity: .075;
+  	shape-rendering: crispEdges;
+}
+
+rect.pane {
+  	fill: none;
+  	pointer-events: all;
+}
+
+div.plotContainer {
+	width:90%;
+	height:170px;
+	margin:20px 20px;
+}
+div.plotContainerContainer {
+	margin:20px 20px;
+}
+div#controlPlot {
+height:100px;
+}
+/*NUIG inserted styles END*/

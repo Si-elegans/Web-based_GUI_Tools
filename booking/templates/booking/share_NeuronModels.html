@@ -1,0 +1,355 @@
+{% extends 'base-with-login.html' %}
+{% load js %}
+{% load staticfiles %}
+
+{% block extra_header %}
+
+    <script type="text/javascript" src="{% static "js/jquery.tokeninput.js" %}"></script>
+    <link rel="stylesheet" href="{% static "css/token-input.css" %}" type="text/css" />
+    <link rel="stylesheet" href="{% static "css/token-input-facebook.css" %}" type="text/css" />
+
+{% endblock%}
+
+{% block content %}
+
+    {% include 'booking/sharePeopleModal.html'%}
+
+    <script type="text/javascript">
+        var allUsers = {{ users | js }};
+
+        function publicOrNot(idPER) {
+
+            var check_public = $('#cp_'+idPER).prop('checked');
+            console.log(check_public);
+
+            var csrftoken = $.cookie('csrftoken');
+            console.log('neuronModel :' + idPER);
+            var payload = {'neuronModel': idPER, 'public_check': check_public};
+            console.log(payload);
+
+            $.ajax({
+                type: "POST",
+                url: "{% url 'neuronModel_make_public' %}",
+                data: JSON.stringify(payload),
+                success: function( response ) {
+                    console.log(response);
+                    if (response.response == 0) {
+                        $('#cp_'+idPER).prop('checked', true);
+                    }
+                    $("#modalPublic-body").html("<p>" + response.msg + "</p>");
+                    $("#modalPublic").modal();
+                },
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-CSRFToken',csrftoken);
+                    //xhr.setRequestHeader('X-CSRFToken', $('meta[name="csrf-token"]').attr('content'));
+                    //xhr.setRequestHeader("Authorization", "Basic " + btoa("admin" + ":" + "admin"));
+                    //xhr.setRequestHeader("Content-Type", "application/json");
+                },
+            });
+
+        }
+
+    </script>
+
+    <div class="container-fluid">
+
+        <div class="page-header">
+            <h1>Share Neuron and Synapse Models</h1>
+        </div>
+
+        <div class="panel panel-primary">
+
+            <div class="panel-heading"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>&nbsp;&nbsp;SHARE WITH USERS</div>
+
+            <div class="panel-body">
+                <p>My Neuron Models</p>
+            </div> <!-- div panel body -->
+
+            <table class="table table-striped" >
+                <!--<form action='{% url 'pe_result_make_public' %}'method='post'>{% csrf_token %}-->
+                    <thead>
+                        <tr>
+                            <th>Model ID</th>
+                            <th>Model Name</th>
+                            <th>Model Description</th>
+                            <th align="center">Public</th>
+                            <th>Shared with</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for neuronModel in neuronmodels_my %}
+                                <tr>
+                                    <td >{{neuronModel.pk}}</td>
+                                    <td>{{ neuronModel.name }}</td>
+                                    <td> {{neuronModel.description}}</td>
+                                    {% if neuronModel.public %}
+                                        <td align="center"><input id="cp_{{neuronModel.pk}}" type="checkbox" onclick="publicOrNot({{neuronModel.pk}})" checked/></td>
+                                    {% else %}
+                                        <td align="center"><input id="cp_{{neuronModel.pk}}" type="checkbox" onclick="publicOrNot({{neuronModel.pk}})" /></td>
+                                    {% endif %}
+                                    <td id="PER_{{neuronModel.pk}}">
+                                      {% for shared_element in allModels_shared %}
+                                          {% if shared_element.lemsModel == neuronModel %}
+                                              {{shared_element.user.first_name}} {{shared_element.user.last_name}} < {{shared_element.user.email}} ><br/>
+                                          {% endif %}
+                                      {% endfor %}
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-info" onclick="sharePeopleModal({{neuronModel.pk}},'/restAPI/shareNeuronModel/','lemsModel')">Share</button>
+                                    </td>
+                                </tr>
+                    {% endfor %}
+                    </tbody>
+                <!--</form>-->
+            </table>
+
+            <div class="panel-body">
+                <p>My Synapse Models</p>
+            </div> <!-- div panel body -->
+
+            <table class="table table-striped" >
+                <!--<form action='{% url 'pe_result_make_public' %}'method='post'>{% csrf_token %}-->
+                    <thead>
+                        <tr>
+                            <th>Model ID</th>
+                            <th>Model Name</th>
+                            <th>Model Description</th>
+                            <th align="center">Public</th>
+                            <th>Shared with</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for neuronModel in synapsemodels_my %}
+                                <tr>
+                                    <td>{{neuronModel.pk}}</td>
+                                    <td>{{ neuronModel.name }}</td>
+                                    <td>{{neuronModel.description}}</td>
+                                    {% if neuronModel.public %}
+                                        <td align="center"><input id="cp_{{neuronModel.pk}}" type="checkbox" onclick="publicOrNot({{neuronModel.pk}})" checked/></td>
+                                    {% else %}
+                                        <td align="center"><input id="cp_{{neuronModel.pk}}" type="checkbox" onclick="publicOrNot({{neuronModel.pk}})" /></td>
+                                    {% endif %}
+                                    <td id="PER_{{neuronModel.pk}}">
+                                      {% for shared_element in allModels_shared %}
+                                          {% if shared_element.lemsModel == neuronModel %}
+                                              {{shared_element.user.first_name}} {{shared_element.user.last_name}} < {{shared_element.user.email}} ><br/>
+                                          {% endif %}
+                                      {% endfor %}
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-info" onclick="sharePeopleModal({{neuronModel.pk}},'/restAPI/shareNeuronModel/','neuronModels')">Share</button>
+                                    </td>
+                                </tr>
+                    {% endfor %}
+                    </tbody>
+                <!--</form>-->
+            </table>
+        </div> <!-- div panel -->
+
+        <div class="panel panel-primary">
+
+            <div class="panel-heading"><span class="glyphicon glyphicon-user" aria-hidden="true"></span>&nbsp;&nbsp;SHARED WITH ME</div>
+
+            <div class="panel-body">
+                <p>Neuron Models shared with me</p>
+            </div> <!-- div panel body -->
+
+            <table class="table table-striped">
+
+                <thead>
+                    <tr>
+                        <tr>
+                            <th>Model ID</th>
+                            <th>Model Name</th>
+                            <th>Model Description</th>
+                            <th>Model Owner</th>
+                            <th align="center">Public</th>
+                        </tr>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for shared_element in neuronModels_shared %}
+                        <tr>
+                            <td>
+                                {{ shared_element.pk }}
+                            </td>
+                            <td>
+                                {{ shared_element.name }}
+                            </td>
+                            <td>
+                                {{shared_element.description}}
+                            </td>
+                            <td>
+                                {{shared_element.owner.username}}
+                            </td>
+                            <td>
+                                {{ shared_element.public }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+
+            <div class="panel-body">
+                <p>Synapse Models shared with me</p>
+            </div> <!-- div panel body -->
+
+            <table class="table table-striped">
+
+                <thead>
+                    <tr>
+                        <tr>
+                            <th>Model ID</th>
+                            <th>Model Name</th>
+                            <th>Model Description</th>
+                            <th>Model Owner</th>
+                            <th align="center">Public</th>
+                        </tr>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for shared_element in synapseModels_shared %}
+                        <tr>
+                            <td>
+                                {{ shared_element.pk }}
+                            </td>
+                            <td>
+                                {{ shared_element.name }}
+                            </td>
+                            <td>
+                                {{shared_element.description}}
+                            </td>
+                            <td>
+                                {{shared_element.owner.username}}
+                            </td>
+                            <td>
+                                {{ shared_element.public }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+        </div> <!-- div panel -->
+
+
+        <div class="panel panel-primary">
+
+            <div class="panel-heading"><span class="glyphicon glyphicon-globe" aria-hidden="true"></span>&nbsp;&nbsp;PUBLICLY SHARED</div>
+
+            <div class="panel-body">
+                <p>Public Neuron Models</p>
+            </div> <!-- div panel body -->
+
+            <table class="table table-striped">
+
+                <thead>
+                    <tr>
+                        <th>Model ID</th>
+                        <th>Model Name</th>
+                        <th>Model Description</th>
+                        <th>Model Owner</th>
+                        <th align="center">Public</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for neuronModel in neuronModels_public %}
+                            <tr>
+                                <td>
+                                    {{ neuronModel.pk }}
+                                </td>
+                                <td>
+                                    {{ neuronModel.name }}
+                                </td>
+                                <td>
+                                    {{ neuronModel.description }}
+                                </td>
+                                <td>
+                                    {{ neuronModel.owner.username }}
+                                </td>
+                                <td>
+                                    {{ neuronModel.public }}
+                                </td>
+                            </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+
+            <div class="panel-body">
+                <p>Public Synapse Models</p>
+            </div> <!-- div panel body -->
+
+            <table class="table table-striped">
+
+                <thead>
+                    <tr>
+                        <th>Model ID</th>
+                        <th>Model Name</th>
+                        <th>Model Description</th>
+                        <th>Model Owner</th>
+                        <th align="center">Public</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for neuronModel in synapsemodels_public %}
+                            <tr>
+                                <td>
+                                    {{ neuronModel.pk }}
+                                </td>
+                                <td>
+                                    {{ neuronModel.name }}
+                                </td>
+                                <td>
+                                    {{ neuronModel.description }}
+                                </td>
+                                <td>
+                                    {{ neuronModel.owner.username }}
+                                </td>
+                                <td>
+                                    {{ neuronModel.public }}
+                                </td>
+                            </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+        </div> <!-- div panel -->
+
+
+        <div class="row">
+            <div class="col-md-12" style="padding: 20px;">
+                {%if messages %}
+                    <div class='row'>
+                        <div class='col-xs-12'>
+                            <ul class="messages">
+                                {% for message in messages %}
+                                    <p{% if message.tags == "success" %} class="alert alert-success"
+                                        {% elif  message.tags == "error" %} class="alert alert-danger"
+                                        {% elif  message.tags == "warning" %} class="alert alert-warning"
+                                        {%endif%}>{{message}}</p>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div> <!-- div container-fluid-->
+
+
+{% endblock %}

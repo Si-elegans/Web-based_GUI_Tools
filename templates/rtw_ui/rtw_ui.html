@@ -1,0 +1,493 @@
+{% extends 'base-with-login.html' %}
+
+{% load staticfiles %}
+{% block content %}
+
+<!-- jQuery -->
+<link type="text/css" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/vader/jquery-ui.css" rel="Stylesheet" />
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+<!-- o3v styles -->
+<link type="text/css" href="{% static "cenet/main_ui.css" %}" rel="Stylesheet" />
+
+<!-- Local -->
+<script type="text/javascript">
+  var STATIC_BASE = "{{ STATIC_URL }}"
+  var o3v = {};  // open-3d-viewer namespace
+</script>
+
+<!-- Webgl -->
+<script type="text/javascript" src="{% static "cenet/scripts/gl-matrix-min.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/webgl.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/loader.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/renderer.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/webgl_util.js" %}"></script>
+
+<!-- o3v specific -->
+<script type="text/javascript" src="{% static "cenet/scripts/common.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/models.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/entities.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/content.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/layer.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/history.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/layers_ui.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/gestures.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/select.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/label.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/nav_ui.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/navigate.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/input_handler.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/search.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/select.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/interpolant.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/opacity.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/main_ui.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/render_interface.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/viewer.js" %}"></script>
+
+<script type="text/javascript">
+
+    {% if open_rtw_conf %}
+    var rtw_data = JSON.parse('{{open_rtw_conf.json|safe}}');
+    var current_rtw_conf = rtw_data.readback_data;
+    var curr_conf_name = rtw_data.rtw_name;
+    var current_net_conf = JSON.parse('{{open_rtw_conf.network.json|safe}}')
+    {% else %}
+    var current_rtw_conf = {}
+    var current_net_conf = null
+    {% endif %}
+    var canSave = true;
+
+
+    <!-- Start viewer. -->
+    $(document).ready(function() {
+        // The assignment to window.viewer_ is ONLY for debugging.
+        // This variable should NEVER be accessed from code.
+
+        $('#neuron_list').change(edit_neuron_model_change);
+
+        $('#save_conf').click(save_conf)
+        $('#save_conf_as').click(save_conf_as)
+
+
+        {% if open_rtw_conf %}
+         $('#neuron_list').val('adal');
+         loadRTWListForSelectedNeuron();
+         $('#start-selectNetwork').hide();
+        {% endif %}
+        window.viewer_ = new o3v.Viewer();
+
+    });
+
+    function save_conf_as() {
+        curr_conf_name = window.prompt("RTW Configuration name:")
+        if(curr_conf_name) {
+            save_conf()
+        }
+    }
+
+    function save_conf() {
+        if (!canSave) {
+            alert("You have exceded the maximum size of 10 GB neuron recording, you will not be able to save this configuration");
+            return;
+        }
+        if( curr_conf_name.length == 0) {
+            alert('Please enter a name for this RTW Configuration')
+            return;
+        }
+
+        console.log('Saving RTW Configuration')
+
+        // Data structure to be stored on the server
+        var data = JSON.stringify({
+            'rtw_name' : curr_conf_name,
+            'readback_data' : current_rtw_conf,
+            'net_name' : current_net_conf.net_name
+        })
+        console.log(data)
+
+        // Send to json to server
+        $.ajax({
+            type: "POST",
+            url: "{% url 'rtw_ui.views.save_conf' %}",
+            data: {msg: data},
+            success: function(data) {
+                console.log(data)
+                $('#save_conf').unbind('click')
+                $('#save_conf').click(save_conf)
+            },
+            async: false
+        })
+
+    }
+
+    function getModelIDForNeuron(neuron_name) {
+        var model_id = current_net_conf.default_model_id;
+        for (var key in current_net_conf.groups) {
+            if (current_net_conf.groups.hasOwnProperty(key)) {
+                var groupname = key;
+                for (var neuron_nameIndex in current_net_conf.groups[key]) {
+                    if (current_net_conf.groups[key][neuron_nameIndex] == neuron_name) {
+                        return current_net_conf.parameterised_data.neuron_groups[groupname].model_id;
+                    }
+                }
+            }
+        }
+
+
+        return model_id;
+    }
+    function getModelDataForModelID(model_id) {
+        return JSON.parse($('#edit_model_' + model_id).attr('param_data'));
+    }
+    function getCTModelDataForModelID(model_id) {
+        return JSON.parse($('#edit_model_' + model_id).attr('param_ctdata'));
+    }
+
+    function show_neurons(neuron_name) {
+        var id_list = []
+        if (typeof(window.viewer_) != "undefined" && typeof(window.viewer_.contentManager_.metadata_) != "undefined" && null != window.viewer_.contentManager_.metadata_) {
+            id_list.push(window.viewer_.contentManager_.metadata_.externalIdToId(neuron_name))
+
+            window.viewer_.select_.clearSelected()
+            window.viewer_.select_.selectMultiple(id_list, 1)
+        }
+    }
+
+    function checkForErrorsForAllNeurons() {
+        var error = "";
+        var memoryRequired = 0;
+        $('#neuron_list option').each( function() {
+            var neuron_name =  $(this).val();
+            var model_id = getModelIDForNeuron(neuron_name);
+            var model_data = getModelDataForModelID(model_id);
+            var ctmodel_data = getCTModelDataForModelID(model_id);
+            var controls_enabled = true
+            //fill in existing RTWs
+            $(current_rtw_conf.neurons[neuron_name]).each( function() {
+                var variableName = this.variable;
+                var found = false;
+                var memoryRequiredThis = 4 * (this.end - this.start) / this.interval;
+                $(ctmodel_data.exposures).each( function() {
+                    if (this.name == variableName) {
+                        found = true;
+                    }
+                });
+                if (!found) {
+                    error = error + "variable " + variableName + " does not exist in model for neuron: " + neuron_name + "<br/>";
+                } else {
+                    memoryRequired = memoryRequired + memoryRequiredThis;
+                }
+            });
+        });
+         $('#errorSlot').html(error);
+         $('#memoryRequiredSlot').html("Recording Size is: " + memoryRequired/(1024*1024) + " MByte");
+         if (memoryRequired > 1024*1024*1024*10)
+         {
+         alert("You have exceded the maximum size of 10 GB neuron recording, you will not be able to save this configuration");
+         canSave = false;
+         } else {
+         canSave = true;
+         }
+    }
+
+
+    function loadRTWListForSelectedNeuron() {
+        $('#ReadBackTimeWindowsTable tbody tr').remove();
+        $('#variable_list option').remove();
+        var neuron_name = $('#neuron_list').find('option:selected').val();
+        show_neurons(neuron_name);
+        var model_id = getModelIDForNeuron(neuron_name);
+        var model_data = getModelDataForModelID(model_id);
+        var ctmodel_data = getCTModelDataForModelID(model_id);
+        var controls_enabled = true
+        //fill in the variable drop down selection
+        $(ctmodel_data.exposures).each( function() {
+            $('#variable_list').append("<option value='" + this.name + "'>" + this.name + "</option>");
+        });
+        //fill in existing RTWs
+        $(current_rtw_conf.neurons[neuron_name]).each( function() {
+            controls_enabled = false
+            $('#ReadBackTimeWindowsTable tbody').append("<tr><td class='variable'>" + this.variable + "</td><td class='interval'>" + this.interval +
+            "</td><td class='start'>" + this.start + "</td><td class='end'>" + this.end + "</td><td><button onclick='deleteitem(this);'>remove</button></td></tr>");
+            $('#input_interval').val(this.interval);
+            $('#input_start').val(this.start);
+            $('#input_end').val(this.end);
+        });
+
+           // <tr>
+           //     <td>{{ rtw_conf.name }}</td>
+
+        //if no items in list unlock controls
+        if (controls_enabled) {
+        $('#input_interval').removeAttr('disabled');
+        $('#input_end').removeAttr('disabled');
+        $('#input_start').removeAttr('disabled');
+        } else
+        {
+        $('#input_interval').attr('disabled','disabled');
+        $('#input_end').attr('disabled','disabled');
+        $('#input_start').attr('disabled','disabled');
+        }
+        checkForErrorsForAllNeurons();
+    }
+
+
+    function additem() {
+        var neuron_name = $('#neuron_list').find('option:selected').val();
+
+        var readBackItem = {'variable': $('#variable_list').val(), 'start': $('#input_start').val(),
+        'end': $('#input_end').val(), 'interval': $('#input_interval').val()};
+        current_rtw_conf.neurons[neuron_name].push(readBackItem);
+        loadRTWListForSelectedNeuron();
+    }
+
+    function deleteitem(item) {
+        $(item).parent().parent().remove();
+        var neuron_name = $('#neuron_list').find('option:selected').val();
+        show_neurons(neuron_name);
+        current_rtw_conf.neurons[neuron_name] = []
+        $('#ReadBackTimeWindowsTable tbody tr').each( function() {
+
+            var readBackItem = {'variable': $(this).find('.variable').html(), 'start': $(this).find('.start').html(),
+            'end': $(this).find('.end').html(), 'interval': $(this).find('.interval').html()};
+            current_rtw_conf.neurons[neuron_name].push(readBackItem);
+        });
+        loadRTWListForSelectedNeuron();
+
+        //if no other items left then unlock the controls
+
+    }
+
+    function default_conf(default_RTW) {
+        //apply the default_RTW asked for
+        current_rtw_conf.neurons = {}
+        $('#neuron_list option').each(function() {
+            var neuron_name = $( this ).val();
+            var model_id = getModelIDForNeuron(neuron_name);
+            var model_data = getModelDataForModelID(model_id);
+            var ctmodel_data = getCTModelDataForModelID(model_id);
+            current_rtw_conf.neurons[neuron_name] = []
+
+            if (default_RTW == 1 || default_RTW == 3) {
+                //all voltages
+                $(ctmodel_data.exposures).each( function() {
+                    if (this.dim == 'voltage') {
+                        var readBackItem = {'variable': this.name, 'start': 0, 'end': 100, 'interval':0.001};
+                        current_rtw_conf.neurons[neuron_name].push(readBackItem);
+                    }
+                });
+            }
+            if (default_RTW == 2 || default_RTW == 3) {
+                //all currents
+                $(ctmodel_data.exposures).each( function() {
+                if (this.dim == 'current') {
+                    var readBackItem = {'variable': this.name, 'start': 0, 'end': 100, 'interval':0.001};
+                    current_rtw_conf.neurons[neuron_name].push(readBackItem);
+                }
+                });
+
+            }
+        });
+
+    }
+
+    function start_networkselected() {
+        //load up the network
+        $.ajax({
+                type: "GET",
+                url: "{% url 'rtw_ui.views.get_net' %}" +  $('#new_network_conf').val() + "/",
+                success: function(data) {
+                    current_net_conf = JSON.parse(data);
+                    //prime the configuration
+                    default_conf($('#new_network_default').val());
+                    //select the first neuron
+                    $('#neuron_list').val('adal');
+                    loadRTWListForSelectedNeuron();
+
+
+                    $('#start-selectNetwork').hide();
+                },
+                async: false
+            })
+
+
+
+    }
+
+    function edit_neuron_model_change() {
+        loadRTWListForSelectedNeuron();
+    }
+
+    {% if open_rtw_conf %}
+    $( document ).ready(function() {
+        loadRTWListForSelectedNeuron();
+         $('#neuron_list').val($("#target option:first").val());
+        $('#start-selectNetwork').hide();
+        checkForErrorsForAllNeurons();
+        });
+    {% endif %}
+
+</script>
+
+<div class="panel panel-default" style="margin-left:-15px; margin-right:-15px; margin-bottom:0px">
+    <div class="panel-heading">
+        <input type="Button" id="save_conf" value="Save"/>
+        <input type="Button" id="save_conf_as" value="Save As"/>
+    </div>
+</div>
+
+<!-- Canvas for verifying webgl -->
+<!-- TODO(dkogan): dynamically create this -->
+<canvas id="gltest" style="display:none"></canvas>
+
+<div class="row">
+    <div id="col_0" class="col-lg-3 col-md-3 col-sm-3 panel panel-default" style="background-color:#b2d1ff; padding-right:0px">
+        <div id="nav_ui" style="height:0px"></div>
+        <canvas id="viewer" style="width:100%; height:400px; position:relative; z-index:1"></canvas>
+    </div>
+
+    <div id="col_1" class="col-lg-9 col-md-9 col-sm-9 panel panel-default" style="padding-left:0px">
+
+        <div class="row" style="padding-left:20px">
+            <div class="col-lg-2 col-md-2 col-sm-2">
+                <label>All Neurons</label><br>
+                <select id="neuron_list" size="25">
+                    {% for neuron in neurons %}
+                    <option value="{{ neuron.name }}" ondblclick="open_info('{{ neuron.info_url }}')">{{ neuron.name }} 
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+    
+            <div class="col-lg-10 col-md-10 col-sm-10">
+                <label>New Variable Recording</label> <div id="memoryRequiredSlot" style="float:right"></div><br>
+                <br/>
+                <div style="width:100%;margin: 2px solid gray;">
+
+                <label>Variable</label>
+                <select id="variable_list"></select>
+                <label>Interval</label>
+                <select name="input_interval" id="input_interval" size="1">
+                    <option value="0.0005">0.5ms</option>
+                    <option value="0.001">1ms</option>
+                    <option value="0.002">2ms</option>
+                    <option value="0.004">4ms</option>
+                    <option value="0.008">8ms</option>
+                    <option value="0.016">16ms</option>				
+				</select>
+                <label>Start</label>
+                <input type="text" name="input_start" id="input_start">
+                <label>End</label>
+                <input type="text" name="input_end" id="input_end">
+                <button onclick="additem()">Add Readback</button>
+                </div>
+                <br>
+                <label>Current Variable Recordings</label><br>
+                <div style="width:100%;margin: 2px solid gray;">
+                    <table class="table" id="ReadBackTimeWindowsTable">
+                        <thead>
+                            <th>Variable</th>
+                            <th>Interval</th>
+                            <th>Start</th>
+                            <th>End</th>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <div id="col_2" class="col-lg-3 col-md-3 col-sm-3 panel panel-default" style="display:none; padding-left:0px">
+        <label id="edit_group_name"></label><br>
+        <p id="edit_group_neurons"></p><br>
+        <label>Model: </label>
+        <select onchange="edit_neuron_model_change() "id="edit_group_models">
+            {% for model in models %}
+            <option param_data = '{{ model.json_data }}' param_ctdata = '{{ model.ctjson_data }}' id="edit_model_{{model.id}}" value="{{ model.id }}" >{{ model.model.name }}</option>
+            {% endfor %}
+        </select><br>
+
+        <div id="edit_group_params">
+
+        </div><br>
+
+        <button onclick="edit_synapses()">Synapses</button>
+        <button onclick="edit_group_delete()">Uncustomise</button>
+        <button onclick="edit_group_done()">Done</button>
+    </div>
+
+    <div id="col_3" class="col-lg-3 col-md-3 col-sm-3 panel panel-default" style="display:none; padding-left:0px">
+
+        <div id="syn_data" class="row panel panel-default" style="margin-left:0px">
+        </div>
+
+
+        <button onclick="edit_synapses_done()">Done</button>
+    </div>
+    <div id="errorSlot"> </div>
+
+    {% if not open_rtw_conf %}
+<div id="start-selectNetwork"style="z-index: 100;position:relative; top:0px;left:0px;margin:0px;margin-top:-40px;width:100%;height:600px;background-color:white;border: 2px solid gray;">
+	<div style="position:absolute;margin: 10% 30% 10% 30%;">
+        <p>Please select a Network Configuration to base this RTW Configuration on:</p>
+         <label>Network Configuration: </label>
+        <select id="new_network_conf">
+            {% for network_conf in network_confs %}
+            <option id="network_conf_{{network_conf.id}}" value="{{ network_conf.id }}" >{{ network_conf.name }}</option>
+            {% endfor %}
+        </select><br><br>
+	    <p>Please select a Default RTW configuration:</p>
+         <label>Default Recording: </label>
+        <select id="new_network_default">
+             <option value="0" >Record Nothing By Default</option>
+             <option value="1" >Record Voltages By Default</option>
+             <option value="2" >Record Currents By Default</option>
+             <option value="3" >Record Voltages and Currents By Default</option>
+        </select>
+        <br/>
+        <button onclick="start_networkselected()">Done</button>
+    </div>
+</div>
+    {% endif %}
+</div>
+
+<!-- Container for labels -->
+<!-- TODO(dkogan): dynamically create this and use css -->
+<div id="labelcontainer" style="width:0px; height:0px; left:0px; top:0px; position:absolute; z-index:1"></div>
+
+<!--div id="opac_idx" style="display:none;left:50%;top:100%;position:absolute;margin-top:-50px;color:#06F;z-index:3;margin-left:-89px"></div>
+
+<div id="r0" class="indicator"> </div>
+<div id="r1" class="indicator"> </div>
+<div id="r2" class="indicator"> </div>
+<div id="r3" class="indicator"> </div>
+<div id="r4" class="indicator"> </div>
+<div id="r5" class="indicator"> </div>
+<div id="r6" class="indicator"> </div>
+<div id="r7" class="indicator"> </div-->
+
+<div id="loading-feedback" class="loading-feedback">
+	<p>Loading...</p>
+	<div id="loader-img"></div>
+	<p>Loading time may vary depending on your system</p>
+</div>
+
+
+{% endblock content  %}
+
+
+
+
+
+
+
+
+
+
+

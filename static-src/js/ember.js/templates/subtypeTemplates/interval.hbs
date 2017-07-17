@@ -1,0 +1,48 @@
+<div class="row">
+	<div class="col-sm-12">
+		<div class="hcontrols">
+			{{#if isModifiable}}
+			<button {{action 'deleteEvent'}} class="btn btn-turquesa" style="margin: 5px">Delete This Event</button>
+			{{/if}}
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12">
+		<div class=" title">Description</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12 block">
+		<div>
+			{{input id="intervalDescription" class="" value=model.description }}
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12">
+		<div class=" title">Time</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12 block">
+		<div>
+			{{input id="intervalTimeSlider" class="simpleSlider" data-slider-id='intervalTimeSlider' type="text" data-slider-min="0" data-slider-step="0.1" data-slider-value=eventInterval }}
+		</div>
+	</div>
+</div>
+{{#if isMechano}}
+{{ render "mechanosensationInterval" mechanosensation}}
+{{/if}}
+{{#if isPhoto}}
+{{ render "phototaxisInterval" phototaxis}}
+{{/if}}
+{{#if isChemo}}
+{{ render "chemotaxisInterval" chemotaxis}}
+{{/if}}
+{{#if isGalvano}}
+{{ render "galvanotaxisInterval" galvanotaxis}}
+{{/if}}
+{{#if isTermo}}
+{{ render "termotaxisInterval" termotaxis}}
+{{/if}}

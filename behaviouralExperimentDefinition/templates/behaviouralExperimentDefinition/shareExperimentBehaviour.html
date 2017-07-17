@@ -1,0 +1,266 @@
+{% extends 'base-with-login.html' %}
+{% load js %}
+{% load staticfiles %}
+
+{% block extra_header %}
+    
+    {% comment %}
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+    {% endcomment %}
+    <script type="text/javascript" src="{% static "js/jquery.tokeninput.js" %}"></script>
+    <link rel="stylesheet" href="{% static "css/token-input.css" %}" type="text/css" />
+    <link rel="stylesheet" href="{% static "css/token-input-facebook.css" %}" type="text/css" />
+     
+{% endblock%}
+
+{% block content %}
+    
+    {% include 'behaviouralExperimentDefinition/sharePeopleModal.html'%}
+
+    <script type="text/javascript">
+        var allUsers = {{ users | js }};
+
+        function modalForceCloneContinue (idBE) {
+            console.log('idBE=>'+idBE);
+            var check_public = $('#cp_'+idBE).prop('checked');
+            console.log(check_public);
+
+            var csrftoken = $.cookie('csrftoken');
+            console.log('behaviouralExperiment :' + idBE);
+            var payload = {'behaviouralExperiment': idBE, 'public_check': check_public};
+            console.log(payload);
+            $.ajax({
+                    type: "POST",
+                    url: "{% url 'behavExp_make_public' %}",
+                    data: JSON.stringify(payload),
+                    success: function( response ) {
+                        console.log(response);
+                        if (response.response == 0) {
+                            $('#cp_'+idBE).prop('checked', true);
+                        }
+                        $("#modalPublic-body").html("<p>" + response.msg + "</p>");
+                        $("#modalPublic").modal();
+                    },
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader('X-CSRFToken',csrftoken);
+                        //xhr.setRequestHeader('X-CSRFToken', $('meta[name="csrf-token"]').attr('content'));
+                        //xhr.setRequestHeader("Authorization", "Basic " + btoa("admin" + ":" + "admin"));
+                        //xhr.setRequestHeader("Content-Type", "application/json");
+                    },
+            });
+        };
+        function modalForceCloneCancel (idBE) {
+          $( '#cp_'+idBE ).prop( "checked", false );
+        };
+
+        function publicOrNot(idBE) {
+
+            var check_public = $('#cp_'+idBE).prop('checked');
+            console.log(check_public);
+
+            var csrftoken = $.cookie('csrftoken');
+            console.log('behaviouralExperiment :' + idBE);
+            var payload = {'behaviouralExperiment': idBE, 'public_check': check_public};
+            console.log(payload);
+            if ((check_public == true) && ($('#be_'+idBE).text().indexOf('@')==-1)) {
+                <!--This checks if there is any email (@) on shared with and that user is trying to put it to true-->
+                $("#modalForceCloneContinue").unbind();
+                $("#modalForceCloneContinue").click(function() {
+                    modalForceCloneContinue(idBE);
+                    console.log ("modalForceCloneContinue");
+                    });
+                $("#modalForceCloneCancel").unbind();
+                $("#modalForceCloneCancel").click(function() {
+                    modalForceCloneCancel(idBE);
+                    console.log ("modalForceCloneCancel");
+                });
+                $("#modalForceClone").modal();
+            }
+            else
+            {
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'behavExp_make_public' %}",
+                    data: JSON.stringify(payload),
+                    success: function( response ) {
+                        console.log(response);
+                        if (response.response == 0) {
+                            $('#cp_'+idBE).prop('checked', true);
+                        }
+                        $("#modalPublic-body").html("<p>" + response.msg + "</p>");
+                        $("#modalPublic").modal();
+                    },
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader('X-CSRFToken',csrftoken);
+                        //xhr.setRequestHeader('X-CSRFToken', $('meta[name="csrf-token"]').attr('content'));
+                        //xhr.setRequestHeader("Authorization", "Basic " + btoa("admin" + ":" + "admin"));
+                        //xhr.setRequestHeader("Content-Type", "application/json");
+                    },
+                });
+            }
+
+        }
+
+    </script>
+
+    <div class="container-fluid">
+
+        <div class="page-header">
+            <h1>Share my behavioural experiments <small>Make public your BE and/or share them personally.</small></h1>
+        </div>
+        
+        <div class="panel panel-primary">
+
+            <div class="panel-heading"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>&nbsp;&nbsp;SHARE WITH USERS</div>
+    
+            <div class="panel-body">
+                <p>Here you will be able to share your BE publicly and/or personally.</p>
+            </div> <!-- div panel body -->
+    
+            <table class="table table-striped">
+                <!--<form action='{% url 'shareExperimentBehaviour' %}'method='post'>{% csrf_token %}-->
+                    <thead>
+                        <tr>
+                            <th>Behavioural experiments</th>
+                            <th>Description</th>
+                            <th>Date created</th>
+                            <th>Public</th>
+                            <th>Shared with</th>               
+                            <th></th>
+                        </tr>
+                    </thead>
+    
+                    <tbody>
+                        {% for behaviouralExperiment in behaviouralExperiments %}
+                            {% if behaviouralExperiment.creator == request.user %}
+                                <tr>                                    
+                                    <td><a href="{% url 'experimentDefinition' %}#/experiment/{{behaviouralExperiment.uuid}}"><span class="uuid">{{behaviouralExperiment.uuid}}</span></a></td>
+                                    <td>{{behaviouralExperiment.description}}</td>
+                                    <td>{{behaviouralExperiment.created}}</td>
+                                    {% if behaviouralExperiment.public %}
+                                        <td><input id="cp_{{behaviouralExperiment.uuid}}" type="checkbox" onclick="publicOrNot('{{ behaviouralExperiment.uuid}}')" checked/></td>
+                                    {% else %}
+                                        <td><input id="cp_{{behaviouralExperiment.uuid}}" type="checkbox" onclick="publicOrNot('{{ behaviouralExperiment.uuid}}')" /></td>
+                                    {% endif %}
+                                    <td id="be_{{behaviouralExperiment.pk}}">
+                                      {% for shared_behav_exp in share %}           
+                                          {% if shared_behav_exp.behaviouralExperiment == behaviouralExperiment %}                                                             
+                                              {{shared_behav_exp.user.first_name}} {{shared_behav_exp.user.last_name}} < {{shared_behav_exp.user.email}} ><br/>
+                                          {% endif %}
+                                      {% endfor %}
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-info" onclick="sharePeopleModal('{{ behaviouralExperiment.uuid}}')">Share</button>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}       
+                    </tbody>
+                <!--</form>-->
+            </table>
+
+        </div> <!-- div panel -->
+
+
+        <div class="panel panel-primary">
+
+            <div class="panel-heading"><span class="glyphicon glyphicon-user" aria-hidden="true"></span>&nbsp;&nbsp;SHARED WITH ME</div>
+    
+            <div class="panel-body">
+                <p>These are the BE other users have shared with you.</p>
+            </div> <!-- div panel body -->
+
+            <table class="table table-striped">
+
+                <thead>
+                    <tr>
+                        <th>Behavioural experiments</th>
+                        <th>Description</th>
+                        <th>Public Sharing</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for shared_behav_exp in share %}
+                        {% if shared_behav_exp.user == request.user %}
+                            <tr>
+                                <td><a href="{% url 'experimentDefinition' %}#/experiment/{{shared_behav_exp.behaviouralExperiment.uuid}}"><span class="uuid">{{shared_behav_exp.behaviouralExperiment.uuid}}</span></a></td>
+                                <td>
+                                    {{ shared_behav_exp.behaviouralExperiment.description }}
+                                </td>
+                                <td>
+                                    {{ shared_behav_exp.behaviouralExperiment.public }}
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+        </div> <!-- div panel -->
+
+
+        <div class="panel panel-primary">
+
+            <div class="panel-heading"><span class="glyphicon glyphicon-globe" aria-hidden="true"></span>&nbsp;&nbsp;PUBLICLY SHARED</div>
+    
+            <div class="panel-body">
+                <p>These are the BE publicly shared by the paltform users.</p>
+            </div> <!-- div panel body -->
+
+            <table class="table table-striped">
+
+                <thead>
+                    <tr>
+                        <th>Behavioural experiments</th>
+                        <th>Description</th>
+                        <th>Public Sharing</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for behaviouralExperiment in behaviouralExperiments %}
+                        {% if behaviouralExperiment.public == True %}
+                            <tr>
+                                <td><a href="{% url 'experimentDefinition' %}#/experiment/{{behaviouralExperiment.uuid}}"><span class="uuid">{{behaviouralExperiment.uuid}}</span></a></td>
+                                </td>
+                                <td>
+                                    {{ behaviouralExperiment.description }}
+                                </td>
+                                <td>
+                                    {{ behaviouralExperiment.public }}
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+        </div> <!-- div panel -->
+
+
+        <div class="row">
+            <div class="col-md-12" style="padding: 20px;">
+                {%if messages %}
+                    <div class='row'>
+                        <div class='col-xs-12'>
+                            <ul class="messages">
+                                {% for message in messages %}
+                                    <p{% if message.tags == "success" %} class="alert alert-success"
+                                        {% elif  message.tags == "error" %} class="alert alert-danger"
+                                        {% elif  message.tags == "warning" %} class="alert alert-warning"
+                                        {%endif%}>{{message}}</p>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div> <!-- div container-fluid-->
+
+
+{% endblock %}

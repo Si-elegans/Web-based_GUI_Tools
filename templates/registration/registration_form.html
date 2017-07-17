@@ -1,0 +1,23 @@
+{% extends "base-homepage.html" %}
+{% load i18n %}
+
+{% block main %}
+&nbsp;
+  <div>
+    <form method="post" action=".">
+      {% csrf_token %}      
+            
+      <p><b>{{form.username.label}} </b> {{form.username}} {{form.username.help_text}}</p>
+      <p><b>{{form.first_name.label}} </b>{{form.first_name}}</p>
+      <p><b>{{form.last_name.label}} </b>{{form.last_name}}</p>
+      <p><b>{{form.email.label}} </b>{{form.email}}</p>
+      
+      <p></p>
+    
+      <p><b>{{form.password1.label}}: </b>{{form.password1}}</p>
+      <p><b>{{form.password2.label}}: </b>{{form.password2}}</p>
+    
+      <input type="submit" value="{% trans 'Submit' %}" />
+    </form>
+  </div>
+{% endblock %}

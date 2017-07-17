@@ -1,0 +1,33 @@
+<div class="col-sm-12 wrap">
+    <div class="row">
+        <div class="col-sm-12 wrap">
+            <div class="hcontrols row">
+                {{#if isInTimeline}}
+                <button {{action 'changeIsInTimeline'}} class="btn btn-turquesa" style="margin: 5px"> Voltages </button>
+                {{else}}
+                <button {{action 'changeIsInTimeline'}} class="btn btn-turquesa" style="margin: 5px"> Timeline </button>
+                {{/if}}
+                <button {{action 'playAnimation'}} class="glyphicon glyphicon-play btn btn-turquesa2"></button>
+                <button class="glyphicon glyphicon-stop btn btn-turquesa2"></button>
+                <img src="static/data/vel50.png"></img>
+                <img src="static/data/opa10.png"></img>
+            </div>
+        </div>
+    </div>
+    <div class="row translucent">
+        {{#if isInTimeline}}
+            {{view "visualizationTimeline"}}
+        {{else}}
+            <div class="col-sm-12 htimelinebox scrolly">
+                {{#each neuron in neurons}}
+                {{#if neuron.selected}}
+                <div class="row">
+                    {{render "visualizationGraph" neuron}}
+                </div>
+                {{/if}}
+                {{/each}}
+            </div>
+        {{/if}}
+    </div>
+    <canvas id="timelineCanvas" class="timelineCanvas"></canvas>
+</div>

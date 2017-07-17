@@ -1,0 +1,105 @@
+<div class="row">
+	<div class="col-sm-12">
+		<div class="hcontrols row">
+			<div class="col-sm-8">
+			</div>
+			<div class="col-sm-4">
+				<button {{action 'gotoExperiment'}} class="btn btn-turquesa" style="margin: 5px">Go to Experiment</button>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12">
+		<div class="whitefont">Ambient Temperature</div>
+	</div>
+</div>
+<div class="row">
+    <div class="col-sm-12 block">
+        <div>
+            <input id="environmentTempSlider" class='simpleSlider' data-slider-id='environmentTempSlider' type="text" data-slider-min="0" data-slider-max="100" data-slider-step="0.1" data-slider-value="14"/>     
+        </div>
+    </div>
+</div>
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+  <div class="">
+    <div class="title" role="tab" id="headingFour">
+      <h4 class="panel-title smallmargin">
+        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+          Worm Status
+        </a>
+      </h4>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
+      <div class="panel-body">
+        {{render "wormStatus" wormStatus}}
+      </div>
+    </div>
+  </div>
+  <div class="">
+    <div class="title" role="tab" id="headingOne">
+      <h4 class="panel-title smallmargin">
+        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+          Plate Configuration
+        </a>
+      </h4>
+    </div>
+    <div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+      <div class="panel-body">
+        {{render "plateConfiguration" plateConfiguration}}
+      </div>
+    </div>
+  </div>
+  <div class="">
+    <div class="title" role="tab" id="headingThree">
+      <h4 class="panel-title smallmargin">
+        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+          Obstacles
+        </a>
+      </h4>
+    </div>
+    <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+      <div class="panel-body">
+		<div class="row">
+			<div class="col-sm-8">
+				<button class="btn btn-turquesa" data-toggle="modal" data-target="#newModalObstacle">New Obstacle</button>
+			</div>
+		</div>					
+		{{#each obs in obstacle}}
+			{{render "obstacleLocation" obs}}
+		{{/each}}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal fade" id="newModalObstacle" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content color">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="myModalLabel">New Obstacle</h4>
+			</div>
+			<div class="row">
+				<div class="col-sm-12">
+					<div class="title centered">Type</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-12 block">
+					<select class="btn" id="createObstacleType">
+						<option>Cube</option>
+						<option>Cylinder</option>
+						<option>Hexagonal</option>
+					</select>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button {{action 'addObstacle'}} type="button" class="btn btn-turquesa" data-dismiss="modal">Create</button>
+				<button type="button" class="btn btn-turquesa" data-dismiss="modal">Cancel</button>
+			</div>
+		</div>
+	</div>
+</div>

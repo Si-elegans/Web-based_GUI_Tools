@@ -1,0 +1,843 @@
+{% extends 'base-with-login.html' %}
+{% load staticfiles %}
+
+{% block content %}
+
+<!-- jQuery -->
+<link type="text/css" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/vader/jquery-ui.css" rel="Stylesheet" />
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+<!-- o3v styles -->
+<link type="text/css" href="{% static "cenet/main_ui.css" %}" rel="Stylesheet" />
+
+<!-- Local -->
+<script type="text/javascript">
+
+    var neuron_groups = {}
+    var syn_groups = {}
+    var parameterised_data = {'neuron_groups':{}, 'syn_groups':{}}
+    var STATIC_BASE = "{{ STATIC_URL }}"
+
+    <!-- Start viewer. -->
+    $(document).ready(function() {
+        window.viewer_ = new o3v.Viewer();
+
+        {% if open_net %}
+        var open_net = JSON.parse('{{open_net.json|safe}}')
+        $('#net_name').val(open_net['net_name'])
+        $('#net_description').val(open_net['net_description'])
+        {% else %}
+        var open_net = null
+        {% endif %}
+
+        $('#group_neuron_list').change(function(){ select_changed(true) })
+        $('#neuron_list').change(function(){ select_changed(false) })
+
+        $('#save_net').click(save_net)
+        $('#save_net_as').click(save_net_as)
+        $('#save_net_modal_btn').click(save_net)
+        $('#open_xml').click(open_xml)
+
+        $('.ntx_syn_models').each(function() {
+            $(this).append('<option selected value="default">use default</option>')
+            $(this).append($('#syn_model_list > option').clone() )
+        })
+
+        $('#synapseModelId').append($('#syn_model_list > option').clone())
+
+        if(open_net != null) {
+
+            $('#muscleModel').val(muscleModel)
+            $('#neuron_model_list').val(open_net['default_model_id'])
+            $('#syn_model_list').val(open_net['default_syn_model_id'])
+            neuron_groups = open_net['groups']
+            parameterised_data = open_net['parameterised_data']
+
+            for(group_name in neuron_groups){
+                group_as_str = '['
+                for(var i=0; i<neuron_groups[group_name].length; i++){
+                    if(i != 0) {
+                        group_as_str += ', '
+                    }
+                    group_as_str += '\'' + neuron_groups[group_name][i] + '\''
+                }
+                group_as_str += ']'
+
+                $('#neuron_group_list').append('<option onclick="show_neurons(' + group_as_str + ')" ' +
+                                'title="' + neuron_groups[group_name] + '" ondblclick="edit_group(\''+ group_name +
+                                '\')" id="neuron_group_' + group_name + '" value="' + group_name + '">' +
+                                group_name + '</option>')
+                $('#neuron_group_list').show()
+            }
+
+            // Load syn_data
+            for(neuron_name in open_net['parameterised_data']['syn_groups']){
+                $('#syn_neuron_group_list').append('<option onclick="show_neurons([\'' + neuron_name + '\'])" ' +
+                                'title="' + neuron_groups[neuron_name] + '" ondblclick="edit_synapses(\''+ neuron_name +
+                                '\')" id="syn_group_' + neuron_name + '" value="' + neuron_name + '">' +
+                                neuron_name + '</option>')
+                $('#syn_neuron_group_list').show()
+            }
+
+            // Load neurotx data
+            for( neurotx in open_net['neurotx_data'] ) {
+                $('#' + neurotx).val(open_net['neurotx_data'][neurotx])
+            }
+        }
+    });
+
+    function get_neurotx_data() {
+        var neurotx_data = {}
+        $('.ntx_syn_models').each(function() {
+            if($(this).val() != 'default') {
+                console.log($(this).val())   
+                console.log($(this).attr('id'))
+                neurotx_data[$(this).attr('id')] = $(this).val()   
+            }
+        })
+        return neurotx_data
+    }
+
+    function open_xml() {
+        save_net()
+
+        var url = "{% url 'cenet.views.net_to_lems_xml' %}" +
+                  "?net_name=" + $('#net_name').val()
+
+        console.log("Trying to open url: " + url)
+        window.open(url, '_blank')
+    }
+
+    function save_net_as() {
+        $('#saveModal').modal('show')
+    }
+
+
+    function save_net() {
+        if(! $('#net_name').val()) {
+            save_net_as()
+            return
+        }
+
+        console.log('Saving Network')
+
+        get_neurotx_data()
+        // Data structure to be stored on the server
+        var data = JSON.stringify({
+            'net_name' : $('#net_name').val(),
+            'net_description' : $('#net_description').val(),
+            'default_model_id': $('#neuron_model_list').val(),
+            'default_syn_model_id': $('#syn_model_list').val(),
+            'groups' : neuron_groups,
+            'neurotx_data' : get_neurotx_data(),
+            'parameterised_data' : parameterised_data,
+            'muscleModel' : $('#muscleModel').val()
+        })
+
+        // Send to json to server
+        $.ajax({
+            type: "POST",
+            url: "{% url 'cenet.views.save_net' %}",
+            data: {msg: data},
+            success: function(data) {
+                console.log(data)
+                if (data.indexOf("Error") > -1) {
+                    $('#net_name').val('')
+                    alert('This network is already in use by a simulation, please save it under a new name');
+                }
+                $('#saveModal').modal('hide')
+                $('#save_net').unbind('click')
+                $('#save_net').click(save_net)
+            },
+            async: false
+        })
+
+    }
+
+    function select_changed(group) {
+        if(group) {
+            list_val = $('#group_neuron_list').val()
+        }
+        else {
+            list_val = $('#neuron_list').val()
+        }
+        show_neurons(list_val)
+    }
+
+    function show_neurons(neuron_name_list) {
+        var id_list = []
+        for(i=0; i < neuron_name_list.length; i++){
+            id_list.push(window.viewer_.contentManager_.metadata_.externalIdToId(neuron_name_list[i]))
+        }
+
+        window.viewer_.select_.clearSelected()
+        window.viewer_.select_.selectMultiple(id_list, 1)
+    }
+
+    function open_info(url) {
+        if(url != null && url.length > 0 && url != 'None') {
+            window.open(url, '_blank')
+        }
+    }
+
+    function create_group(syn_group){
+        var selected_neurons = null
+        var groups_params_var = null
+        var id_prefix = null
+        var edit_method = null
+
+        if(syn_group) {
+            this_list = $('#syn_neuron_list')
+            selected_neurons = [this_list.val()]
+            dest_list = $('#syn_neuron_group_list')
+            groups_params_var = syn_groups
+            id_prefix = 'syn_group'
+            edit_method = 'edit_synapses'
+        }
+        else {
+            this_list = $('#neuron_list')
+            selected_neurons = this_list.val()
+            dest_list = $('#neuron_group_list')
+            groups_params_var = neuron_groups
+            id_prefix = 'neuron_group'
+            edit_method = 'edit_group'
+        }
+
+        console.log(selected_neurons)
+        if(selected_neurons == [] || selected_neurons[0] == null) {
+            return
+        }
+
+        // check if selected neurons are in any existing groups
+        for(i=0; i<selected_neurons.length; i++){
+            for(var group in groups_params_var){
+                for(j=0; j< groups_params_var[group].length; j++){
+                    if(groups_params_var[group][j] == selected_neurons[i]){
+                        if(neuron_in_group(selected_neurons[i], group, groups_params_var[group]) == false){
+                            console.log("Create group cancelled")
+                            return
+                        }
+                    }
+                }
+            }
+        }
+
+        // remove any empty groups
+        for(group in groups_params_var){
+            if( groups_params_var[group].length == 0){
+                delete groups_parasm_var[group]
+                delete parameterised_data[id_prefix + 's'][group]
+                $('#' + id_prefix + '_' + group).remove()
+            }
+        }
+
+        // we got this far so we'll create the group
+        if(selected_neurons.length > 1) {
+            var group_name = window.prompt("Please enter a name for this group of neurons:")
+            if( ! group_name){
+                group_name = "group_" + selected_neurons[0]
+            }
+        }
+        else {
+            var group_name = selected_neurons[0]
+        }
+
+        if(name in groups_params_var){
+            alert("Group [" + group_name + " already exists")
+            return
+        }
+
+        // add new group
+        groups_params_var[group_name] = selected_neurons
+
+        // add default parameterised data
+        parameterised_data[id_prefix + 's'][group_name] = {
+            'model_id' : $('#neuron_model_list').val(),   // not used for syn_groups
+            'data' : JSON.parse($('#neuron_model_list').find('option:selected').attr('param_data')),
+            'syn_data' : {}
+        }
+
+        selected_neurons_as_str = '['
+        for(var i=0; i<selected_neurons.length; i++){
+            if(i != 0) {
+                selected_neurons_as_str += ', '
+            }
+            selected_neurons_as_str += '\'' + selected_neurons[i] + '\''
+        }
+        selected_neurons_as_str += ']'
+
+        dest_list.show()
+        dest_list.append('<option onclick="show_neurons(' + selected_neurons_as_str + ')" ' +
+                         'title="'+ selected_neurons + '" ondblclick="' + edit_method + '(\''+ group_name +
+                         '\')" id="' + id_prefix + '_' + group_name + '" value="' + group_name + '">' +
+                         group_name + '</option>')
+
+        if( syn_group ) {
+            edit_synapses(group_name)
+        }
+        else {
+            edit_group(group_name)
+        }
+    }
+
+    function remove_group(group_name){
+        if(confirm("Undo all customisations and use default model?") == true){
+            delete neuron_groups[group_name]
+            delete parameterised_data["neuron_groups"][group_name]
+            $('#neuron_group_' + group_name).remove()
+
+            if($('#neuron_group_list').find('option').length == 0){
+                $('#neuron_group_list').hide()
+            }
+
+            return true
+        }
+        return false
+    }
+
+    function edit_group(group_name){
+        $('#config_neurons_top').hide()
+        $('#config_neurons_group').show()
+
+        $('#edit_group_name').text(group_name)
+
+        // if the group contains more than one neuron then display those contained
+        if(neuron_groups[group_name].length > 1) {
+            $('#edit_group_neurons').text(neuron_groups[group_name].toString())
+        }
+        else {
+            $('#edit_group_neurons').text('')
+        }
+
+        // initialised the selected model from the stored value
+        $('#edit_group_models').val(parameterised_data['neuron_groups'][group_name]['model_id'])
+
+        edit_group_model_change()
+    }
+
+    function select_comp(){
+        console.log("***** select_comp()*****")
+        var group_name = $('#edit_group_name').text()
+        var comp = $('#comp_select').val()
+        var comps = parameterised_data["neuron_groups"][group_name]['data']['comps']
+
+        var params_html = ""
+        // Display parameters for selected component
+        for(param in comps[comp]['params']){
+            params_html += '<label>' + param + '</label>'
+            params_html += '<input onchange="param_changed(\'paraminput_' + param + '\')" id="paraminput_' + param + '" class="param_' + comp + '" value="' + comps[comp]['params'][param]['val'] + '" size="10" />' + comps[comp]['params'][param]['unit'] + '<br>'
+        }
+        $('#params').empty()
+        $('#params').append(params_html)
+    }
+
+    function param_changed(id) {
+        console.log("Param changed")
+        console.log($('#' + id))
+        newvalue = $('#' + id).val()
+        console.log(newvalue)
+
+        var group_name = $('#edit_group_name').text()
+        var comp = $('#comp_select').val()
+        var comps = parameterised_data["neuron_groups"][group_name]['data']['comps']
+        // update parameterised_data
+        comps[comp]['params'][id.substring(11)]['val'] = newvalue
+    }
+
+    function muscleModel_changed() {
+        var val = $('#muscleModel').val();
+        $('#config_muscles_top div span').hide();
+        $('#muscle_desc_' + val).show();
+    }
+
+    function edit_group_model_change(){
+        var group_name = $('#edit_group_name').text()
+
+        // if the model has changed reset the parameterised data
+        if(parameterised_data["neuron_groups"][group_name]['model_id'] != $('#edit_group_models').val()) {
+            parameterised_data["neuron_groups"][group_name]['model_id'] = $('#edit_group_models').val()
+            parameterised_data["neuron_groups"][group_name]['data'] = JSON.parse($('#edit_group_models').find('option:selected').attr('param_data'))
+        }
+
+        // reset the displayed parameter values from the stored values
+        $('#edit_group_params').empty()
+
+        var comp_select = '<select onchange="select_comp()" id="comp_select">'
+        var comps = parameterised_data["neuron_groups"][group_name]['data']['comps']
+        for(comp in comps){
+            comp_select += '<option value="' + comp + '">' + comps[comp]['name'] + '</option>'
+        }
+        comp_select += "</select>"
+        $('#edit_group_params').append('<hr style="margin-bottom:5px"><label>Customize Component: </label>' +
+                                        comp_select + '<hr style="margin-top:0px;margin-bottom:5px">')
+
+        var params_div = '<div id="params">'
+        params_div += '</div>'
+
+        $('#edit_group_params').append(params_div)
+
+        select_comp()
+    }
+
+    function edit_group_delete(){
+        if(remove_group($('#edit_group_name').text()) == true) {
+            edit_group_done()
+        }
+    }
+
+    function edit_group_done(){
+        $('#config_neurons_group').hide()
+        $('#config_neurons_top').show()
+    }
+
+    function neuron_in_group(neuron, group_name,  group){
+        var r = confirm("Requested neuron [" + neuron + "] is already in group [" + group + "]\n" + 
+                        "Remove this neuron from existing group?")
+
+        if( r == true ){
+            group = removeA(group, neuron)
+            return true
+        }
+        return false
+
+    }
+
+    function edit_synapses(neuron_name){
+        $('#config_syns_byneuron_top').hide()
+        $('#config_syns_byneuron_group').show()
+
+        $('#syn_data').empty()
+
+        $('#syn_data').append('<label id="def_syn_label" style="padding-left:10px">Default Synapse:</label>')
+
+        var synapse_select = '<select onchange="set_default_syn(\'' + neuron_name + '\')" id="synapse_select"></select>'
+
+        $('#syn_data').append(synapse_select)
+        $('#synapse_select').append($('#syn_model_list > option').clone())
+
+        // set default synapse from stored value in parameterised_data
+        if( parameterised_data["syn_groups"][neuron_name]["data"]["default_syn"] == undefined ) {
+            parameterised_data["syn_groups"][neuron_name]["data"]["default_syn"] = $('#syn_model_list').val()
+        }
+        $('#synapse_select').val(parameterised_data["syn_groups"][neuron_name]["data"]["default_syn"])
+
+        // list synaptic connections for this neuron ** TODO **
+        $.ajax({
+            type: "GET",
+            url: "{% url 'cenet.views.syn_conns' %}" + neuron_name + "/",
+            success: function(data) {
+                add_syn_conns(JSON.parse(data), neuron_name)
+            },
+            async: false
+        })
+    }
+
+    function syn_changed(select_id, neuron_name) {
+        console.log("syn_changed "  + neuron_name)
+        // we're customising synapses so group_name is the origin neuron
+        var synapse_data = parameterised_data["syn_groups"][neuron_name]['syn_data']
+
+        var target = select_id.substring(8)
+
+        var synapse_to_use = $('#' + select_id).val()
+
+        // we've already customised this connection
+        if(target in synapse_data) {
+            if(synapse_to_use == 'default') {
+                delete synapse_data[target]
+            }
+            else {
+                synapse_data[target] = synapse_to_use
+            }
+        }
+        else if(synapse_to_use != 'default') {
+            synapse_data[target] = synapse_to_use
+        }
+    }
+
+    function add_syn_conns(data, neuron_name) {
+        console.log('Adding Synaptic Connections')
+        //console.log(data)
+
+        var syn_conn_html = '<div style="height:250px; overflow-y:auto">'
+        syn_conn_html += '<table class="table" id="syn_conns"><thead><tr><th>target</th>' +
+                         '<th>number</th><th>synapse</th></tr></thead>'
+
+        for(i=0; i<data.length; i++) {
+            var sel_id = 'synconn_' + data[i]['target']
+            var syn_select_html = '<select id="' + sel_id + '" onchange="syn_changed(\'' +
+                                  sel_id + '\', \'' + neuron_name + '\')"><option value="default">use default</option>'
+
+            $('#synapse_select').find('option').each(function() {
+                syn_select_html += '<option value="' + $(this).val() + '">' + $(this).text() + '</option>'
+            })
+
+            syn_select_html += '</select>'
+
+            syn_conn_html += '<tr><td><a href="#" onclick="show_neurons([\'' + neuron_name + '\', \'' +
+                             data[i]['target'] + '\']); return false;">' + data[i]['target'] + '</a>' +
+                             '</td><td>' + data[i]['num_conns'] +
+                             '</td><td>' + syn_select_html + '</td></tr>'
+        }
+
+        syn_conn_html += '</table></div>'
+
+        $('#syn_data').append(syn_conn_html)
+
+        // restore synapses from parameterised_data
+        for(syn_conn in parameterised_data["syn_groups"][neuron_name]['syn_data']){
+            console.log('Setting value: ' + syn_conn)
+            console.log('to: ' + parameterised_data["syn_groups"][neuron_name]['syn_data'][syn_conn])
+            $('#synconn_' + syn_conn).val(parameterised_data["syn_groups"][neuron_name]['syn_data'][syn_conn])
+        }
+    }
+
+    function config_neurons() {
+        $('#config_syns_btn').css('color', 'black')
+        $('#config_neurons_btn').css('color', 'mediumblue')
+        $('#config_muscles_btn').css('color', 'black')
+        $('#config_syns_top').hide()
+        $('#config_neurons_group').hide()
+        $('#config_neurons_top').show()
+        $('#config_muscles_top').hide()
+    }
+
+    function config_syns() {
+        $('#config_neurons_btn').css('color', 'black')
+        $('#config_syns_btn').css('color', 'mediumblue')
+        $('#config_neurons_top').hide()
+        $('#config_neurons_group').hide()
+        $('#config_syns_top').show()
+        $('#config_muscles_top').hide()
+    }
+    function config_muscles() {
+        $('#config_neurons_btn').css('color', 'black')
+        $('#config_syns_btn').css('color', 'black')
+        $('#config_muscles_btn').css('color', 'mediumblue')
+        $('#config_neurons_top').hide()
+        $('#config_neurons_group').hide()
+        $('#config_muscles_top').show()
+        $('#config_syns_hide').show()
+    }
+
+    function config_syns_byneurotx() {
+        $('#config_syns_byneuron_btn').css('color', 'black')
+        $('#config_syns_byneurotx_btn').css('color', 'mediumblue')
+        $('#config_syns_byneuron_top').hide()
+        $('#config_syns_byneuron_group').hide()
+        $('#config_syns_byneurotx_top').show()
+    }
+
+    function config_syns_byneuron() {
+        $('#config_syns_byneurotx_btn').css('color', 'black')
+        $('#config_syns_byneuron_btn').css('color', 'mediumblue')
+        $('#config_syns_byneurotx_top').hide()
+        $('#config_syns_byneuron_group').hide()
+        $('#config_syns_byneuron_top').show()
+    }
+
+
+    function set_default_syn(neuron_name){
+        console.log('Setting default synapse ' + neuron_name)
+        parameterised_data["syn_groups"][neuron_name]['data']['default_syn'] = $('#synapse_select').val()
+    }
+
+    function edit_synapses_done(){
+        $('#config_syns_byneuron_group').hide()
+        $('#config_syns_byneuron_top').show()
+        // TODO: store in parameterised_data["syn_groups"]
+    }
+
+    function removeA(arr) {
+        var what, a = arguments, L = a.length, ax;
+        while (L > 1 && arr.length) {
+            what = a[--L];
+            while ((ax= arr.indexOf(what)) !== -1) {
+                arr.splice(ax, 1);
+            }
+        }
+        return arr;
+    }
+
+</script>
+
+<script type="text/javascript">
+  var o3v = {};  // open-3d-viewer namespace
+</script>
+
+<!-- Webgl -->
+<script type="text/javascript" src="{% static "cenet/scripts/gl-matrix-min.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/webgl.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/loader.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/renderer.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/webgl_util.js" %}"></script>
+
+<!-- o3v specific -->
+<script type="text/javascript" src="{% static "cenet/scripts/common.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/models.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/entities.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/content.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/layer.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/history.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/layers_ui.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/gestures.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/select.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/label.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/nav_ui.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/navigate.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/input_handler.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/search.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/select.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/interpolant.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/opacity.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/main_ui.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/render_interface.js" %}"></script>
+<script type="text/javascript" src="{% static "cenet/scripts/viewer.js" %}"></script>
+
+<div class="panel panel-default" style="margin-left:-15px; margin-right:-15px; margin-bottom:0px">
+    <div class="panel-heading">
+        <input type="Button" id="save_net" value="Save"/>
+        <input type="Button" id="save_net_as" value="Save As"/>
+        <input type="Button" id="open_xml" value="Save And Generate XML"/>
+    </div>
+</div>
+
+<!-- Canvas for verifying webgl -->
+<!-- TODO(dkogan): dynamically create this -->
+<canvas id="gltest" style="display:none"></canvas>
+
+<div class="row">
+    <div id="3d_col" class="col-lg-9 col-md-9 col-sm-9 panel panel-default" style="background-color:#b2d1ff; padding-right:0px">
+        <div id="nav_ui" style="height:0px"></div>
+        <canvas id="viewer" style="width:100%; height:400px; position:relative; z-index:1"></canvas>
+    </div>
+
+    <div id="config_col_top" class="col-lg-3 col-md-3 col-sm-3 panel panel-default" style="padding-left:0px">
+        <div class="row panel panel-default" style="margin-left:0px">
+            <label style="padding-left:10px">Default Neuron Model</label>
+            <select id="neuron_model_list">
+                {% for model in neuron_models %}
+                <option param_data = '{{ model.json_data | safe}}' value="{{ model.id }}" >{{ model.model.name }} ({{model.model.owner.username}})
+                </option>
+                {% endfor %}
+            </select>
+
+            <label style="padding-left:10px">Default Synapse Model</label>
+            <select id="syn_model_list">
+                {% for model in syn_models %}
+                <option param_data = '{{ model.json_data | safe}}' value="{{ model.id }}" >{{ model.model.name }} ({{model.model.owner.username}})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="row panel panel-default" style="margin-left:0px">
+            <button id="config_neurons_btn" onclick="config_neurons()">Configure Neurons</button>
+            <button id="config_syns_btn" onclick="config_syns()">Configure Synapses</button>
+            <button id="config_muscles_btn" onclick="config_muscles()">Configure Muscles</button>
+        </div>
+
+        <div class="row" style="padding-left:20px;display:none" id="config_neurons_top">
+            <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-6">
+                    <label>All Neurons</label><br>
+                    <select id="neuron_list" multiple size="15">
+                        {% for neuron in neurons %}
+                        <option value="{{ neuron.name }}" ondblclick="open_info('{{ neuron.info_url }}')">{{ neuron.name }} 
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-lg-6 col-md-6 col-sm-6">
+                    <label>Customised</label><br>
+                    <select id="neuron_group_list" size="15" style="display:none">
+                    </select>
+                </div>
+            </div>
+            <div class="row" style="padding-left:15px">
+                <button onclick="create_group(false)">Customise</button>
+            </div>
+        </div> <!-- end config_neurons_top -->
+
+        <div class="row" style="padding-left:20px;display:none" id="config_neurons_group">
+            <div class="col-lg-12 col-md-12 col-sm-12 panel panel-default">
+                <label>Group Name: </label><label id="edit_group_name"></label><br>
+                <label>Group Members: </label><p style="display:inline" id="edit_group_neurons"></p><br>
+                <label>Neuron Model: </label>
+                <select onchange="edit_group_model_change() "id="edit_group_models">
+                    {% for model in neuron_models %}
+                        <option param_data = '{{ model.json_data | safe }}' id="edit_model_{{model.id}}" value="{{ model.id }}" >{{ model.model.name }}</option>
+                    {% endfor %}
+                </select><br>
+
+                <div id="edit_group_params">
+
+                </div><br>
+
+                <button onclick="edit_group_delete()">Undo Customise</button>
+                <button onclick="edit_group_done()">Apply</button>
+            </div>
+        </div> <!-- end config_neurons_top -->
+
+        <div class="row" style="padding-left:20px;display:none" id="config_syns_top">
+            <button id="config_syns_byneurotx_btn" onclick="config_syns_byneurotx()">Set By Neurotransmitter</button>
+            <button id="config_syns_byneuron_btn" onclick="config_syns_byneuron()">Set By Pre-Synaptic Neuron</button>
+
+            <div class="row" style="padding-left:20px;display:none" id="config_syns_byneuron_top">
+                <div class="row">
+                    <div class="col-lg-6 col-md-6 col-sm-6">
+                        <label>All Neurons</label><br>
+                        <select id="syn_neuron_list" size="15">
+                            {% for neuron in neurons %}
+                            <option value="{{ neuron.name }}" ondblclick="open_info('{{ neuron.info_url }}')">{{ neuron.name }} 
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-lg-6 col-md-6 col-sm-6">
+                        <label>Customised</label><br>
+                        <select id="syn_neuron_group_list" size="15" style="display:none"></select>
+                    </div>
+                </div>
+                <div class="row" style="padding-left:15px">
+                    <button onclick="create_group(true)">Customise</button>
+                </div>
+            </div> <!-- end config_syns_byneuron_top -->
+
+            <div class="row" style="display:none;padding-right:20px" id="config_syns_byneurotx_top">
+                <div class="col-lg-12 col-md-12 col-sm-12" style="height:250px;overflow-y:auto">
+                    <table class="table">
+                        <thead><tr><td>Neurotransmitter</td><td>Synapse Model</td></tr></thead>
+                        <tbody>
+                        <tr><td>Generic_GJ</td><td><select id="Generic_GJ" class="ntx_syn_models"></select></td></tr>
+                        <tr><td>Glutamate</td><td><select id="Glutamate" class="ntx_syn_models"></select></td></tr>
+                        <tr><td>Dopamine</td><td><select id="Dopamine" class="ntx_syn_models"></select></td></tr>
+                        <tr><td>Serotonin</td><td><select id="Serotonin" class="ntx_syn_models"></select></td></tr>
+                        <tr><td>FMRFamide</td><td><select id="FMRFamide" class="ntx_syn_models"></select></td></tr>
+                        <tr><td>Acetylcholine</td><td><select id="Acetylcholine" class="ntx_syn_models"></select></td></tr>
+                        <tr><td>GABA</td><td><select id="GABA" class="ntx_syn_models"></select></td></tr>
+                        <tr><td>Serotonin_Acetylcholine</td><td><select id="Serotonin_Acetylcholine" class="ntx_syn_models"></select></td></tr>
+                        <tr><td>Serotonin_Glutamate</td><td><select id="Serotonin_Glutamate" class="ntx_syn_models"></select></td></tr>
+                        <tr><td>Octapamine</td><td><select id="Octapamine" class="ntx_syn_models"></select></td></tr>
+                        <tr><td>Acetylcholine_Tyramine</td><td><select id="Acetylcholine_Tyramine" class="ntx_syn_models"></select></td></tr>
+                        </tbody></table>
+                </div>
+            </div> <!-- end config_syns_byneurotx_top -->
+
+
+            <div class="row" style="padding-right:20px;padding-left:20px;display:none" id="config_syns_byneuron_group">
+                <div id="col_3" class="col-lg-12 col-md-12 col-sm-12 panel panel-default" style="height:250px;overflow-y:auto">
+
+                    <div id="syn_data" class="row panel panel-default" style="margin-left:0px">
+                    </div>
+
+
+                    <button onclick="edit_synapses_done()">Apply</button>
+                </div>
+            </div> <!-- end config_syns_byneuron_group -->
+        </div> <!-- end config_syns_top -->
+
+        <div class="row" style="padding-right:20px;padding-left:20px;display:none" id="config_muscles_top">
+            <div class="col-lg-12 col-md-12 col-sm-12 panel panel-default" style="height:250px;overflow-y:auto">
+                <label style="padding-left:10px">Muscle Model Configuration</label>
+                <select id="muscleModel" onchange="muscleModel_changed()">
+                    <option value="1" >Model 1</option>
+                    <option value="2" >Model 2</option>
+                    <option value="3" >Model 3</option>
+                </select>
+                <span id="muscle_desc_1"><br>
+A third order linear differential equation model was of optimal order for fitting the muscle force over a range of pulse inputs. Therefore, a linear model of third order is used.
+
+<img style="max-width:100%" src="{% static "cenet/img/muscle_eq1.jpg" %}" />
+
+Where F(t) is the muscle force as a function of time and theta , j = 1,..., 4, are the model parameters. The model has 4 parameters theta_3, theta_2, theta_1 and theta_0 with units of s^3, s^2, s and dimensionless, respectively, for the case where the force is normalised.
+
+The starting values for the model parameters are: theta_3=1, theta_2=25, theta_1=-1 and theta_0=14.
+                </span>
+                <span id="muscle_desc_2" style="display:none;"><br>
+A second-order linear differential equation is used to describe the linear dynamics, and the static nonlinearity is assumed to have a similar form to that of existing models.
+
+
+<img style="max-width:100%" src="{% static "cenet/img/muscle_eq2.jpg" %}" />
+
+
+This model has 5 parameters theta_2, theta_1, theta_0, m and k with units of s^2, s, dimensionless, dimensionless and dimensionless, respectively, for the case where the force is normalised. A dummy variable q(t) is used to couple the nonlinear to the linear model.
+
+The starting values for the model parameters are: theta_3=1, theta_2=25, theta_1=-1, theta_0=14 and A=100.
+                </span>
+
+                <span id="muscle_desc_3" style="display:none;"><br>
+                The model of was adapted to give a model of similar, yet simpler form to that of (Bobet et al. 1998). This new, 'Adapted model' is presented in (Wilson et al. 2011).
+
+<img style="max-width:100%" src="{% static "cenet/img/muscle_eq3.jpg" %}" />
+
+This model has 3 parameters, tau_c, tau_1 and A. For the case where F(t) is normalised, the time constants tau_c and tau_1 have units of s, A units of s^{-1}.
+
+The starting values for the model parameters are: tau_c=tau_1=1 and A=100.
+
+                </span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Container for labels -->
+<div id="labelcontainer" style="width:0px; height:0px; left:0px; top:0px; position:absolute; z-index:1"></div>
+
+<div id="loading-feedback" class="loading-feedback">
+    <p>Loading...</p>
+    <div id="loader-img"></div>
+    <p>Loading time may vary depending on your system</p>
+</div>
+
+
+<div id="saveModal" class="modal fade">
+    <div class="modal-dialog" style="width:300px">
+        <div class="modal-content"> 
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Save Network</h4>
+            </div>
+            <div class="modal-body">
+                <table><tr><td>
+                    <label for="net_name">Network Name:</label>
+                </td><td>
+                    <input type="text" id="net_name"/>
+                </td></tr>
+
+                <tr><td>
+                    <label for="net_description">Description</label>
+                </td><td>
+                    <textarea id="net_description" rows="5" cols="22"></textarea>
+                </td></tr>
+
+                <tr><td>
+                    <label for="net_public">Share:</label>
+                </td><td>
+                    <input type="checkbox" id="net_public"/>
+                </td></tr></table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="save_net_modal_btn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock content  %}
+
+
+
+
+
+
+
+
+
+
+

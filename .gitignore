@@ -1,0 +1,5 @@
+*.pyc
+/db.djangodb
+/django_log.txt
+/media/*
+.idea/

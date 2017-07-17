@@ -1,0 +1,204 @@
+{% extends 'base-with-login.html' %}
+{% load js %}
+{% load staticfiles %}
+
+{% block extra_header %}
+    
+    {% comment %}
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+    {% endcomment %}
+    <script type="text/javascript" src="{% static "js/jquery.tokeninput.js" %}"></script>
+    <link rel="stylesheet" href="{% static "css/token-input.css" %}" type="text/css" />
+    <link rel="stylesheet" href="{% static "css/token-input-facebook.css" %}" type="text/css" />
+     
+{% endblock%}
+
+{% block content %}
+
+    
+    <div class="container-fluid">
+
+        <div class="page-header">
+            <h1>View Neuron Recordings </h1>
+        </div>
+        
+        <div class="panel panel-primary">
+
+            <div class="panel-heading"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>&nbsp;&nbsp;MY NEURON RECORDINGS</div>
+
+    
+            <table class="table table-striped">
+                <!--<form action='{% url 'rb_result_make_public' %}'method='post'>{% csrf_token %}-->
+                    <thead>
+                        <tr>
+                            <th>Neuron Results ID</th>
+                            <th>Associated reservation</th>
+                            <th>Reservation description</th>                           
+                            <th>Shared with</th>
+                            <th>When</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+    
+                    <tbody>
+                        {% for rb_result in rb_results %}
+                            {% for creator in rb_result.reservation_for_rb_result.creator.all %}
+                              {% if creator == request.user %}
+                                <tr>                                    
+                                    <td align="center">{{rb_result.pk}}</td>
+                                    <td>{{ rb_result.reservation_for_rb_result.pk }}</td>
+                                    <td>{{ rb_result.reservation_for_rb_result.description }}          </td>
+                                    <td id="PER_{{rb_result.pk}}">
+                                      {% for shared_element in share %}            
+                                          {% if shared_element.rb_results == rb_result %}
+                                              {{shared_element.user.first_name}} {{shared_element.user.last_name}} < {{shared_element.user.email}} ><br/>
+                                          {% endif %}
+                                      {% endfor %}
+                                    </td>
+                                    <td>
+                                        {% for rb_file in rb_result.rb_results_files.all %}
+                                            {% if rb_file.file_order == 0 %}
+                                                {{rb_file.created}}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    
+                                    <td>
+                                        <input type="button" class="btn btn-info" onclick="location.href='/djlems/results_viewer/?sim_id={{rb_result.reservation_for_rb_result.sim_id}}'" value="View" />
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                    </tbody>
+                <!--</form>-->
+            </table>
+
+        </div> <!-- div panel -->
+
+        <div class="panel panel-primary">
+
+            <div class="panel-heading"><span class="glyphicon glyphicon-user" aria-hidden="true"></span>&nbsp;&nbsp;SHARED WITH ME</div>
+
+
+            <table class="table table-striped">
+
+                <thead>
+                    <tr>
+                            <th>Neuron Results ID</th>
+                            <th>Associated reservation</th>
+                            <th>Reservation description</th>
+                            <th>Shared with</th>
+                            <th>When</th>
+                            <th></th>
+                            <th></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for shared_element in share %}
+                        {% if shared_element.user == request.user %}
+                            <tr>
+                                <td>
+                                    {{ shared_element.rb_results.pk }}
+                                </td>
+                                <td>
+                                    {{ shared_element.rb_results.reservation_for_rb_result.pk }}
+                                </td>
+                                <td>
+                                    {{ shared_element.rb_results.reservation_for_rb_result.description }}
+                                </td>                                
+                                <td>
+                                    {{ shared_element.rb_results.public }}
+                                </td>
+                                <td>
+                                    {% for rb_file in shared_element.rb_results.rb_results_files.all %}
+                                        {% if rb_file.file_order == 0 %}
+                                            {{rb_file.created}}
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    <input type="button" class="btn btn-info" onclick="location.href='/djlems/results_viewer/?sim_id={{shared_element.rb_results.reservation_for_rb_result.sim_id}}'" value="View" />
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+        </div> <!-- div panel -->
+
+
+        <div class="panel panel-primary">
+
+            <div class="panel-heading"><span class="glyphicon glyphicon-globe" aria-hidden="true"></span>&nbsp;&nbsp;PUBLICLY SHARED</div>
+
+            <table class="table table-striped">
+
+                <thead>
+                    <tr>
+                            <th>Neuron Results ID</th>
+                            <th>Associated reservation</th>
+                            <th>Reservation description</th>
+                            <th>Shared with</th>
+                            <th>When</th>
+                            <th></th>
+                            <th></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for rb_result in rb_results %}
+                        {% if rb_result.public == True %}
+                            <tr>
+                                <td>
+                                    {{ rb_result.pk }}
+                                </td>
+                                <td>
+                                    {{ rb_result.reservation_for_rb_result.pk }}
+                                </td>
+                                <td>
+                                    {{ rb_result.reservation_for_rb_result.description }}
+                                </td>
+                                <td>
+
+                                </td>
+                                <td>
+                                    <input type="button" class="btn btn-info" onclick="location.href='/djlems/results_viewer/?sim_id={{rb_result.reservation_for_rb_result.sim_id}}'" value="View" />
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+        </div> <!-- div panel -->
+
+
+        <div class="row">
+            <div class="col-md-12" style="padding: 20px;">
+                {%if messages %}
+                    <div class='row'>
+                        <div class='col-xs-12'>
+                            <ul class="messages">
+                                {% for message in messages %}
+                                    <p{% if message.tags == "success" %} class="alert alert-success"
+                                        {% elif  message.tags == "error" %} class="alert alert-danger"
+                                        {% elif  message.tags == "warning" %} class="alert alert-warning"
+                                        {%endif%}>{{message}}</p>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div> <!-- div container-fluid-->
+
+
+{% endblock %}

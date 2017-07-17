@@ -1,0 +1,124 @@
+{% extends 'base-with-login.html' %}
+{% load js %}
+{% load staticfiles %}
+
+{% block extra_header %}
+    
+    {% comment %}
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+    {% endcomment %}
+    <script type="text/javascript" src="{% static "js/jquery.tokeninput.js" %}"></script>
+    <link rel="stylesheet" href="{% static "css/token-input.css" %}" type="text/css" />
+    <link rel="stylesheet" href="{% static "css/token-input-facebook.css" %}" type="text/css" />
+     
+{% endblock%}
+
+{% block content %}
+
+    
+    <div class="container-fluid">
+
+        <div class="page-header">
+            <h1>My Recording Configurations </h1>
+        </div>
+        
+        <div class="panel panel-primary">
+
+
+    
+            <table class="table table-striped">
+                <!--<form action='{% url 'rb_result_make_public' %}'method='post'>{% csrf_token %}-->
+                     <thead>
+                        <tr>
+                             <th style="width:15%">Configuration Name</th>
+                            <th style="width:15%"></th>
+                            <th style="width:40%">Network Name</th>
+                            <th style="width:15%"></th>
+                            <th style="width:15%"></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for rtw_conf in rtws %}
+                              {% if rtw_conf.owner == request.user %}
+                                <tr>
+
+                                <td>{{ rtw_conf.name }}</td>
+                                <td></td>
+                                <td>{{ rtw_conf.network.name }}</td>
+                                <td><a href="/djlems/rtw_ui/{{ rtw_conf.name }}/">edit</a>
+                                <input type="button" class="btn btn-info" onclick="deleteModel('{{ neuronModel.name }}')" value="Delete" />
+                                </td>
+                                </tr>
+                            {% endif %}
+                    {% endfor %}
+                    </tbody>
+            </table>
+
+        </div> <!-- div panel -->
+
+
+
+    </div> <!-- div container-fluid-->
+
+
+<script>
+    window.onload = function(){
+        window.refresh_timer = null
+        handle_btns()
+    }
+
+    function handle_btns(){
+        $('.res_btn').hide()
+
+        var refreshing = false
+        $('.res_sel').each(function(){
+            if($(this).val() == 2){
+                $(this).next('button').show()
+            }
+            else if($(this).val() == 0 || $(this).val() == 1){
+                refreshing = true
+            }
+        })
+
+        if(refreshing == true && window.refreshing_timer == null) {
+            console.log('starting auto reload')
+            window.refreshing_timer = setInterval("location.reload()", 10000)
+        }
+        if(refreshing == false && window.refreshing_timer != null) {
+            console.log('stopping auto reload')
+            clearInterval(window.refreshing_timer)
+            window.refreshing_timer = null
+        }
+    }
+
+    function build_net(net_name){
+        $('#' + net_name).text('Queued for build')
+    }
+
+
+    function show_results(model_id) {
+        sim_id = $('#prev_jobs_select_' + model_id).find('option:selected').attr('job_id')
+        console.log('Opening Results for job: ' + sim_id)
+
+        window.open('/djlems/results_viewer/?sim_id=' + sim_id, '_blank')
+    }
+
+    function view_lems(model_name) {
+        var url = "{% url 'lems_ui.views.model_to_lems_xml' %}" +
+                  "?model_name=" + model_name
+
+        console.log("Trying to open url: " + url)
+        window.open(url, '_blank')
+    }
+
+    function deleteModel(model_name) {
+        if (confirm('Are you sure you want to delete this model?')) {
+           if (confirm('Are you really sure?')) {
+                location.href='/djlems/delete_rtw_model/' + model_name;
+           }
+        }
+    }
+
+</script>
+{% endblock %}

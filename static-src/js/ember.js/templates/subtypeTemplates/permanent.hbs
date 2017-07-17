@@ -1,0 +1,36 @@
+<div class="row">
+	<div class="col-sm-12">
+		<div class="hcontrols">
+			{{#if isModifiable}}
+			<button {{action 'deleteEvent'}} class="btn btn-turquesa" style="margin: 5px">Delete This Event</button>
+			{{/if}}
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12">
+		<div class=" title">Description</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12 block">
+		<div>
+			{{input id="permanentDescription" class="" value=model.description }}
+		</div>
+	</div>
+</div>
+{{#if isMechano}}
+{{ render "mechanosensationPermanent" mechanosensation}}
+{{/if}}
+{{#if isPhoto}}
+{{ render "phototaxisPermanent" phototaxis}}
+{{/if}}
+{{#if isChemo}}
+{{ render "chemotaxisPermanent" chemotaxis}}
+{{/if}}
+{{#if isGalvano}}
+{{ render "galvanotaxisPermanent" galvanotaxis}}
+{{/if}}
+{{#if isTermo}}
+{{ render "termotaxisPermanent" termotaxis}}
+{{/if}}

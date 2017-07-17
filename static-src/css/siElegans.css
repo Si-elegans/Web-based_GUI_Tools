@@ -1,0 +1,159 @@
+body {
+  padding-bottom: 20px;
+}
+.shareSelection div {
+  float: left;
+  clear: none; 
+}
+.properties{
+height: 55vh;
+background-color:#B4BFCC;
+padding-left:30px;
+}
+.screen{
+height: 55vh;
+background-color:#BBC1C7;
+}
+.choose-experiment{
+height: 10vh;
+background-color:#DCE2E8;
+}
+.experiments{
+height: 30vh;
+background-color:#DCE2E8;
+}
+
+#launchButton{
+position: absolute;
+top: 85%;
+left: 75%;
+}
+
+.h1{
+    font-size: 30px;
+    line-height: 40px;
+}
+
+.h2{
+    font-size: 18px;
+    line-height: 20px;
+}
+
+.form-control{
+width: 100px;
+}
+
+.coordinates{
+border-collapse: separate; 
+border-spacing: 5px;
+}
+
+.touch{
+left: 180px;
+}
+
+.huge {
+    font-size: 40px;
+}
+
+.panel-purple{
+  border-color: #8674A6;  
+}
+
+.panel-purple .panel-heading {
+    border-color: #8674A6;
+    color: #fff;
+    background-color: #8674A6;
+}
+
+.panel-purple a {
+    color: #8674A6;
+}
+
+.panel-purple a:hover {
+    color: #000000;
+}
+
+
+.panel-green{
+  border-color: #43B5AD;  
+}
+
+.panel-green .panel-heading {
+    border-color: #43B5AD;
+    color: #fff;
+    background-color: #43B5AD;
+}
+
+.panel-green a {
+    color: #43B5AD;
+}
+
+.panel-green a:hover {
+    color: #000000;
+}
+
+.panel-yellow{
+  border-color: #DEB948;  
+}
+
+.panel-yellow .panel-heading {
+    border-color: #DEB948;
+    color: #fff;
+    background-color: #DEB948;
+}
+
+.panel-yellow a {
+    color: #DEB948;
+}
+
+.panel-yellow a:hover {
+    color: #000000;
+}
+
+
+.panel-red{
+  border-color: #DF4F47;  
+}
+
+.panel-red .panel-heading {
+    border-color: #DF4F47;
+    color: #fff;
+    background-color: #DF4F47;
+}
+
+.panel-red a {
+    color: #DF4F47;
+}
+
+.panel-red a:hover {
+    color: #000000;
+}
+
+
+
+.panel-blue{
+  border-color: #578EBE;  
+}
+
+.panel-blue .panel-heading {
+    border-color: #578EBE;
+    color: #fff;
+    background-color: #578EBE;
+}
+
+.panel-blue a {
+    color: #578EBE;
+}
+
+.panel-blue a:hover {
+    color: #000000;
+}
+/*Ellipsis for span tags with uuid class*/
+span.uuid{
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 70px;
+    display: block;
+    overflow: hidden
+}

@@ -1,0 +1,942 @@
+
+var timeDifferenceToReload =2;
+var globalDataUpperTime = 0.1;
+var globalDataLowerTime = 0;
+var globalData = [];
+var globalAlreadyPlottedNames = new Array();
+var firstStep = 0
+var yAxisTextAngle = 0
+var numStepsLoaded = 0;
+var globalTimePlot = {};
+var chartBodyArray = [];
+var graphs = [];
+var globalGraph = null;
+var lineXs;
+var lineYs;
+var xs = [];
+var ys = [];
+var min = [];
+var max = [];
+var interval = [];
+var xGlobal;
+var yGlobal = [];
+var xAxes = [];
+var yAxes = [];
+var lines = [];
+var linesGlobal = [];
+var tsDuration = [];
+var tsInterval = [];
+var timeLoadedStart = [];
+var timeLoadedEnd = [];
+var neuronId = [];
+var graphIsLoading = [];
+var variableName = [];
+var chartBodys = [];
+var xAxisGlobal;
+var yAxisGlobal;
+var chartBodyGlobal;
+var zooms = [];
+var i = 0;
+var index = 0;
+var xAxis;
+var yAxisLeft;
+var w;
+var h;
+var colour = d3.scale.category10();		//can also be 20 different colours
+var brush;
+var formatter = d3.format("s");	//'s' does Si units
+var xFormatter;
+var yFormatter;
+var tsDuration = [];
+var tsInterval = [];
+var timeLoadedStart = [];
+var timeLoadedEnd = [];
+var neuronId = [];
+var variableName = [];
+var chartBodys = [];
+
+var retrievedTsInfo = false;
+
+//$(window).load(function() {
+	var options = $("#options");
+	var listItems = ""			//List to hold the variable names that can be plotted
+
+	var listOfVariables = {};
+	//var userId = "userFinn";	//Username
+	var userId = 'finnk';	//Username
+	//var simId = "sim3";			//Simulation ID
+	var rtwId = "1";			//Simulation ID
+	var neuronIdL = "1";			//Simulation ID
+
+	function addDataToPlot(isNew,name,newSeriesData,neuronIdL, variableNameL,index,isEarlier) {
+		var indexL = index
+		if (isEarlier) {
+			globalData[indexL] = newSeriesData.concat(globalData[indexL])
+		} else {
+			globalData[indexL] = globalData[indexL].concat(newSeriesData)
+		}
+		min[indexL] = d3.min(globalData[indexL]);
+		max[indexL] = d3.max(globalData[indexL]);
+		interval[indexL] = max[indexL]-min[indexL];
+		//console.log('interval: ' + interval[indexL] + ' ');
+		min[indexL] = min[indexL] - (interval[indexL]/50);
+		max[indexL] = max[indexL] + (interval[indexL]/100);
+		//Allow buffer of a few percent either side on y axis
+		ys[indexL] = d3.scale.linear().domain([min[indexL], max[indexL]]).range([h, 0]);
+
+		lineXs = xs[indexL];
+		lineYs = ys[indexL];
+
+		// create a line function that can convert data[] into x and y points
+		//lines[indexL] = createLine(indexL);
+		var line = lines[indexL]
+		line
+		// assign the X function to plot our line as we wish
+		.x(function(d,k) {
+			// return the X coordinate where we want to plot this datapoint
+			k = timeLoadedStart[indexL] + k * tsDuration[indexL] * tsInterval[indexL];
+			return xs[indexL](k);
+		})
+		.y(function(d) {
+			// return the Y coordinate where we want to plot this datapoint
+			return ys[indexL](d);
+			//return lineYs(d);
+		})
+
+		// create xAxis
+		//xAxes[indexL] = make_x_axis(lineXs);
+		xFormatter = d3.format(".3r");	//'s' does Si units
+		xAxes[indexL] = d3.svg.axis().scale(xs[indexL]).tickSize(-h).tickSubdivide(true).orient("bottom").tickFormat(xFormatter);
+
+		//xAxes[indexL] = d3.svg.axis().scale(lineXs).tickSize(-h).tickSubdivide(true).orient("bottom");;
+		// create left yAxis
+		//yAxes[indexL] = make_y_axis(lineYs);
+		yFormatter = d3.format(".3r");
+		yAxes[indexL] = d3.svg.axis().scale(ys[indexL]).ticks(4).orient("left").tickFormat(yFormatter);
+
+
+		var chartBody = chartBodys[indexL];
+		d3.select(chartBody[0][0].children[0]).remove();
+		mypath = chartBody.append("path")
+			.datum(globalData[indexL])
+   			.attr("d", lines[indexL])
+			.attr("stroke", colour(indexL))
+			.attr("class", "line");
+	}
+
+
+	function removePlot(neuronIdL,name) {
+		var alreadyAdded =false
+		var indexL = 0;
+		$.each(globalAlreadyPlottedNames, function(index, value) {	//Iterate over globalAlreadyPlottedNames and check to see if variable already exists
+			if (value == neuronIdL + "_" + name)
+			{
+				alreadyAdded = true
+				indexL = index;
+			}
+		});
+		if (alreadyAdded) {
+			$("#plot_" + indexL + variableName[indexL]).remove()
+			globalAlreadyPlottedNames[indexL] = null
+			/*linesGlobal.splice(indexL, 1);
+			globalAlreadyPlottedNames.splice(indexL, 1);
+			globalData.splice(indexL, 1);
+			graphs.splice(indexL, 1);
+			xAxes.splice(indexL, 1);
+			yAxes.splice(indexL, 1);
+			lines.splice(indexL, 1);
+			zooms.splice(indexL, 1);
+			xs.splice(indexL, 1);
+			ys.splice(indexL, 1);
+			min.splice(indexL, 1);
+			max.splice(indexL, 1);
+			interval.splice(indexL, 1);
+			tsDuration.splice(indexL, 1);
+			tsInterval.splice(indexL, 1);
+			timeLoadedStart.splice(indexL, 1);
+			timeLoadedEnd.splice(indexL, 1);
+			neuronId.splice(indexL, 1);
+			variableName.splice(indexL, 1);
+			chartBodys.splice(indexL, 1);
+			i = i - 1;*/
+		}
+		replotGlobalTimePlot();
+	}
+
+	function addPlot(isNew,name,seriesData,tsDurationL,tsIntervalL,timeStart,timeEnd,neuronIdL, variableNameL)
+	{
+		i = i + 1;
+		var indexL = i - 1;
+		if (isNew) {
+			globalData.push(seriesData);
+			graphs.push(null);
+			xAxes.push(null);
+			yAxes.push(null);
+			lines.push(null);
+			zooms.push(null);
+			xs.push(null);
+			ys.push(null);
+			min.push(null);
+			max.push(null);
+			interval.push(null);
+			tsDuration.push(null);
+			tsInterval.push(null);
+			timeLoadedStart.push(null);
+			timeLoadedEnd.push(null);
+			neuronId.push(null);
+			graphIsLoading.push(null);
+			variableName.push(null);
+			chartBodys.push(null);
+
+			tsDuration[indexL] =tsDurationL;
+			tsInterval[indexL] =tsIntervalL;
+			timeLoadedStart[indexL] = timeStart
+			timeLoadedEnd[indexL] = timeEnd
+			neuronId[indexL] = neuronIdL;
+			graphIsLoading[indexL] = false;
+			variableName[indexL] = variableNameL;
+		} else {
+			//find this indexL
+		}
+		replotGlobalTimePlot();
+
+		//console.log('I: ' + i + ' ');
+
+		$("#variablePlotContainer").append("<div class='plotContainer' id='plot_" + indexL + name + "'></div>");
+
+		var m = [20,20, 23, 90]; // margins {top: 20, right: 20, bottom: 20, left: 50}
+		if(indexL==0)	//Determine width on first graph creation and keep constant from then
+		{
+			w = $("#plot_" + indexL + name).width() - m[1] - m[3]; // width
+			h = $("#plot_" + indexL +  name).height() - m[0] - m[2]; // height
+		}
+
+		// X scale will fit all values from data[] within pixels 0-w
+		xs[indexL] = d3.scale.linear().domain([brush.extent()[0], brush.extent()[1]]).range([0, w]);
+		//xs[indexL] = getX(globalData[indexL],w,brush.extent()[0],brush.extent()[1]);
+		// Y scale will fit values from 0-10 within pixels h-0 (Note the inverted domain for the y-scale: bigger is up!)
+		min[indexL] = d3.min(globalData[indexL]);
+		max[indexL] = d3.max(globalData[indexL]);
+		interval[indexL] = max[indexL]-min[indexL];
+		//console.log('interval: ' + interval[indexL] + ' ');
+		min[indexL] = min[indexL] - (interval[indexL]/50);
+		max[indexL] = max[indexL] + (interval[indexL]/100);
+		//Allow buffer of a few percent either side on y axis
+		ys[indexL] = d3.scale.linear().domain([min[indexL], max[indexL]]).range([h, 0]);
+		//ys[indexL] = getY(globalData[indexL],h);
+
+
+		lineXs = xs[indexL];
+		lineYs = ys[indexL];
+
+		// create a line function that can convert data[] into x and y points
+		//lines[indexL] = createLine(indexL);
+		lines[indexL] = d3.svg.line()
+		// assign the X function to plot our line as we wish
+		.x(function(d,k) {
+			// return the X coordinate where we want to plot this datapoint
+			k = timeLoadedStart[indexL] + k * tsDuration[indexL] * tsInterval[indexL];
+			return xs[indexL](k);
+		})
+		.y(function(d) {
+			// return the Y coordinate where we want to plot this datapoint
+			return ys[indexL](d);
+			//return lineYs(d);
+		})
+
+		// create xAxis
+		//xAxes[indexL] = make_x_axis(lineXs);
+		xFormatter = d3.format(".4r");	//'s' does Si units
+		xAxes[indexL] = d3.svg.axis().scale(xs[indexL]).tickSize(-h).tickSubdivide(true).orient("bottom").tickFormat(xFormatter);
+
+		//xAxes[indexL] = d3.svg.axis().scale(lineXs).tickSize(-h).tickSubdivide(true).orient("bottom");;
+		// create left yAxis
+		//yAxes[indexL] = make_y_axis(lineYs);
+		yFormatter = d3.format("r");
+		yAxes[indexL] = d3.svg.axis().scale(ys[indexL]).ticks(4).orient("left").tickFormat(yFormatter);
+
+		zooms[indexL] = d3.behavior.zoom()
+			.x(lineXs)
+			//.y(y)
+			//.scaleExtent([0.5, 250])
+			.on("zoom", zoomHandler);
+
+
+		// Add an SVG element with the desired dimensions and margin.
+		graphs[indexL] = d3.select("#plot_" + indexL +  name).append("svg")
+			//.call(zooms[indexL])
+			.attr("id", i + "Top")
+			.attr("width", "100%")
+			.attr("height", "100%")
+			.append("g")
+			.attr("transform", "translate(" + m[3] + "," + m[0] + ")");
+
+		graphs[indexL].append("rect")
+			.attr("id", i)
+			.attr("class", "pane")
+			.attr("width", w)
+			.attr("height", h)
+			.call(zooms[indexL]);
+
+		// Add the x-axis.
+		graphs[indexL].append("g")
+			.attr("class", "x axis")
+			.attr("transform", "translate(0," + h + ")")
+			.call(xAxes[indexL]);
+
+		// Add the y-axis to the left
+		graphs[indexL].append("g")
+			.attr("class", "y axis")
+			.attr("transform", "translate(-25,0)")
+			.call(yAxes[indexL]);
+
+		var clip = graphs[indexL].append("svg:clipPath")
+			.attr("id", "clip")
+			.append("svg:rect")
+   		 	.attr("x", 0)
+			.attr("y", 0)
+			.attr("width", w)
+			.attr("height", h);
+
+		var chartBody = graphs[indexL].append("g")
+			.attr("clip-path", "url(#clip)");
+		chartBodys[indexL] = chartBody;
+		// Add the line by appending an svg:path element with the data line we created above
+		// do this AFTER the axes above so that the line is above the tick-lines
+		//mypath = graphs[indexL].append("path").attr("d", line);
+		mypath = chartBody.append("path")
+			.datum(globalData[indexL])
+   			.attr("d", lines[indexL])
+			.attr("stroke", colour(indexL))
+			.attr("class", "line");
+
+		//graphs[indexL].select("path.line").data(seriesData);
+
+		//Append labels
+		graphs[indexL].append("text")
+			.attr("class", "x label")
+			.attr("x", w/2)
+			.attr("y", h+m[2])
+			.text("Time (seconds)");
+		var dimension = name.substring(0, name.indexOf("_"));
+		graphs[indexL].append("text")
+			.attr("class", "y label")
+			.attr("x", -h/2)
+			.attr("y", -m[3])
+			.attr("dy", "1em")	//shift 1 em to the right
+			.attr("transform", "rotate(-90)")
+			.text(dimension);
+
+		graphs[indexL].append("text")
+			.attr("class", "chart label")
+			.attr("x", w/2)
+			.attr("y", -m[1])
+			.attr("dy", "1em")	//shift 1 em to the right
+			.text($("#optionsNeurons option[value=" + neuronIdL + "]").text() + " : " + name);
+
+		/*graphs[indexL].append("text")
+			.attr("transform", "translate(" + (w+3) + "," + seriesData[seriesData.length-1] + ")")
+			.attr("dy", ".35em")
+			.attr("text-anchor", "start")
+			.style("fill", "steelblue")
+			.text("Close");*/
+
+
+	}
+
+	// function for handling zoom event
+	function zoomHandler() {
+		//console.log('ID: ' + d3.select(this).attr("id") + ' ');
+
+		currentID = d3.select(this).attr("id") - 1;			//get the id of the currently zoomed window
+		//lower = brush.extent[0];		//get the upper and lower bounds of the currently zoomed window
+		//upper = brush.extent[1];
+		//console.log('zoom translate: ' + zooms[currentID].x().domain() + ' ');
+
+		//console.log('TT zoom domain: ' + zooms[currentID].x().domain() + ' ');
+		//console.log('TT zoom scale: ' + zooms[currentID].scale() + ' ');
+		//console.log('TT zoom translate: ' + zooms[currentID].translate() + ' ');
+
+		//graphs[i].attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+		var j;
+		for(j=0;j<i;j++)
+		{
+			//xs[j].domain(brush.empty() ? xGlobal.domain() : brush.extent());
+			xs[j].domain(zooms[currentID].x().domain());
+			//xs[j] = getX(globalData[j],w,lower,upper);
+			//console.log('zoomed: ' + j + ' ');
+			graphs[j].select(".x.axis").call(xAxes[currentID]);
+			//zooms[j].event(graphs[j].transition().duration(5));
+			//console.log('j: ' + j + ' ');
+			//graphs[j].select(".x.axis").call(xAxes[currentID]);
+
+			//lineXs = xs[j];
+			//lineYs = ys[j];
+			index = j+1;
+			graphs[j].select("path.line").attr('d', lines[j]);
+		}
+
+		//Update control plot with selected zoomed view
+		var brushExt = [xs[currentID].invert(0), xs[currentID].invert(w)];
+		globalGraph.select(".brush").call(brush.extent(brushExt));
+		//brush.extent([lower, upper]);
+        //globalGraph.select('.brush').call(brush);
+	}
+
+	// create a line function that can convert data[] into x and y points
+	var createLine = function(idx){
+		//console.log('recalled: ' + idx + ' ');
+		return d3.svg.line()
+		// assign the X function to plot our line as we wish
+		.x(function(d,k) {
+			// verbose logging to show what's actually being done
+			//console.log('Plotting X value for data point: ' + d + ' using index: ' + i + ' to be at: ' + x(i) + ' using our xScale.');
+			// return the X coordinate where we want to plot this datapoint
+			k = timeLoadedStart[i-1] + k * tsDuration[i-1] * tsInterval[i-1];
+			return xs[idx](k);
+		})
+		.y(function(d) {
+			// verbose logging to show what's actually being done
+			//console.log('Plotting Y value for data point: ' + d + ' to be at: ' + y(d) + " using our yScale.");
+			// return the Y coordinate where we want to plot this datapoint
+			return ys[idx](d);
+		})
+	}
+
+	// X scale will fit all values from data[] within pixels 0-w
+	var getX = function(seriesData,w , lower, upper){
+		return d3.scale.linear().domain([lower, upper]).range([0, w]);
+	}
+
+	var getY = function(seriesData,h){
+		/*return d3.scale.linear().domain(d3.extent(seriesData, function (d) {return d;}))
+			.range([h, 0]);*/
+		var min = d3.min(seriesData);
+		var max = d3.max(seriesData);
+		var interval = max-min;
+		//console.log('interval: ' + interval + ' ');
+		min = min - (interval/50);
+		max = max + (interval/100);
+		//Allow buffer of a few percent either side on y axis
+		return d3.scale.linear().domain([min, max]).range([h, 0]);
+	}
+
+	// X scale will fit all values from data[] within pixels 0-w
+	var getZoomX = function(seriesData,w){
+		return d3.scale.linear().domain([0, seriesData.length]).range([0, w]);
+	}
+
+	var make_x_axis = function (x) {
+		//console.log('im here: ' + ' ');
+		return d3.svg.axis().scale(x).tickSize(-h).tickSubdivide(true).orient("bottom");
+	};
+
+	var make_y_axis = function (y) {
+		//console.log('new y axis');
+		formatter = d3.format("r");	//'s' does Si units
+		return d3.svg.axis().scale(y).ticks(4).orient("left").tickFormat(formatter);
+	};
+	var j = 1;
+	function replotGlobalTimePlot()
+	{
+		d3.select("#controlPlot").select("*").remove();
+
+		//If globalGraph hasn't already been plotted, set up axes
+		if(true)//globalGraph == null)
+		{
+			var m = [20,20, 23, 90]; // margins
+			//var m = {top: 20, right: 20, bottom: 20, left: 50}; // margins
+			wGlobal = $("#controlPlot").width() - m[1] - m[3]; // width
+			hGlobal = $("#controlPlot").height() - m[0] - m[2]; // height
+
+			//globalDataUpperTime = globalData[i-1].length * tsDuration[i-1] * tsInterval[i-1];
+
+			//console.log(":globalDataUpperTime " + globalDataUpperTime + '  ' + globalDataUpperTime);
+			// X scale will fit all values from seriesData within pixels 0-wGlobal
+			//xGlobal = getX(globalData[0],wGlobal,0,globalData[i-1].length);
+			xGlobal = d3.scale.linear().domain([globalDataLowerTime, globalDataUpperTime]).range([0, wGlobal]);
+
+			var lineXsGlobal = xGlobal;
+
+			// Y scale will fit values within pixels hGlobal-0 (Note the inverted domain for the y-scale: bigger is up!)
+			yGlobal = getY(globalData[i-1],hGlobal);
+			lineYsGlobal = yGlobal;
+
+			brushExtentInterval = globalDataUpperTime;
+			brushMargin = brushExtentInterval/50;
+			brushExtentLower = brushMargin;
+			brushExtentUpper = globalDataUpperTime - brushMargin;
+			brush = d3.svg.brush()
+				.x(xGlobal)
+				.extent([brushExtentLower,brushExtentUpper])
+				.on("brush", brushed);
+
+			// create xAxis - never changes in overview plot
+			xAxisGlobal = d3.svg.axis().scale(xGlobal).tickSize(-hGlobal).tickSubdivide(true).orient("bottom");
+
+
+			// create left yAxis
+			yAxisGlobal = make_y_axis(yGlobal[i-1]);
+
+			// Add an SVG element with the desired dimensions and margin.
+			globalGraph = d3.select("#controlPlot").append("svg")
+				.attr("id", "control")
+				.attr("width", wGlobal + m[1] + m[3])
+				.attr("height", hGlobal + m[0] + m[2])
+				.append("g")
+				.attr("transform", "translate(" + m[3] + "," + m[0] + ")");
+
+			var clip = globalGraph.append("svg:clipPath")
+				.attr("id", "globalClip")
+				.append("svg:rect")
+				.attr("x", 0)
+				.attr("y", 0)
+				.attr("width", wGlobal)
+				.attr("height", hGlobal);
+
+			chartBodyGlobal = globalGraph.append("g")
+				.attr("clip-path", "url(#globalClip");
+
+			chartBodyGlobal.append("g")
+				.attr("class", "x brush")
+				.call(brush)
+				.selectAll("rect")
+				.attr("y", 0)
+				.attr("height", hGlobal);
+
+		}
+		var indexL = 0;
+		for (indexL = 0; indexL < i;indexL++) {
+			if (globalAlreadyPlottedNames[indexL] == null)
+			{continue;}
+			// Y scale will fit values within pixels hGlobal-0 (Note the inverted domain for the y-scale: bigger is up!)
+			yGlobal[indexL] = getY(globalData[indexL],hGlobal);
+			var lineYsGlobal = yGlobal[indexL];
+
+			// create a line function that can convert data[] into x and y points
+			//lines[indexL] = createLine(indexL);
+			linesGlobal[indexL] = d3.svg.line()
+			// assign the X function to plot our line as we wish
+			.x(function(d,k) {
+				// return the X coordinate where we want to plot this datapoint
+			k = timeLoadedStart[indexL] + k * tsDuration[indexL] * tsInterval[indexL];
+				return lineXsGlobal(k);
+			})
+			.y(function(d) {
+				// return the Y coordinate where we want to plot this datapoint
+				return lineYsGlobal(d);
+			})
+
+			// create left yAxis
+			yAxisGlobal = make_y_axis(yGlobal[indexL]);
+
+			// Add the line by appending an svg:path element with the data line we created above
+			// do this AFTER the axes above so that the line is above the tick-lines
+			//mypath = globalGraph.append("path").attr("d", line);
+			j = j + 1
+			mypath = chartBodyGlobal.append("path")
+				.attr("d", linesGlobal[indexL](globalData[indexL]))
+				.attr("stroke", colour(indexL))
+				.attr("id", "rand" + j)
+				.attr("class", "line");
+
+		}
+
+
+			// Add the x-axis.
+			globalGraph.append("g")
+				.attr("class", "x axis")
+				.attr("transform", "translate(0," + hGlobal + ")")
+				.call(xAxisGlobal);
+
+			//Append labels
+			globalGraph.append("text")
+				.attr("class", "x label")
+				.attr("x", wGlobal/2)
+				.attr("y", hGlobal+m[2])
+				.text("Time (seconds)");
+
+			globalGraph.append("text")
+				.attr("class", "chart label")
+				.attr("x", wGlobal/2)
+				.attr("y", -m[1])
+				.attr("dy", "1em")	//shift 1 em to the right
+				.text("Overview");
+	}
+
+	function brushed() {
+		/*x.domain(brush.empty() ? x2.domain() : brush.extent());
+		focus.select(".area").attr("d", area);
+		focus.select(".x.axis").call(xAxis);*/
+		var extent = brush.extent();
+		var j = 0;
+		for(j=0;j<i;j++)
+		{
+
+			if (globalAlreadyPlottedNames[j] == null)
+			{continue;}
+
+			//console.log('ys[j] domain: ' + ys[j].domain() + ' ');
+			//console.log('A zoom scale: ' + zooms[j].scale() + ' ');
+			//console.log('A zoom translate: ' + zooms[j].translate() + ' ');
+
+			xs[j].domain(brush.empty() ? xGlobal.domain() : brush.extent());
+			//console.log('brushed: ' + j + ' ');
+			//lineXs = xs[j];
+			index = j+1;
+			graphs[j].select(".x.axis").call(xAxes[j]);
+			//graphs[j].select(".y.axis").call(yAxes[j]);
+
+
+			//xs[j] = getX(globalData[j],w,brush.extent()[0],brush.extent()[1]);
+			lineYs = ys[j];		//If updating the line, have to respecify y points
+			//lineXs = xs[j];
+			graphs[j].select("path.line").attr('d', lines[j]);
+			//graphs[j].select("path.line").call(lines[j]);
+
+			//Handle zoom behaviour
+			/*var translate = zooms[j].translate();
+			//var scale = zooms[j].scale();
+			var xd = extent;
+			var xCopy0 = xs[j].copy();
+			var xCopy = xs[j].copy();*/
+
+			//xCopy0.domain(extent);
+			//zooms[j].x(xCopy.domain(extent));
+
+			// Reset the domain relative to the current zoom offsets.
+			//xCopy.domain(xCopy0.range().map(function(x) { return (x - translate[0]) / scale; }).map(xCopy0.invert));
+
+			/*console.log('A zoom domain: ' + zooms[j].x().domain() + ' ');
+			console.log('A zoom scale: ' + zooms[j].scale() + ' ');
+			console.log('A zoom translate: ' + zooms[j].translate() + ' ');
+
+			//var scale = (brush.extent()[1]-brush.extent()[0])/2000;
+			//zooms[j].x().domain([(extent[0]/scale),(brush.extent()[1]/scale)]);
+			//zooms[j].scale(scale);
+
+			console.log('brush.extent: ' + extent + ' ');
+			console.log('zoom domain: ' + zooms[j].x().domain() + ' ');
+			console.log('zoom scale: ' + zooms[j].scale() + ' ');
+			console.log('zoom translate: ' + zooms[j].translate() + ' ');*/
+			//brushZoomHandler(j);
+			//xs[j] = getX(globalData[j],w,brush.extent()[0],brush.extent()[1]);
+			//lineXs = xs[j];
+			//graphs[j].call(zooms[j]);
+			//zooms[j].call();
+			//d3.select("#plot_" +indexL +  name).call(zooms[i-1])
+
+			//graphs[j].call(zooms[j].x(xs[j].domain(extent)));
+			zooms[j].x(xs[j]);
+		}
+
+		//Update control plot with selected zoomed view
+		//brush.extent([lower, upper]);
+        //globalGraph.select('.brush').call(brush);
+	}
+
+	function RVAPIAddVariable(neuronIdL,name)
+	{
+		downloadAndAddPlot(neuronIdL,name)
+	}
+
+	function RVAPIRemoveVariable(neuronIdL,name) {
+		removePlot(neuronIdL,name)
+	}
+
+	function downloadAndAddPlot(neuronIdL,name)
+	{
+		//check if this graph already up
+		var alreadyAdded =false
+		$.each(globalAlreadyPlottedNames, function(index, value) {	//Iterate over globalAlreadyPlottedNames and check to see if variable already exists
+			if (value == neuronIdL  + "_" + name)
+			{
+				alreadyAdded = true
+			}
+		});
+		if (alreadyAdded === true)
+		{
+			alert("Data has already been plotted");
+		}
+		else
+		{
+			globalAlreadyPlottedNames.push(neuronIdL + "_" + name);	//add name to list of already plotted variables
+			//Get data via http get from web.py
+
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', "https://results.si-elegans.eu/NUIG_RUS/getDataForVarFromTo/userId=" + userId + "&simId=" + simId +
+							"&rtwId=" + neuronIdL + "&neuronId=" + neuronIdL + "&varName=" + name + "&timeFrom=" + globalDataLowerTime + "&timeTo=" + globalDataUpperTime, true);
+			xhr.responseType = 'arraybuffer';
+
+			xhr.onload = function(e) {
+			    if (this.status == 200) {
+				var arraybuffer = xhr.response;
+				var data = arraybuffer
+				//Do your stuff here
+    				data = msgpack.decode(data)
+					//Get timestep duration and interval from the server
+					$.getJSON( "https://results.si-elegans.eu/NUIG_RUS/getTSDurationInterval/userId=" + userId 	+ "&simId=" + simId + "&rtwId=" + neuronIdL + "&neuronId=" + neuronIdL, function( timeData ) {
+						var tsDurationL = parseFloat(timeData[0][0]);
+						var tsIntervalL = parseFloat(timeData[0][1]);
+						//console.log("timestep data: " + tsInterval);
+
+						numStepsLoaded = data.length;	//must be here as json request must b completed before addPlot
+						addPlot(true,name,data,tsDurationL,tsIntervalL,globalDataLowerTime,globalDataUpperTime,neuronIdL,name);
+						brush.extent([globalDataLowerTime,globalDataUpperTime])
+						brushed();
+						replotGlobalTimePlot();
+					});
+
+				}
+				else
+				{//We have an error
+					globalAlreadyPlottedNames.pop();
+					alert("Data is not available");
+				}
+
+			};
+
+			xhr.send();
+		}
+	}
+
+
+	function downloadFreshDataForExistingPlot(neuronIdL,name,from,to,index,isEarlier)
+	{
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', "https://results.si-elegans.eu/NUIG_RUS/getDataForVarFromTo/userId=" + userId + "&simId=" + simId +
+						"&rtwId=" + neuronIdL + "&neuronId=" + neuronIdL + "&varName=" + name + "&timeFrom=" + from + "&timeTo=" + to, true);
+		xhr.responseType = 'arraybuffer';
+		graphIsLoading[index] = true;
+
+		xhr.onload = function(e) {
+			if (this.status == 200) {
+			var arraybuffer = xhr.response;
+			var data = arraybuffer
+			//Do your stuff here
+				data = msgpack.decode(data)
+				timeLoadedStart[index] = from
+				timeLoadedEnd[index] = to
+				globalData[index] = []
+				addDataToPlot(true,name,data,neuronIdL,name,index,isEarlier);
+				if (to > timeLoadedEnd[index]) {
+					timeLoadedEnd[index] = to;
+				}
+				if (from < timeLoadedStart[index]) {
+					timeLoadedStart[index] = from;
+				}
+			}
+			else
+			{//We have an error
+				alert("Data is not available");
+			}
+			brush.extent([globalDataLowerTime,globalDataUpperTime])
+			brushed();
+			graphIsLoading[index] = false;
+			//replotGlobalTimePlot();
+
+		};
+
+		xhr.send();
+	}
+
+
+	function downloadNewDataForExistingPlot(neuronIdL,name,from,to,index,isEarlier)
+	{
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', "https://results.si-elegans.eu/NUIG_RUS/getDataForVarFromTo/userId=" + userId + "&simId=" + simId +
+						"&rtwId=" + neuronIdL + "&neuronId=" + neuronIdL + "&varName=" + name + "&timeFrom=" + from + "&timeTo=" + to, true);
+		xhr.responseType = 'arraybuffer';
+		graphIsLoading[index] = true;
+		xhr.onload = function(e) {
+			if (this.status == 200) {
+			var arraybuffer = xhr.response;
+			var data = arraybuffer
+			//Do your stuff here
+				data = msgpack.decode(data)
+				addDataToPlot(true,name,data,neuronIdL,name,index,isEarlier);
+				if (to > timeLoadedEnd[index]) {
+					timeLoadedEnd[index] = to;
+				}
+				if (from < timeLoadedStart[index]) {
+					timeLoadedStart[index] = from;
+				}
+			}
+			else
+			{//We have an error
+				alert("Data is not available");
+			}
+			brush.extent([globalDataLowerTime,globalDataUpperTime])
+			brushed();
+			replotGlobalTimePlot();
+			graphIsLoading[index] = false;
+
+		};
+
+		xhr.send();
+	}
+
+	function RVAPIFocusOnTimeLine(startTime, endTime,velocity)
+	{
+		if (startTime > velocity) {
+			focusOnTimeLine(startTime - velocity, endTime- velocity);
+		} else {
+			focusOnTimeLine(startTime, endTime);
+		}
+		updateLine(startTime, endTime,velocity);
+	}
+
+	function updateLine(startTime, endTime,velocity) {
+
+	}
+
+	function focusOnTimeLine(startTime, endTime) {
+		globalDataUpperTime = endTime;
+		globalDataLowerTime = startTime;
+
+		//iterate through all plots
+		var  index = -1;
+		variableName.forEach(function(thisName) {
+			index = index + 1;
+
+			if (globalAlreadyPlottedNames[index] == null)
+			{return;}
+			//check if data is already in loaded range, if it is do nothing
+			if (timeLoadedStart[index] <= globalDataLowerTime && timeLoadedEnd[index] >= globalDataUpperTime)
+			{
+				brush.extent([globalDataLowerTime,globalDataUpperTime])
+				brushed();
+				replotGlobalTimePlot();
+				return;
+			}
+			//check if new data is higher than current data
+			if (timeLoadedEnd[index] < globalDataUpperTime)
+			{
+				//check if it is really far away (and then do a fresh load)
+				if (timeLoadedEnd[index] < globalDataUpperTime - timeDifferenceToReload) {
+					if (!graphIsLoading[index]) {
+						downloadFreshDataForExistingPlot(neuronId[index],thisName,globalDataLowerTime,globalDataUpperTime + timeDifferenceToReload,index,false)
+					}
+				}else {
+					//load the missing data
+					if (!graphIsLoading[index]) {
+						downloadNewDataForExistingPlot(neuronId[index],thisName,timeLoadedEnd[index],globalDataUpperTime + timeDifferenceToReload,index,false)
+					}
+				}
+			}
+
+			//check if new data is lower than current data
+			if (timeLoadedStart[index] > globalDataLowerTime)
+			{
+				//check if it is really far away (and then do a fresh load)
+				if (timeLoadedStart[index] > globalDataLowerTime + timeDifferenceToReload) {
+					if (!graphIsLoading[index]) {
+						downloadFreshDataForExistingPlot(neuronId[index],thisName,globalDataLowerTime - timeDifferenceToReload,globalDataUpperTime,index,true)
+					}
+				} else {
+					//load the missing data
+					if (!graphIsLoading[index]) {
+						downloadNewDataForExistingPlot(neuronId[index],thisName,globalDataLowerTime,timeLoadedStart[index] + timeDifferenceToReload,index,true)
+					}
+				}
+			}
+		});
+	}
+
+	//Entry point to the program
+	//Get list of variables that can be plotted from the server
+	var RVAPI_ISINITIALISED = false;
+	function RVAPIloadInitialTraceVisualisation() {
+		if (RVAPI_ISINITIALISED){ return;} else {RVAPI_ISINITIALISED = true;}
+		$.getJSON("https://results.si-elegans.eu/NUIG_RUS/getVarNames/userId=" + userId + "&simId=" + simId +
+				"&rtwId=" + neuronIdL + "&neuronId=" + neuronIdL, function( varNames ) {
+			listOfVariables=varNames
+			listItems = "";
+			$.each(listOfVariables, function() {
+				listItems += "<option value='" + this + "'>"+ this + "</option>"
+			});
+			options.html(listItems);
+
+			//Plot first variable returned as the default plot on the screen
+			/*if (listOfVariables.length > 1) {
+			RVAPIAddVariable(neuronIdL,listOfVariables[1]);
+			} else if (listOfVariables.length > 0) {
+			RVAPIAddVariable(neuronIdL,listOfVariables[0]);
+			}*/
+
+		});
+	}
+
+	//Detect variable selected by user for plotting and plot data if addNewPlot button is clicked
+	$( "#addNewPlot" ).click(function() {
+		var itemToLoad = $("#options option:selected").text();	//Get variable name
+		var neuronId = $("#optionsNeurons").val();
+		RVAPIAddVariable(neuronId,itemToLoad)
+	});
+
+	$( "#removePlot" ).click(function() {
+		var itemToLoad = $("#options option:selected").text();	//Get variable name
+		var neuronId = $("#optionsNeurons").val();
+		RVAPIRemoveVariable(neuronId,itemToLoad)
+	});
+
+
+
+
+	/*$( "#controlForward" ).click(function() {
+		RVAPIFocusOnTimeLine(globalDataLowerTime + 0.05,globalDataUpperTime+0.05);
+	});*/
+
+	$( "#controlExport" ).click(function() {
+		var url = "https://results.si-elegans.eu/NUIG_RUS/getCSVDataForVariables/userId=" + userId + "&simId=" + simId +
+			"&rtwId=" + neuronIdL + "&varNames=" + globalAlreadyPlottedNames.join();
+		window.open(url,'_blank');
+	});
+
+
+	/*$( "#controlBackward" ).click(function() {
+		var change = 0.05;
+		if (globalDataLowerTime - change < 0){
+			change = globalDataLowerTime - 0;
+		}
+		RVAPIFocusOnTimeLine(globalDataLowerTime - change,globalDataUpperTime - change);
+	});*/
+
+	function RVAPIShowControls(show) {
+		if (!show){
+			$("#controls_view").css('display','none');
+		} else {
+			$("#controls_view").css('display','block');
+		}
+	}
+	function RVAPIgetVariablesForNeuron(neuronID,callback) {
+		$.getJSON("https://results.si-elegans.eu/NUIG_RUS/getVarNames/userId=" + userId + "&simId=" + simId +
+			"&rtwId=" + neuronID + "&neuronId=" + neuronID, function( varNames ) {
+			listOfVariables=varNames
+			callback(listOfVariables)
+
+
+		});
+	}
+
+	$( "#showHideControls" ).click(function() {
+		if ($("#controls_view").css('display') == "block"){
+			RVAPIShowControls(false)
+		} else {
+			RVAPIShowControls(true)
+		}
+	});
+
+	$( "#optionsNeurons" ).change(function() {
+		$.getJSON("https://results.si-elegans.eu/NUIG_RUS/getVarNames/userId=" + userId + "&simId=" + simId +
+			"&rtwId=" + $( "#optionsNeurons" ).val() + "&neuronId=" + $( "#optionsNeurons" ).val(), function( varNames ) {
+			listOfVariables=varNames
+			listItems = "";
+			$.each(listOfVariables, function() {
+				listItems += "<option value='" + this + "'>"+ this + "</option>"
+			});
+			options.html(listItems);
+		});
+	});
+
+//});

@@ -1,0 +1,226 @@
+{% extends 'base-with-login.html' %}
+{% load js %}
+{% load staticfiles %}
+
+{% block extra_header %}
+    
+    {% comment %}
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+    {% endcomment %}
+    <script type="text/javascript" src="{% static "js/jquery.tokeninput.js" %}"></script>
+    <link rel="stylesheet" href="{% static "css/token-input.css" %}" type="text/css" />
+    <link rel="stylesheet" href="{% static "css/token-input-facebook.css" %}" type="text/css" />
+     
+{% endblock%}
+
+{% block content %}
+    
+    {% include 'booking/sharePeopleModal.html'%}
+
+    <script type="text/javascript">
+        var allUsers = {{ users | js }};
+
+        function publicOrNot(idPER) {
+
+            var check_public = $('#cp_'+idPER).prop('checked');
+            console.log(check_public);
+
+            var csrftoken = $.cookie('csrftoken');
+            console.log('pe_result :' + idPER);
+            var payload = {'pe_result': idPER, 'public_check': check_public};
+            console.log(payload);
+            
+            $.ajax({
+                type: "POST",
+                url: "{% url 'pe_result_make_public' %}",
+                data: JSON.stringify(payload),
+                success: function( response ) {
+                    console.log(response);
+                    if (response.response == 0) {
+                        $('#cp_'+idPER).prop('checked', true);
+                    }
+                    $("#modalPublic-body").html("<p>" + response.msg + "</p>");
+                    $("#modalPublic").modal();
+                },
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-CSRFToken',csrftoken);
+                    //xhr.setRequestHeader('X-CSRFToken', $('meta[name="csrf-token"]').attr('content'));
+                    //xhr.setRequestHeader("Authorization", "Basic " + btoa("admin" + ":" + "admin"));
+                    //xhr.setRequestHeader("Content-Type", "application/json");
+                },
+            });
+
+        }
+
+    </script>
+
+    <div class="container-fluid">
+
+        <div class="page-header">
+            <h1>Share visual locomotion results <small>Make public your pe_results and/or share them personally.</small></h1>
+        </div>
+        
+        <div class="panel panel-primary">
+
+            <div class="panel-heading"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>&nbsp;&nbsp;SHARE WITH USERS</div>
+    
+            <div class="panel-body">
+                <p>Here you will be able to share your pe_results publicly and/or personally.</p>
+            </div> <!-- div panel body -->
+    
+            <table class="table table-striped">
+                <!--<form action='{% url 'pe_result_make_public' %}'method='post'>{% csrf_token %}-->
+                    <thead>
+                        <tr>
+                            <th>Visual locomotion results</th>
+                            <th>Associated Behavioral Experiment</th>
+                            <th>Associated Worm Configuration</th>
+                            <th align="center">Public</th>
+                            <th>Shared with</th>               
+                            <th></th>
+                        </tr>
+                    </thead>
+    
+                    <tbody>
+                        {% for pe_result in pe_results %}
+                            {% for creator in pe_result.reservation_for_pe_result.creator.all %}
+                              {% if creator == request.user %}
+                                <tr>
+                                    <td><a href="{% url 'experimentReview' pe_result.uuid  %}"> <span class="uuid">{{pe_result.uuid}}</span></a>
+                                    </td>
+                                    <td><a href="{% url 'experimentDefinition' %}#/experiment/{{pe_result.reservation_for_pe_result.experiment.uuid}}"> <span class="uuid">{{pe_result.reservation_for_pe_result.experiment.uuid}}</span></a>
+                                    </td>
+                                    <td><a href="{% url 'worm_conf_details' pe_result.reservation_for_pe_result.worm_conf  %}#nav=2.94,0,5"> {{pe_result.reservation_for_pe_result.worm_conf}}</a>
+                                    </td>
+                                    {% if pe_result.public %}
+                                        <td align="center"><input id="cp_{{pe_result.uuid}}" type="checkbox" onclick="publicOrNot('{{pe_result.uuid}}')" checked/></td>
+                                    {% else %}
+                                        <td align="center"><input id="cp_{{pe_result.uuid}}" type="checkbox" onclick="publicOrNot('{{pe_result.uuid}}')" /></td>
+                                    {% endif %}
+                                    <td id="PER_{{pe_result.uuid}}">
+                                      {% for shared_element in share %}            
+                                          {% if shared_element.pe_results == pe_result %}                                                             
+                                              {{shared_element.user.first_name}} {{shared_element.user.last_name}} < {{shared_element.user.email}} ><br/>
+                                          {% endif %}
+                                      {% endfor %}
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-info" onclick="sharePeopleModal('{{pe_result.uuid}}','/restAPI/sharePEresult/','pe_results')">Share</button>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                    </tbody>
+                <!--</form>-->
+            </table>
+
+        </div> <!-- div panel -->
+
+        <div class="panel panel-primary">
+
+            <div class="panel-heading"><span class="glyphicon glyphicon-user" aria-hidden="true"></span>&nbsp;&nbsp;SHARED WITH ME</div>
+    
+            <div class="panel-body">
+                <p>These are the pe_results other users have shared with you.</p>
+            </div> <!-- div panel body -->
+
+            <table class="table table-striped">
+
+                <thead>
+                    <tr>
+                        <th>Visual locomotion results</th>
+                        <th>Associated Behavioral Experiment</th>
+                        <th>Associated Worm Configuration</th>
+                        <th>Public Sharing</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for shared_element in share %}
+                        {% if shared_element.user == request.user %}
+                            <tr>
+                                <td><a href="{% url 'experimentReview' shared_element.pe_results.uuid  %}"> <span class="uuid"> {{ shared_element.pe_results.uuid }}</span></a>
+                                </td>
+                                <td><a href="{% url 'experimentDefinition' %}#/experiment/{{shared_element.pe_results.reservation_for_pe_result.experiment.uuid}}"> <span class="uuid">{{shared_element.pe_results.reservation_for_pe_result.experiment.uuid}}</span></a>
+                                </td>
+                                <td><a href="{% url 'worm_conf_details' shared_element.pe_results.reservation_for_pe_result.worm_conf  %}#nav=2.94,0,5"> {{shared_element.pe_results.reservation_for_pe_result.worm_conf}}</a>
+                                </td>
+                                <td>
+                                    {{ shared_element.pe_results.public }}
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+        </div> <!-- div panel -->
+
+
+        <div class="panel panel-primary">
+
+            <div class="panel-heading"><span class="glyphicon glyphicon-globe" aria-hidden="true"></span>&nbsp;&nbsp;PUBLICLY SHARED</div>
+    
+            <div class="panel-body">
+                <p>These are the pe_results publicly shared by the paltform users.</p>
+            </div> <!-- div panel body -->
+
+            <table class="table table-striped">
+
+                <thead>
+                    <tr>
+                        <th>Visual locomotion results</th>
+                        <th>Associated Behavioral Experiment</th>
+                        <th>Associated Worm Configuration</th>
+                        <th>Public Sharing</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for pe_result in pe_results %}
+                        {% if pe_result.public == True %}
+                            <tr>
+                                <td><a href="{% url 'experimentReview' pe_result.uuid  %}"> <span class="uuid">{{pe_result.uuid}}</span></a>
+                                </td>
+                                <td><a href="{% url 'experimentDefinition' %}#/experiment/{{pe_result.reservation_for_pe_result.experiment.uuid}}"> <span class="uuid">{{pe_result.reservation_for_pe_result.experiment.uuid}}</span></a>
+                                </td>
+                                <td><a href="{% url 'worm_conf_details' pe_result.reservation_for_pe_result.worm_conf  %}#nav=2.94,0,5"> {{pe_result.reservation_for_pe_result.worm_conf}}</a>
+                                </td>
+                                <td>
+                                    {{ pe_result.public }}
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+        </div> <!-- div panel -->
+
+
+        <div class="row">
+            <div class="col-md-12" style="padding: 20px;">
+                {%if messages %}
+                    <div class='row'>
+                        <div class='col-xs-12'>
+                            <ul class="messages">
+                                {% for message in messages %}
+                                    <p{% if message.tags == "success" %} class="alert alert-success"
+                                        {% elif  message.tags == "error" %} class="alert alert-danger"
+                                        {% elif  message.tags == "warning" %} class="alert alert-warning"
+                                        {%endif%}>{{message}}</p>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div> <!-- div container-fluid-->
+
+
+{% endblock %}

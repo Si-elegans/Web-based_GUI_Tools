@@ -1,0 +1,107 @@
+{% extends 'base-with-login-without-footer.html' %}
+{% load staticfiles %}
+{% block extra_header %}
+
+<link rel="stylesheet" href="{% static "css/bootstrap.min.css"%}">   
+<link rel="stylesheet" href="{% static "css/slider.css"%}">
+<link rel="stylesheet" href="{% static "css/style.css"%}">
+<link rel="stylesheet" href="{% static "css/vis.js/vis.css"%}" >  
+
+<script>
+    var baseURL = "https://{{ request.get_host }}"
+</script>	
+
+<script src="{% static "js/vis.js/vis.js" %}"></script> 
+<script src="{% static "js/visualization/three.js/three.min.js" %}"></script>
+<script src="{% static "js/visualization/three.js/stats.min.js" %}"></script>
+<script src="{% static "js/visualization/three.js/TrackballControls.js" %}"></script>
+<script src="{% static "js/visualization/three.js/OrbitControls.js" %}"></script>
+<script src="{% static "js/visualization/three.js/ColladaLoader.js" %}"></script>
+<script src="{% static "js/visualization/three.js/OBJLoader.js" %}"></script>
+<script src="{% static "js/visualization/three.js/Editor.js" %}"></script>
+<script src="{% static "js/visualization/three.js/signals.min.js" %}"></script>
+<script src="{% static "js/visualization/three.js/Config.js" %}"></script>
+<script src="{% static "js/visualization/three.js/TransformControls.js" %}"></script>
+<script src="{% static "js/visualization/three.js/EditorControls.js" %}"></script>
+<script src="{% static "js/visualization/three.js/system.min.js" %}"></script>
+<script src="{% static "js/visualization/three.js/RaytracingRenderer.js" %}"></script>
+<script src="{% static "js/visualization/three.js/Loader.js" %}"></script>
+<!-- <script src="{% static "js/visualization/three.js/Viewport.js" %}"></script> -->
+<script src="{% static "js/visualization/three.js/ui.js" %}"></script>
+<script src="{% static "js/slider.js" %}"></script>
+
+<script>
+	var behavExp_url ="{% url 'behaviouralExperiments_nested_uuid' uuid=behavExp %}" + "?format=json"
+	var media_url = "{{ MEDIA_URL }}";
+	{% comment %} When using AWS S3boto var results_path =  "https://{{ request.get_host }}{{PE_results_path}}";
+	was generating a wrong url, "https://sielegans.elasticbeanstalk.comhttps://sielegans.s3.amazonaws.com/media/PE_results/1/"
+	{% endcomment %}
+	if (media_url.indexOf("https") > -1){
+		var results_path =  "{{PE_results_path}}";
+		var host = "https://{{ request.get_host }}"
+		var behavExp_path =  host.concat(behavExp_url);
+	}
+	else{
+		var results_path =  "https://{{ request.get_host }}{{PE_results_path}}";
+		var host = "https://{{ request.get_host }}"
+		var behavExp_path =  host.concat(behavExp_url);
+	}
+</script>
+
+{% endblock %}
+
+{% block content %}
+
+<div class="modal fade" id="modalLoading" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content color saving">
+			<div class="modal-header">
+				<h4 class="modal-title" id="myModalLabel">Loading</h4>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="container-fluid wrap">
+	<div class="col-sm-12 wrap">
+		<div class="row">
+			<button id="playPauseButton" class="btn btn-turquesa" style="margin: 5px" onclick="playPauseAnimation()">Play</button>
+			<input id="timeSlider" class="simpleSlider timeSlider" type="text" data-slider-min="0" data-slider-step="0.01">
+		</div>
+		<div class="row">
+			<button id="velocityButton" class="btn btn-turquesa" style="margin: 5px">Velocity</button>
+			<input id="velocitySlider" class="simpleSlider timeSlider" type="text" data-slider-min="0" data-slider-step="0.01">
+		</div>
+		<div class="row">
+			<button id="opacityButton" class="btn btn-turquesa" style="margin: 5px">Opacity</button>
+			<input id="opacitySlider" class="simpleSlider timeSlider" type="text" data-slider-min="0" data-slider-step="0.01">
+		</div>
+		<div class="row wrap">
+			<div id="visualizationScreenLocomotion" class="visualizationScreenLocomotion"></div>
+		</div>
+		<div class="row">
+			<div class="col-sm-12">
+				<div id="visualizationTimelineLocomotion" class="visualizationTimelineLocomotion"></div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-12">
+				<canvas id="timeCanvas" class="visualizationTimelineLocomotion"></canvas>
+			</div>
+		</div>
+		<div class="helpText2" >
+		<b>Left Click:</b> rotate; <b>Center Click:</b> zoom in/out; <b>Center Scroll:</b> zoom in/out; <b>Right Click:</b> translate    
+
+		</div>
+	</div>
+</div>
+<div id="piecemaker-container">
+	{% comment %}
+    <div id="piecemaker">
+     <h1> https://{{ request.get_host }}{{PE_results_path}}</h1>
+    </div>
+	{% endcomment %}
+</div>
+
+<script src="{% static "js/visualization/visualization-only-locomotion.js" %}"></script>
+{% endblock %}

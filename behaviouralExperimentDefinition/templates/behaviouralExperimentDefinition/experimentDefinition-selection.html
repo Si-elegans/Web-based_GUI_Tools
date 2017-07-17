@@ -1,0 +1,183 @@
+{% extends 'base-with-login.html' %}
+
+{% block content %}
+    <div class="container">
+        {%if messages %}
+        <div class='row'>
+            <div class='col-xs-12'>
+                <ul class="messages">
+                    {% for message in messages %}
+                    <p{% if message.tags == "success" %} class="alert alert-success"
+                      {% elif  message.tags == "error" %} class="alert alert-danger"
+                      {% elif  message.tags == "warning" %} class="alert alert-warning"
+                      {%endif%}>
+                      {{message}}<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a></p>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+     <div class="container-fluid">
+
+          <div class="page-header">
+            <h1>My behavioural experiments <small>Create, view and edit your BE.</small></h1>
+          </div>
+
+          <div class="row" style="margin-bottom: 20px; margin-right: 20px">
+               <form role="form" method="post" action="{% url 'experimentDefinition_Selection' %}">
+                    {% csrf_token %}
+                    <button type="submit" name="addBehavExp" class="btn btn-primary pull-right"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>&nbsp;&nbsp;Create a new behavioural experiment</button>
+               </form>
+          </div>
+
+          <div class="panel panel-primary">
+
+               <div class="panel-heading"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>&nbsp;&nbsp;MY BEHAVIOURAL EXPERIMENTS</div>
+    
+               <div class="panel-body">
+                    <p>Here you will be able to view and edit your own BE.</p>
+               </div> <!-- div panel body -->
+    
+               <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th class="text-center">id BE</th>
+                            <th class="text-center">Description</th>
+                            <th class="text-center">Date created</th>
+                            <th class="text-center">Shared with</th>
+                            <th class="text-center">Action</th>
+                            <th class="text-center">Export Point</th>
+                        </tr>
+                    </thead>
+    
+                    <tbody>
+                        {% for behaviouralExperiment in behaviouralExperiments %}
+                            {% if behaviouralExperiment.creator == request.user %}
+                                <tr>                                    
+                                    <td class="text-center"><a href="{% url 'experimentDefinition' %}#/experiment/{{behaviouralExperiment.uuid}}"><span class="uuid">{{behaviouralExperiment.uuid}}</span></a></td>
+                                    <td class="text-center">{{behaviouralExperiment.description}}</td>
+                                    <td class="text-center">{{behaviouralExperiment.created}}</td>
+                                    <td id="be_{{behaviouralExperiment.uuid}}" class="text-center">
+                                      {% for shared_behav_exp in shared_behavExperiments %}
+                                          {% if shared_behav_exp.behaviouralExperiment == behaviouralExperiment %}                                                             
+                                              {{shared_behav_exp.user.first_name}} {{shared_behav_exp.user.last_name}} < {{shared_behav_exp.user.email}} ><br/>
+                                          {% endif %}
+                                      {% endfor %}
+                                    </td>
+
+                                    <td class="text-center">
+                                        <a href="{% url 'experimentDefinition' %}#/experiment/{{ behaviouralExperiment.uuid}}" role="button" class="btn btn-info">View/Edit</a>
+                                        <form role="form" method="post" action="{% url 'experimentDefinition_Selection' %}">
+                                            {% csrf_token %}
+                                            <button type="submit" name="delBehavExp" value="{{ behaviouralExperiment.uuid}}" class="btn btn-info">Delete</button>
+                                       </form>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <a href="{% url 'behaviouralExperiments_nested_uuid'  uuid=behaviouralExperiment.uuid %}?format=xml" role="button" class="btn btn-info">Export XML</a>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}       
+                    </tbody>
+               </table>
+          </div> <!-- div panel -->
+
+
+          <div class="panel panel-primary">
+
+               <div class="panel-heading"><span class="glyphicon glyphicon-user" aria-hidden="true"></span>&nbsp;&nbsp;SHARED WITH ME</div>
+    
+               <div class="panel-body">
+                    <p>These are the BE other users have shared with you.</p>
+               </div> <!-- div panel body -->
+
+               <table class="table table-striped">
+
+                    <thead>
+                         <tr>
+                              <th class="text-center">id BE</th>
+                              <th class="text-center">Description</th>
+                              <th class="text-center">Public Sharing</th>
+                              <th class="text-center">Action</th>
+                              <th class="text-center">Export Point</th>
+                         </tr>
+                    </thead>
+
+                    <tbody>
+                         {% for shared_behav_exp in shared_behavExperiments %}
+                              {% if shared_behav_exp.user == request.user %}
+                                   <tr>
+                                        <td class="text-center"><a href="{% url 'experimentDefinition' %}#/experiment/{{shared_behav_exp.behaviouralExperiment.uuid}}"><span class="uuid">{{ shared_behav_exp.behaviouralExperiment.uuid}}</span></a>
+                                        </td>
+                                        <td class="text-center">
+                                             {{ shared_behav_exp.behaviouralExperiment.description }}
+                                        </td>
+                                        <td class="text-center">
+                                             {{ shared_behav_exp.behaviouralExperiment.public }}
+                                        </td>
+                                        <td class="text-center">
+                                             <a href="{% url 'experimentDefinition' %}#/experiment/{{ shared_behav_exp.behaviouralExperiment.uuid}}" role="button" class="btn btn-info">View/Edit</a>
+                                        </td>
+                                        <td class="text-center">
+                                             <a href="{% url 'behaviouralExperiments_nested_uuid'  uuid=shared_behav_exp.behaviouralExperiment.uuid %}?format=xml" role="button" class="btn btn-info">Export XML</a>
+                                        </td>
+                                   </tr>
+                              {% endif %}
+                         {% endfor %}
+                    </tbody>
+
+               </table>
+
+          </div> <!-- div panel -->
+
+
+          <div class="panel panel-primary">
+
+               <div class="panel-heading"><span class="glyphicon glyphicon-globe" aria-hidden="true"></span>&nbsp;&nbsp;PUBLICLY SHARED</div>
+    
+               <div class="panel-body">
+                    <p>These are the BE publicly shared by the platform users.</p>
+               </div> <!-- div panel body -->
+
+               <table class="table table-striped">
+
+                    <thead>
+                         <tr>
+                              <th class="text-center">id BE</th>
+                              <th class="text-center">Description</th>
+                              <th class="text-center">Action</th>
+                              <th class="text-center">Export Point</th>
+                         </tr>
+                    </thead>
+
+                    <tbody>
+                         {% for behaviouralExperiment in behaviouralExperiments %}
+                              {% if behaviouralExperiment.public == True %}
+                                   <tr>
+                                        <td class="text-center"><a href="{% url 'experimentDefinition' %}#/experiment/{{behaviouralExperiment.uuid}}"><span class="uuid">{{ behaviouralExperiment.uuid}}</span></a>
+
+                                        </td>
+                                        <td class="text-center">
+                                             {{ behaviouralExperiment.description }}
+                                        </td>
+                                        <td class="text-center">
+                                             <a href="{% url 'experimentDefinition' %}#/experiment/{{ behaviouralExperiment.uuid}}" role="button" class="btn btn-info">View/Edit</a>
+                                        </td>
+                                       <td class="text-center">
+                                             <a href="{% url 'behaviouralExperiments_nested_uuid'  uuid=behaviouralExperiment.uuid %}?format=xml" role="button" class="btn btn-info">Export XML</a>
+                                        </td>
+                                   </tr>
+                              {% endif %}
+                         {% endfor %}
+                    </tbody>
+
+            </table>
+
+        </div> <!-- div panel -->
+
+     </div> <!-- container fluid -->
+
+{% endblock %}

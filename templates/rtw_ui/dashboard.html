@@ -1,0 +1,90 @@
+{% extends 'base-with-login.html' %}
+
+{% block content %}
+
+
+    <div class="container-fluid">
+
+        <div class="page-header">
+            <h1>Result Recording Profiles </h1>
+        </div>
+            <div class="row" style="margin-bottom: 20px; margin-right: 20px">
+               <form role="form" method="post" action="/djlems/rtw_ui/">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary pull-right"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>&nbsp;&nbsp;Create a new Recording Profile</button>
+               </form>
+          </div>
+        <div class="panel panel-primary">
+
+            <div class="panel-heading"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>&nbsp;&nbsp;MY RECORDING PROFILES</div>
+
+
+            <table class="table table-striped">
+                <!--<form action='{% url 'rb_result_make_public' %}'method='post'>{% csrf_token %}-->
+                   <thead>
+                <th>RTW Configuration Name</th>
+                <th>Owner</th>
+                <th>Network Configuration</th>
+                <th></th>
+                <th></th>
+            </thead>
+
+                    <tbody>
+                        {% for rtw_conf in rtw_confs %}
+                        <tr>
+                            <td>{{ rtw_conf.name }}</td>
+                            <td>{{ rtw_conf.owner }}</td>
+                            <td>{{ rtw_conf.network.name }}</td>
+                            <td>
+                                <input type="button" class="btn btn-info" onclick="deleteModel('{{ rtw_conf.name }}')" value="Delete" />
+                                    </td>
+                            <td>
+                                <input type="button" class="btn btn-info" onclick="location.href='/djlems/rtw_ui/{{ rtw_conf.name }}/'" value="Edit" />
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                <!--</form>-->
+            </table>
+
+        </div> <!-- div panel -->
+
+
+
+        <div class="row">
+            <div class="col-md-12" style="padding: 20px;">
+                {%if messages %}
+                    <div class='row'>
+                        <div class='col-xs-12'>
+                            <ul class="messages">
+                                {% for message in messages %}
+                                    <p{% if message.tags == "success" %} class="alert alert-success"
+                                        {% elif  message.tags == "error" %} class="alert alert-danger"
+                                        {% elif  message.tags == "warning" %} class="alert alert-warning"
+                                        {%endif%}>{{message}}</p>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+
+
+<script>
+    function deleteModel(model_name) {
+        if (confirm('Are you sure you want to delete this model?')) {
+           if (confirm('Are you really sure?')) {
+                location.href='/djlems/delete_rtw_model/' + model_name;
+           }
+        }
+    }
+</script>
+
+    </div> <!-- div container-fluid-->
+
+
+{% endblock content  %}
+

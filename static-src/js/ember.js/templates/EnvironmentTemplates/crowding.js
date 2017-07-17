@@ -1,0 +1,3 @@
+Ember.TEMPLATES["crowding"] = Ember.Handlebars.template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+  data.buffer.push("<div class=\"row\">\r\n    <div class=\"col-sm-12 block\">\r\n        <div>\r\n            <div class=\"whitefont\">Number of Worms (not implemented)</div>\r\n        </div>\r\n    </div>\r\n</div>\r\n<div class=\"row\">\r\n    <div class=\"col-sm-12 block\">\r\n        <div>\r\n            <div class=\"whitefont\">Worms Distribution in Plate (not implemented)</div> \r\n        </div>\r\n    </div>\r\n</div>\r\n");
+  },"useData":true});

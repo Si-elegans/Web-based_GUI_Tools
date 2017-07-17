@@ -1,0 +1,669 @@
+[
+{
+    "fields": {
+        "plateConfiguration": "80afe078-873a-42d7-b212-e0ccfd2ac540",
+        "crowding": "249c5282-5100-4c27-b062-eeb0ccf84bbc",
+        "obstacle": [],
+        "envTemp": 20.0,
+        "wormStatus": "87d82fe4-e1ec-4907-b2be-7856159845b7",
+        "description": ""
+    },
+    "model": "behaviouralExperimentDefinition.environmenttype_model",
+    "pk": "0583a11d-08f8-4f33-9d51-496859d8a656"
+},
+{
+    "fields": {
+        "plateConfiguration": "97aaf46b-3182-491d-8b56-890607121075",
+        "crowding": "fa9efaec-6ae1-4f5f-985d-c23f465315a3",
+        "obstacle": [],
+        "envTemp": 20.0,
+        "wormStatus": "9be4d6e7-d76b-48af-8ea7-833f41ccd1bc",
+        "description": ""
+    },
+    "model": "behaviouralExperimentDefinition.environmenttype_model",
+    "pk": "3687df6c-0d98-4125-8dd6-0a41e44aabae"
+},
+{
+    "fields": {
+        "yCoorDFromPlateCentre": 1.0,
+        "xCoordFromPlateCentre": 1.0,
+        "angleRelativeXaxis": 1.0,
+        "wormData": "82982712-e7f2-4526-aedf-4165ac1522fd"
+    },
+    "model": "behaviouralExperimentDefinition.wormstatustype_model",
+    "pk": "87d82fe4-e1ec-4907-b2be-7856159845b7"
+},
+{
+    "fields": {
+        "yCoorDFromPlateCentre": 1.0,
+        "xCoordFromPlateCentre": 1.0,
+        "angleRelativeXaxis": 1.0,
+        "wormData": "d9b0c99d-0fb0-4d6e-9610-0bfea88e6855"
+    },
+    "model": "behaviouralExperimentDefinition.wormstatustype_model",
+    "pk": "9be4d6e7-d76b-48af-8ea7-833f41ccd1bc"
+},
+{
+    "fields": {
+        "gender": "FH",
+        "age": 1,
+        "stageOfLifeCycle": 1,
+        "timeOffFood": 1
+    },
+    "model": "behaviouralExperimentDefinition.wormdatatype_model",
+    "pk": "82982712-e7f2-4526-aedf-4165ac1522fd"
+},
+{
+    "fields": {
+        "gender": "FH",
+        "age": 1,
+        "stageOfLifeCycle": 1,
+        "timeOffFood": 1
+    },
+    "model": "behaviouralExperimentDefinition.wormdatatype_model",
+    "pk": "d9b0c99d-0fb0-4d6e-9610-0bfea88e6855"
+},
+{
+    "fields": {
+        "wormsDistributionInPlate": "1",
+        "wormsInPlate": 1
+    },
+    "model": "behaviouralExperimentDefinition.crowdingtype_model",
+    "pk": "249c5282-5100-4c27-b062-eeb0ccf84bbc"
+},
+{
+    "fields": {
+        "wormsDistributionInPlate": "1",
+        "wormsInPlate": 1
+    },
+    "model": "behaviouralExperimentDefinition.crowdingtype_model",
+    "pk": "fa9efaec-6ae1-4f5f-985d-c23f465315a3"
+},
+{
+    "fields": {
+        "lid": false,
+        "bottomMaterial": "A",
+        "Cylinder": "9f971f79-2673-4604-8389-e7a27cbf448d",
+        "Cube": null,
+        "shape": "CY",
+        "Hexagon": null,
+        "dryness": 1.0
+    },
+    "model": "behaviouralExperimentDefinition.plateconfigurationtype_model",
+    "pk": "80afe078-873a-42d7-b212-e0ccfd2ac540"
+},
+{
+    "fields": {
+        "lid": false,
+        "bottomMaterial": "A",
+        "Cylinder": "aa46bb53-77a0-4761-a781-489e850b0ca3",
+        "Cube": null,
+        "shape": "CY",
+        "Hexagon": null,
+        "dryness": 1.0
+    },
+    "model": "behaviouralExperimentDefinition.plateconfigurationtype_model",
+    "pk": "97aaf46b-3182-491d-8b56-890607121075"
+},
+{
+    "fields": {
+        "length": 1.0,
+        "radius": 1.0
+    },
+    "model": "behaviouralExperimentDefinition.cylindertype_model",
+    "pk": "9f971f79-2673-4604-8389-e7a27cbf448d"
+},
+{
+    "fields": {
+        "length": 1.0,
+        "radius": 1.0
+    },
+    "model": "behaviouralExperimentDefinition.cylindertype_model",
+    "pk": "aa46bb53-77a0-4761-a781-489e850b0ca3"
+},
+{
+    "fields": {
+        "interactionAtSpecificTime": [
+            "c0532404-a4b5-45ba-bf98-f303294534e6"
+        ],
+        "interactionFromt0tot1": [
+            "5d068e80-e4b4-4f14-9f1a-6623c0792023"
+        ],
+        "experimentWideConf": [
+            "4ed0d2e3-f63e-459e-8566-5445c6f0526a"
+        ],
+        "description": "",
+        "experimentDuration": 8000
+    },
+    "model": "behaviouralExperimentDefinition.experimenttype_model",
+    "pk": "38cb35df-dfe9-4d79-93d5-424a8a3b2935"
+},
+{
+    "fields": {
+        "experimentWideConf": [
+            "52685b1d-c09b-48f1-82de-791e2b8dce73"
+        ],
+        "description": "",
+        "experimentDuration": 10000
+    },
+    "model": "behaviouralExperimentDefinition.experimenttype_model",
+    "pk": "adaddaac-a76e-493c-8051-99f7b2a9f1ed"
+},
+{
+    "fields": {
+        "phototaxis": null,
+        "termotaxis": null,
+        "description": "touch",
+        "mechanosensation": "6f1e4c52-7775-412b-96a3-c4d7fd625fad",
+        "eventTime": 2800,
+        "galvanotaxis": null,
+        "chemotaxis": null,
+        "experimentCategory": "MS"
+    },
+    "model": "behaviouralExperimentDefinition.interactionatspecifictimetype_model",
+    "pk": "c0532404-a4b5-45ba-bf98-f303294534e6"
+},
+{
+    "fields": {
+        "plateTap": "487dc6da-a0ba-4213-be8d-47da0e5c313c",
+        "directTouch": "6eb50744-2b37-4fe6-88f8-8496ba62b0f2",
+        "description": "new mechano exact",
+        "interactionType": "DWT"
+    },
+    "model": "behaviouralExperimentDefinition.mechanosensationtimeeventtype_model",
+    "pk": "6f1e4c52-7775-412b-96a3-c4d7fd625fad"
+},
+{
+    "fields": {
+        "plateTap": "a320142f-b860-4501-8ac3-d0de36fa5998",
+        "directTouch": null,
+        "description": "new mechano exact",
+        "interactionType": "DWT"
+    },
+    "model": "behaviouralExperimentDefinition.mechanosensationtimeeventtype_model",
+    "pk": "a1159258-81e4-423d-9536-8583a8e628ec"
+},
+{
+    "fields": {
+        "touchAngle": 1.0,
+        "appliedForce": 20.5,
+        "directTouchInstrument": "EB",
+        "touchDistance": 0.6
+    },
+    "model": "behaviouralExperimentDefinition.directtouchtype_model",
+    "pk": "1ae1cd3b-7d2b-4367-8b60-2f175add6872"
+},
+{
+    "fields": {
+        "touchAngle": 1.0,
+        "appliedForce": 20.5,
+        "directTouchInstrument": "EB",
+        "touchDistance": 0.6
+    },
+    "model": "behaviouralExperimentDefinition.directtouchtype_model",
+    "pk": "6eb50744-2b37-4fe6-88f8-8496ba62b0f2"
+},
+{
+    "fields": {
+        "appliedForce": 0.0
+    },
+    "model": "behaviouralExperimentDefinition.platetaptype_model",
+    "pk": "487dc6da-a0ba-4213-be8d-47da0e5c313c"
+},
+{
+    "fields": {
+        "appliedForce": 0.0
+    },
+    "model": "behaviouralExperimentDefinition.platetaptype_model",
+    "pk": "a320142f-b860-4501-8ac3-d0de36fa5998"
+},
+{
+    "fields": {
+        "shockFrequency": 60.96,
+        "amplitude": 34.3,
+        "shockDuration": 41
+    },
+    "model": "behaviouralExperimentDefinition.electricshocktype_model",
+    "pk": "600787c7-688d-4794-b30f-ecc1b2d55a38"
+},
+{
+    "fields": {
+        "shockFrequency": 60.96,
+        "amplitude": 34.3,
+        "shockDuration": 41
+    },
+    "model": "behaviouralExperimentDefinition.electricshocktype_model",
+    "pk": "f6d61c23-6e05-4a1f-9034-eea1cd409a8b"
+},
+{
+    "fields": {
+        "phototaxis": null,
+        "termotaxis": null,
+        "description": "galvano",
+        "mechanosensation": null,
+        "eventStartTime": 1500,
+        "galvanotaxis": "1c044736-bb17-491b-8f74-79367e247690",
+        "eventStopTime": 3700,
+        "chemotaxis": null,
+        "experimentCategory": "GT"
+    },
+    "model": "behaviouralExperimentDefinition.interactionfromt0tot1type_model",
+    "pk": "5d068e80-e4b4-4f14-9f1a-6623c0792023"
+},
+{
+    "fields": {
+        "galvanotaxisType": "ES",
+        "electricShockConf": "600787c7-688d-4794-b30f-ecc1b2d55a38",
+        "description": "new galvano interval NaN"
+    },
+    "model": "behaviouralExperimentDefinition.galvanotaxistimet0tot1type_model",
+    "pk": "1c044736-bb17-491b-8f74-79367e247690"
+},
+{
+    "fields": {
+        "galvanotaxisType": "ES",
+        "electricShockConf": "f6d61c23-6e05-4a1f-9034-eea1cd409a8b",
+        "description": "new galvano interval NaN"
+    },
+    "model": "behaviouralExperimentDefinition.galvanotaxistimet0tot1type_model",
+    "pk": "f3b61d65-cf74-4fee-a9d6-bc8ffb883841"
+},
+{
+    "fields": {
+        "phototaxis": null,
+        "termotaxis": "1784224e-b124-45e0-b582-a8b6e10aafff",
+        "description": "termo",
+        "mechanosensation": null,
+        "galvanotaxis": null,
+        "chemotaxis": null,
+        "experimentCategory": "TT"
+    },
+    "model": "behaviouralExperimentDefinition.experimentwideconftype_model",
+    "pk": "4ed0d2e3-f63e-459e-8566-5445c6f0526a"
+},
+{
+    "fields": {
+        "phototaxis": null,
+        "termotaxis": "91f70937-2ac1-4ada-bea6-c7673e5cdb4c",
+        "description": "termo",
+        "mechanosensation": null,
+        "galvanotaxis": null,
+        "chemotaxis": null,
+        "experimentCategory": "TT"
+    },
+    "model": "behaviouralExperimentDefinition.experimentwideconftype_model",
+    "pk": "52685b1d-c09b-48f1-82de-791e2b8dce73"
+},
+{
+    "fields": {
+        "linearThermalGradient": "04900b4e-f58a-478e-8065-045b6532877f",
+        "description": "new termo permanent NaN",
+        "termotaxisType": "LT"
+    },
+    "model": "behaviouralExperimentDefinition.termotaxisexperimentwidetype_model",
+    "pk": "1784224e-b124-45e0-b582-a8b6e10aafff"
+},
+{
+    "fields": {
+        "linearThermalGradient": "b2b62fea-3eaf-4b76-8cf8-baa5b2417546",
+        "description": "new termo permanent NaN",
+        "termotaxisType": "LT"
+    },
+    "model": "behaviouralExperimentDefinition.termotaxisexperimentwidetype_model",
+    "pk": "91f70937-2ac1-4ada-bea6-c7673e5cdb4c"
+},
+{
+    "fields": {
+        "temperatureRightHorizonal": 64.3,
+        "temperatureLeftHorizontal": 27.2
+    },
+    "model": "behaviouralExperimentDefinition.linearthermalgradienttype_model",
+    "pk": "04900b4e-f58a-478e-8065-045b6532877f"
+},
+{
+    "fields": {
+        "temperatureRightHorizonal": 64.3,
+        "temperatureLeftHorizontal": 27.2
+    },
+    "model": "behaviouralExperimentDefinition.linearthermalgradienttype_model",
+    "pk": "b2b62fea-3eaf-4b76-8cf8-baa5b2417546"
+},
+{
+    "fields": {
+        "pe_result": "1ff09270-9407-4bd8-b7cd-109250bad070",
+        "results_file": "PE_results/1ff09270-9407-4bd8-b7cd-109250bad070/3_completed.json",
+        "file_order": 3,
+        "created": "2016-05-05T15:04:17.468Z"
+    },
+    "model": "booking.pe_results_files",
+    "pk": "0854e1ee-206d-41ac-b698-b81434c9fede"
+},
+{
+    "fields": {
+        "pe_result": "1ff09270-9407-4bd8-b7cd-109250bad070",
+        "results_file": "PE_results/1ff09270-9407-4bd8-b7cd-109250bad070/6_completed.json",
+        "file_order": 6,
+        "created": "2016-05-05T15:05:22.756Z"
+    },
+    "model": "booking.pe_results_files",
+    "pk": "188cd980-a792-4de5-870a-9cd8569b79fb"
+},
+{
+    "fields": {
+        "pe_result": "1ff09270-9407-4bd8-b7cd-109250bad070",
+        "results_file": "PE_results/1ff09270-9407-4bd8-b7cd-109250bad070/9_completed.json",
+        "file_order": 9,
+        "created": "2016-05-05T15:05:49.467Z"
+    },
+    "model": "booking.pe_results_files",
+    "pk": "339cd08d-285e-4184-a779-3947e7fe963b"
+},
+{
+    "fields": {
+        "pe_result": "82214d0d-d5b1-43ca-8b3b-c3a8efc614b7",
+        "results_file": "PE_results/82214d0d-d5b1-43ca-8b3b-c3a8efc614b7/3.json",
+        "file_order": 3,
+        "created": "2016-06-30T06:48:40.062Z"
+    },
+    "model": "booking.pe_results_files",
+    "pk": "3598ac7b-be44-4a21-8d32-e9ef1f32b0d7"
+},
+{
+    "fields": {
+        "pe_result": "1ff09270-9407-4bd8-b7cd-109250bad070",
+        "results_file": "PE_results/1ff09270-9407-4bd8-b7cd-109250bad070/10_completed.json",
+        "file_order": 10,
+        "created": "2016-05-05T15:06:00.993Z"
+    },
+    "model": "booking.pe_results_files",
+    "pk": "431fd35c-01f7-468c-b1fd-f997ce558c3f"
+},
+{
+    "fields": {
+        "pe_result": "82214d0d-d5b1-43ca-8b3b-c3a8efc614b7",
+        "results_file": "PE_results/82214d0d-d5b1-43ca-8b3b-c3a8efc614b7/9.json",
+        "file_order": 9,
+        "created": "2016-06-30T06:49:38.213Z"
+    },
+    "model": "booking.pe_results_files",
+    "pk": "4e490099-6236-475d-8bfc-84aad16a4308"
+},
+{
+    "fields": {
+        "pe_result": "82214d0d-d5b1-43ca-8b3b-c3a8efc614b7",
+        "results_file": "PE_results/82214d0d-d5b1-43ca-8b3b-c3a8efc614b7/6.json",
+        "file_order": 6,
+        "created": "2016-06-30T06:49:08.883Z"
+    },
+    "model": "booking.pe_results_files",
+    "pk": "778b7b54-af54-471a-bf0b-064d8a92c800"
+},
+{
+    "fields": {
+        "pe_result": "82214d0d-d5b1-43ca-8b3b-c3a8efc614b7",
+        "results_file": "PE_results/82214d0d-d5b1-43ca-8b3b-c3a8efc614b7/8.json",
+        "file_order": 8,
+        "created": "2016-06-30T06:49:28.317Z"
+    },
+    "model": "booking.pe_results_files",
+    "pk": "7b14cde4-8a41-45ca-8e05-39027bb9dcff"
+},
+{
+    "fields": {
+        "pe_result": "82214d0d-d5b1-43ca-8b3b-c3a8efc614b7",
+        "results_file": "PE_results/82214d0d-d5b1-43ca-8b3b-c3a8efc614b7/4.json",
+        "file_order": 4,
+        "created": "2016-06-30T06:48:50.800Z"
+    },
+    "model": "booking.pe_results_files",
+    "pk": "8371fe93-53e2-459a-9651-6718a658f67f"
+},
+{
+    "fields": {
+        "pe_result": "1ff09270-9407-4bd8-b7cd-109250bad070",
+        "results_file": "PE_results/1ff09270-9407-4bd8-b7cd-109250bad070/2_completed.json",
+        "file_order": 2,
+        "created": "2016-05-05T15:03:57.218Z"
+    },
+    "model": "booking.pe_results_files",
+    "pk": "8484a626-9fe7-4b52-a664-4e7fb0ac3674"
+},
+{
+    "fields": {
+        "pe_result": "82214d0d-d5b1-43ca-8b3b-c3a8efc614b7",
+        "results_file": "PE_results/82214d0d-d5b1-43ca-8b3b-c3a8efc614b7/1.json",
+        "file_order": 1,
+        "created": "2016-06-30T06:48:20.841Z"
+    },
+    "model": "booking.pe_results_files",
+    "pk": "90d12db1-e344-41b7-8040-6fdf559f7b0c"
+},
+{
+    "fields": {
+        "pe_result": "82214d0d-d5b1-43ca-8b3b-c3a8efc614b7",
+        "results_file": "PE_results/82214d0d-d5b1-43ca-8b3b-c3a8efc614b7/sources.list",
+        "file_order": 0,
+        "created": "2016-06-30T06:49:50.749Z"
+    },
+    "model": "booking.pe_results_files",
+    "pk": "9655c37e-d791-4834-b64f-a8d479ef5409"
+},
+{
+    "fields": {
+        "pe_result": "1ff09270-9407-4bd8-b7cd-109250bad070",
+        "results_file": "PE_results/1ff09270-9407-4bd8-b7cd-109250bad070/8_completed.json",
+        "file_order": 8,
+        "created": "2016-05-05T15:05:40.717Z"
+    },
+    "model": "booking.pe_results_files",
+    "pk": "a5e7c3f2-b3de-4767-8c49-48b4f24dcafb"
+},
+{
+    "fields": {
+        "pe_result": "82214d0d-d5b1-43ca-8b3b-c3a8efc614b7",
+        "results_file": "PE_results/82214d0d-d5b1-43ca-8b3b-c3a8efc614b7/2.json",
+        "file_order": 2,
+        "created": "2016-06-30T06:48:30.969Z"
+    },
+    "model": "booking.pe_results_files",
+    "pk": "aac1cc8a-1337-46ab-8328-6b32eaaaa960"
+},
+{
+    "fields": {
+        "pe_result": "1ff09270-9407-4bd8-b7cd-109250bad070",
+        "results_file": "PE_results/1ff09270-9407-4bd8-b7cd-109250bad070/sources.list",
+        "file_order": 0,
+        "created": "2016-05-05T15:09:32.530Z"
+    },
+    "model": "booking.pe_results_files",
+    "pk": "cd509837-202b-49db-91b1-1ab5228cbe1a"
+},
+{
+    "fields": {
+        "pe_result": "1ff09270-9407-4bd8-b7cd-109250bad070",
+        "results_file": "PE_results/1ff09270-9407-4bd8-b7cd-109250bad070/7_completed.json",
+        "file_order": 7,
+        "created": "2016-05-05T15:05:32.143Z"
+    },
+    "model": "booking.pe_results_files",
+    "pk": "cf6d9776-3213-4452-bf76-c367a897797f"
+},
+{
+    "fields": {
+        "pe_result": "82214d0d-d5b1-43ca-8b3b-c3a8efc614b7",
+        "results_file": "PE_results/82214d0d-d5b1-43ca-8b3b-c3a8efc614b7/7.json",
+        "file_order": 7,
+        "created": "2016-06-30T06:49:17.750Z"
+    },
+    "model": "booking.pe_results_files",
+    "pk": "d137df05-30d5-488f-8098-506967722d5e"
+},
+{
+    "fields": {
+        "pe_result": "1ff09270-9407-4bd8-b7cd-109250bad070",
+        "results_file": "PE_results/1ff09270-9407-4bd8-b7cd-109250bad070/1_completed.json",
+        "file_order": 1,
+        "created": "2016-05-05T15:03:23.021Z"
+    },
+    "model": "booking.pe_results_files",
+    "pk": "d19d4e23-b782-455b-b19a-25ddfeec4a6d"
+},
+{
+    "fields": {
+        "pe_result": "1ff09270-9407-4bd8-b7cd-109250bad070",
+        "results_file": "PE_results/1ff09270-9407-4bd8-b7cd-109250bad070/5_completed.json",
+        "file_order": 5,
+        "created": "2016-05-05T15:05:10.433Z"
+    },
+    "model": "booking.pe_results_files",
+    "pk": "d4079f0a-f183-427b-b892-f18b331327e4"
+},
+{
+    "fields": {
+        "pe_result": "82214d0d-d5b1-43ca-8b3b-c3a8efc614b7",
+        "results_file": "PE_results/82214d0d-d5b1-43ca-8b3b-c3a8efc614b7/5.json",
+        "file_order": 5,
+        "created": "2016-06-30T06:48:59.847Z"
+    },
+    "model": "booking.pe_results_files",
+    "pk": "d7953b94-11f6-442c-bddc-9f3e250ae492"
+},
+{
+    "fields": {
+        "pe_result": "1ff09270-9407-4bd8-b7cd-109250bad070",
+        "results_file": "PE_results/1ff09270-9407-4bd8-b7cd-109250bad070/4_completed.json",
+        "file_order": 4,
+        "created": "2016-05-05T15:05:01.747Z"
+    },
+    "model": "booking.pe_results_files",
+    "pk": "e3b722ad-e58e-4d59-af3c-b1340bda6545"
+},
+{
+    "fields": {
+        "last_name": "demo",
+        "last_ip": null,
+        "topic_count": 0,
+        "is_staff": false,
+        "user_permissions": [],
+        "timezone": "UTC",
+        "date_joined": "2016-05-05T14:54:10.971Z",
+        "first_name": "demo",
+        "is_administrator": false,
+        "is_superuser": false,
+        "comment_count": 0,
+        "last_login": "2016-05-27T14:31:27.696Z",
+        "location": "",
+        "email": "demo@demo.com",
+        "username": "demo",
+        "is_active": true,
+        "is_moderator": false,
+        "groups": [],
+        "password": "pbkdf2_sha256$12000$IZcZ0t1R5KSq$ZPMy9kywb//l+b9y8HI4nc7t9w25MZS23VUTsgczGHI=",
+        "slug": "demo",
+        "avatar": "",
+        "last_seen": "2016-05-05T14:54:11.044Z"
+    },
+    "model": "spirit.user",
+    "pk": 1
+},
+{
+    "fields": {
+        "status": "DONE",
+        "sim_id" : 1,
+        "description": "",
+        "created": "2016-05-05T15:01:21.218Z",
+        "start_time": 0,
+        "creator": [
+            1
+        ],
+        "rb_result": null,
+        "experiment": "7feca1af-77e9-4742-8dc2-0949f465bd9c",
+        "worm_conf": 1,
+        "pe_result": "1ff09270-9407-4bd8-b7cd-109250bad070",
+        "resume_timestamp": 0
+    },
+    "model": "booking.reservation",
+    "pk": "8359e7dc-2485-49d0-a822-0c9c610a9d5d"
+},
+{
+    "fields": {
+        "status": "DONE",
+        "sim_id" : 1,
+        "description": "",
+        "created": "2016-06-30T06:47:50.080Z",
+        "start_time": 0,
+        "creator": [
+            1
+        ],
+        "rb_result": null,
+        "experiment": "6c6f1e3c-2954-4dc8-95e6-2b53f628f87d",
+        "worm_conf": 0,
+        "pe_result": "82214d0d-d5b1-43ca-8b3b-c3a8efc614b7",
+        "resume_timestamp": 0
+    },
+    "model": "booking.reservation",
+    "pk": "ea3c2caa-9ea2-4157-83e4-6a2cb5f1b915"
+},
+{
+    "fields": {
+        "pe_results": "1ff09270-9407-4bd8-b7cd-109250bad070",
+        "user": 1,
+        "shared_date": "2016-05-05T15:17:54.795Z"
+    },
+    "model": "booking.share_pe_results",
+    "pk": "3c878927-bcb1-40e3-bda4-722f04c05a18"
+},
+{
+    "fields": {
+        "public": true,
+        "public_set_date": "2016-05-26T15:19:47.953Z"
+    },
+    "model": "booking.pe_results",
+    "pk": "1ff09270-9407-4bd8-b7cd-109250bad070"
+},
+{
+    "fields": {
+        "public": true,
+        "public_set_date": "2016-06-30T08:50:13.445Z"
+    },
+    "model": "booking.pe_results",
+    "pk": "82214d0d-d5b1-43ca-8b3b-c3a8efc614b7"
+},
+{
+    "fields": {
+        "user": 1,
+        "behaviouralExperiment": "6c6f1e3c-2954-4dc8-95e6-2b53f628f87d",
+        "shared_date": "2016-05-26T13:18:40.899Z"
+    },
+    "model": "behaviouralExperimentDefinition.sharebehaviouralexperiment",
+    "pk": "d8d0ceba-b501-47fa-b245-ffe7b6023af5"
+},
+{
+    "fields": {
+        "about": "",
+        "description": "Example experiment, has one experiment of each type exact, interval and permanent. Exact type example is of mechanotaxis type, interval type example is of galvanotaxis type and permanent type example is of termotaxis type.",
+        "created": "2016-05-05T14:57:09.419Z",
+        "environmentDefinition": "3687df6c-0d98-4125-8dd6-0a41e44aabae",
+        "creator": 1,
+        "public_set_date": "2016-05-26T15:19:41Z",
+        "experimentDefinition": "38cb35df-dfe9-4d79-93d5-424a8a3b2935",
+        "public": true
+    },
+    "model": "behaviouralExperimentDefinition.behaviourexperimenttype_model",
+    "pk": "6c6f1e3c-2954-4dc8-95e6-2b53f628f87d"
+},
+{
+    "fields": {
+        "about": "",
+        "description": "Example experiment, has one experiment of permanent type. Permanent type example is of termotaxis type.",
+        "created": "2016-05-27T14:33:48.806Z",
+        "environmentDefinition": "0583a11d-08f8-4f33-9d51-496859d8a656",
+        "creator": 1,
+        "public_set_date": "2016-05-26T15:19:41Z",
+        "experimentDefinition": "adaddaac-a76e-493c-8051-99f7b2a9f1ed",
+        "public": false
+    },
+    "model": "behaviouralExperimentDefinition.behaviourexperimenttype_model",
+    "pk": "7feca1af-77e9-4742-8dc2-0949f465bd9c"
+}
+]

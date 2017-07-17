@@ -1,0 +1,256 @@
+{% extends 'base-with-login-without-footer.html' %}
+{% load staticfiles %}
+{%block extra_header %}
+	<link rel="stylesheet" href="{% static "css/bootstrap.min.css"%}">
+    <link rel="stylesheet" href="{% static "css/vis.js/vis.css"%}" >    
+    <link rel="stylesheet" href="{% static "css/slider.css"%}">
+    <link rel="stylesheet" href="{% static "css/style.css"%}">
+	<link rel="stylesheet" href="{% static "css/dc.css"%}">
+	
+    <script>
+        var cloneBehExpPath = "{% url 'clone_behavExp' %}";
+        var baseURL = "https://{{ request.get_host }}"
+    </script>	
+    <script src="{% static "js/three.js/three.min.js" %}"></script>
+    <script src="{% static "js/three.js/stats.min.js" %}"></script>
+    <script src="{% static "js/three.js/TrackballControls.js" %}"></script>
+    <script src="{% static "js/three.js/OrbitControls.js" %}"></script>
+    <script src="{% static "js/three.js/ColladaLoader.js" %}"></script>
+    <script src="{% static "js/three.js/OBJLoader.js" %}"></script>
+    <script src="{% static "js/three.js/Editor.js" %}"></script>
+    <script src="{% static "js/three.js/signals.min.js" %}"></script>
+    <script src="{% static "js/three.js/Config.js" %}"></script>
+    <script src="{% static "js/three.js/TransformControls.js" %}"></script>
+    <script src="{% static "js/three.js/EditorControls.js" %}"></script>
+    <script src="{% static "js/three.js/system.min.js" %}"></script>
+    <script src="{% static "js/three.js/RaytracingRenderer.js" %}"></script>
+    <script src="{% static "js/three.js/Loader.js" %}"></script>
+    <script src="{% static "js/three.js/Viewport.js" %}"></script>
+    <script src="{% static "js/three.js/ui.js" %}"></script>
+    <script src="{% static "js/vis.js/vis.js" %}"></script>    
+    <script src="{% static "js/step.js" %}"></script>
+    <script src="{% static "js/slider.js" %}"></script>
+    <script src="{% static "js/dc.js/crossfilter.js" %}"></script>
+    <script src="{% static "js/dc.js/d3.min.js" %}"></script>
+    <script src="{% static "js/dc.js/dc.js" %}"></script>    
+    <script src="{% static "js/ember.js/libs/handlebars-v2.0.0.js" %}"></script>
+    <script src="{% static "js/ember.js/libs/ember-1.9.1.js" %}"></script>
+    <script src="{% static "js/ember.js/libs/ember-data.js" %}"></script>
+    <script src="{% static "js/ember.js/libs/handlebarsHelpers.js" %}"></script>
+    <script src="{% static "js/ember.js/app.js" %}"></script>
+    <script src="{% static "js/ember.js/adapter.js" %}"></script>
+    <script src="{% static "js/ember.js/models/hexagon.js" %}"></script>
+    <script src="{% static "js/ember.js/models/interactionAtSpecificTime.js" %}"></script>
+	<script src="{% static "js/ember.js/models/interactionFromt0tot1.js" %}"></script>
+    <script src="{% static "js/ember.js/models/chemotaxisInterval.js" %}"></script>
+    <script src="{% static "js/ember.js/models/mechanosensationExact.js" %}"></script>
+	<script src="{% static "js/ember.js/models/mechanosensationInterval.js" %}"></script>
+	<script src="{% static "js/ember.js/models/mechanosensationPermanent.js" %}"></script>
+    <script src="{% static "js/ember.js/models/chemotaxisPermanent.js" %}"></script>
+    <script src="{% static "js/ember.js/models/obstacleLocation.js" %}"></script>
+    <script src="{% static "js/ember.js/models/plateTap.js" %}"></script>
+    <script src="{% static "js/ember.js/models/plateConfiguration.js" %}"></script>
+    <script src="{% static "js/ember.js/models/experimentWideConf.js" %}"></script>
+    <script src="{% static "js/ember.js/models/chemical.js" %}"></script>
+    <script src="{% static "js/ember.js/models/chemotaxisExact.js" %}"></script>
+    <script src="{% static "js/ember.js/models/behaviouralExperiment.js" %}"></script>
+    <script src="{% static "js/ember.js/models/crowding.js" %}"></script>
+    <script src="{% static "js/ember.js/models/cube.js" %}"></script>
+    <script src="{% static "js/ember.js/models/cylinder.js" %}"></script>
+    <script src="{% static "js/ember.js/models/directTouch.js" %}"></script>
+    <script src="{% static "js/ember.js/models/environment.js" %}"></script>
+    <script src="{% static "js/ember.js/models/experiment.js" %}"></script>
+    <script src="{% static "js/ember.js/models/hair.js" %}"></script>
+    <script src="{% static "js/ember.js/models/wormStatus.js" %}"></script>
+	<script src="{% static "js/ember.js/models/osmoticRing.js" %}"></script>
+    <script src="{% static "js/ember.js/models/galvanotaxisInterval.js" %}"></script>
+	<script src="{% static "js/ember.js/models/galvanotaxisPermanent.js" %}"></script>
+	<script src="{% static "js/ember.js/models/galvanotaxisExact.js" %}"></script>
+	<script src="{% static "js/ember.js/models/termotaxisInterval.js" %}"></script>
+	<script src="{% static "js/ember.js/models/termotaxisExact.js" %}"></script>
+	<script src="{% static "js/ember.js/models/termotaxisPermanent.js" %}"></script>
+	<script src="{% static "js/ember.js/models/phototaxisInterval.js" %}"></script>
+	<script src="{% static "js/ember.js/models/phototaxisExact.js" %}"></script>
+	<script src="{% static "js/ember.js/models/phototaxisPermanent.js" %}"></script>
+	<script src="{% static "js/ember.js/models/chemotaxisQuadrants1.js" %}"></script>
+	<script src="{% static "js/ember.js/models/chemotaxisQuadrants2.js" %}"></script>
+	<script src="{% static "js/ember.js/models/chemotaxisQuadrants4.js" %}"></script>
+	<script src="{% static "js/ember.js/models/staticPointSource.js" %}"></script>
+	<script src="{% static "js/ember.js/models/pointSourceLight.js" %}"></script>
+	<script src="{% static "js/ember.js/models/wormDatum.js" %}"></script>
+	<script src="{% static "js/ember.js/models/plateTap.js" %}"></script>
+	<script src="{% static "js/ember.js/models/directTouch.js" %}"></script>
+	<script src="{% static "js/ember.js/models/dynamicDropTest.js" %}"></script>
+	<script src="{% static "js/ember.js/models/user.js" %}"></script>
+	<script src="{% static "js/ember.js/models/electricShock.js" %}"></script>
+	<script src="{% static "js/ember.js/models/temperatureChangeInTime.js" %}"></script>
+	<script src="{% static "js/ember.js/models/linearThermalGradient.js" %}"></script>
+	<script src="{% static "js/ember.js/models/pointSourceHeatAvoidance.js" %}"></script>
+    <script src="{% static "js/ember.js/routes/experiment.js" %}"></script>
+	<script src="{% static "js/ember.js/routes/experiments.js" %}"></script>
+    <script src="{% static "js/ember.js/routes/definition.js" %}"></script>
+    <script src="{% static "js/ember.js/routes/environment.js" %}"></script>
+	<script src="{% static "js/ember.js/routes/subtypeRoutes/exact.js" %}"></script>
+	<script src="{% static "js/ember.js/routes/subtypeRoutes/permanent.js" %}"></script>
+	<script src="{% static "js/ember.js/routes/subtypeRoutes/interval.js" %}"></script>
+    <script src="{% static "js/ember.js/routes/visualization.js" %}"></script>
+    <script src="{% static "js/ember.js/controllers/experiment.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/experiments.js" %}"></script>
+    <script src="{% static "js/ember.js/controllers/definition.js" %}"></script>
+    <script src="{% static "js/ember.js/controllers/visualization.js" %}"></script>
+    <script src="{% static "js/ember.js/controllers/visualizationGraph.js" %}"></script>
+    <script src="{% static "js/ember.js/controllers/environment.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/exact.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/linearThermalGradient.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/pointSourceHeatAvoidance.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/temperatureChangeInTime.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/electricShock.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/dynamicDropTest.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/mechanosensationExact.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/mechanosensationInterval.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/mechanosensationPermanent.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/chemotaxisExact.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/chemotaxisInterval.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/chemotaxisPermanent.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/galvanotaxisExact.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/galvanotaxisInterval.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/galvanotaxisPermanent.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/termotaxisExact.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/termotaxisInterval.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/termotaxisPermanent.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/phototaxisExact.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/phototaxisPermanent.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/phototaxisInterval.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/pointSourceLight.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/chemotaxisQuadrants1.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/chemotaxisQuadrants2.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/chemotaxisQuadrants4.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/staticPointSource.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/osmoticRing.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/chemical.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/interval.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/permanent.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/directTouch.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/subtypeControllers/plateTap.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/environmentControllers/crowding.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/environmentControllers/plateConfiguration.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/environmentControllers/obstacleLocation.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/environmentControllers/wormStatus.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/environmentControllers/wormDatum.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/environmentControllers/cube.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/environmentControllers/hexagon.js" %}"></script>
+	<script src="{% static "js/ember.js/controllers/environmentControllers/cylinder.js" %}"></script>
+    <script src="{% static "js/ember.js/templates/experiment.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/experiments.js" %}"></script>
+    <script src="{% static "js/ember.js/templates/definition.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/definition2.js" %}"></script>
+    <script src="{% static "js/ember.js/templates/environment.js" %}"></script>
+    <script src="{% static "js/ember.js/templates/visualizationTimeline.js" %}"></script>
+    <script src="{% static "js/ember.js/templates/visualizationNeurons.js" %}"></script>
+    <script src="{% static "js/ember.js/templates/visualizationGraph.js" %}"></script>
+    <script src="{% static "js/ember.js/templates/visualizationDown.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/exact.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/linearThermalGradient.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/pointSourceHeatAvoidance.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/temperatureChangeInTime.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/electricShock.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/dynamicDropTest.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/interval.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/permanent.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/mechanosensationExact.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/mechanosensationInterval.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/mechanosensationPermanent.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/galvanotaxisExact.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/galvanotaxisInterval.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/galvanotaxisPermanent.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/termotaxisExact.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/termotaxisInterval.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/termotaxisPermanent.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/chemotaxisExact.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/chemotaxisInterval.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/chemotaxisPermanent.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/chemotaxisQuadrants1.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/chemotaxisQuadrants2.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/chemotaxisQuadrants4.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/staticPointSource.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/osmoticRing.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/chemical.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/phototaxisExact.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/phototaxisInterval.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/phototaxisPermanent.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/pointSourceLight.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/directTouch.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/subtypeTemplates/plateTap.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/EnvironmentTemplates/crowding.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/EnvironmentTemplates/plateConfiguration.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/EnvironmentTemplates/obstacleLocation.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/EnvironmentTemplates/wormStatus.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/EnvironmentTemplates/wormDatum.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/EnvironmentTemplates/cube.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/EnvironmentTemplates/cylinder.js" %}"></script>
+	<script src="{% static "js/ember.js/templates/EnvironmentTemplates/hexagon.js" %}"></script>
+    <script src="{% static "js/ember.js/views/experiment.js" %}"></script>
+	<script src="{% static "js/ember.js/views/experiments.js" %}"></script>
+    <script src="{% static "js/ember.js/views/definition.js" %}"></script>
+	<script src="{% static "js/ember.js/views/definition2.js" %}"></script>
+    <script src="{% static "js/ember.js/views/environment.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/exact.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/linearThermalGradient.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/pointSourceHeatAvoidance.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/temperatureChangeInTime.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/electricShock.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/dynamicDropTest.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/interval.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/permanent.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/mechanosensationExact.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/mechanosensationInterval.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/mechanosensationPermanent.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/chemotaxisExact.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/chemotaxisInterval.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/chemotaxisPermanent.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/termotaxisExact.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/termotaxisInterval.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/termotaxisPermanent.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/galvanotaxisExact.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/galvanotaxisInterval.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/galvanotaxisPermanent.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/phototaxisExact.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/phototaxisInterval.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/phototaxisPermanent.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/pointSourceLight.js" %}"></script>	
+	<script src="{% static "js/ember.js/views/subtypeViews/directTouch.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/plateTap.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/chemotaxisQuadrants1.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/chemotaxisQuadrants2.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/chemotaxisQuadrants4.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/staticPointSource.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/osmoticRing.js" %}"></script>
+	<script src="{% static "js/ember.js/views/subtypeViews/chemical.js" %}"></script>
+    <script src="{% static "js/ember.js/views/visualizationTimeline.js" %}"></script>
+    <script src="{% static "js/ember.js/views/visualizationNeurons.js" %}"></script>
+    <script src="{% static "js/ember.js/views/visualizationGraph.js" %}"></script>
+    <script src="{% static "js/ember.js/views/visualizationDown.js" %}"></script>
+	<script src="{% static "js/ember.js/views/environmentViews/crowding.js" %}"></script>
+	<script src="{% static "js/ember.js/views/environmentViews/plateConfiguration.js" %}"></script>
+	<script src="{% static "js/ember.js/views/environmentViews/obstacleLocation.js" %}"></script>
+	<script src="{% static "js/ember.js/views/environmentViews/wormStatus.js" %}"></script>
+	<script src="{% static "js/ember.js/views/environmentViews/wormDatum.js" %}"></script>
+	<script src="{% static "js/ember.js/views/environmentViews/cube.js" %}"></script>
+	<script src="{% static "js/ember.js/views/environmentViews/cylinder.js" %}"></script>
+	<script src="{% static "js/ember.js/views/environmentViews/hexagon.js" %}"></script>
+    <!--<script src="{% static "js/ember.js/dist/sielegans-ember.min.js" %}"></script>-->
+    
+    
+    
+{% endblock %}
+{% block content %}
+
+<div class="container-fluid wrap2 col-sm-12">
+        <div class="row heightgeneral">
+            <div id="ember-app" class="wrap col-sm-12"></div>
+        </div>
+    </div>
+	
+{% endblock %}
+
+    

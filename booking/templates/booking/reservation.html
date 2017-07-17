@@ -1,0 +1,204 @@
+{% extends 'base-with-login.html' %}
+{% load get_RTWCONF_url from booking_extras %}
+{% load get_RTWCONF_name from booking_extras %}
+{% load get_cenet_url from booking_extras %}
+{% load get_cenet_id from booking_extras %}
+
+{% block content %}
+<div class="container">
+{%if messages %}
+<div class='row'>
+    <div class='col-xs-12'>
+        <ul class="messages">
+            {% for message in messages %}
+            <p{% if message.tags == "success" %} class="alert alert-success"
+              {% elif  message.tags == "error" %} class="alert alert-danger"
+              {% elif  message.tags == "warning" %} class="alert alert-warning"
+              {%endif%}>
+              {{message}}<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a></p>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endif %}
+</div>
+<div class="page-header">
+    <h1>Reservations in the queue <small>Check the details of the reservations in the queue</h1>
+</div>
+<div style="clear:both; font-size:1px;"></div>
+ <form action='/booking/reserve' method='post'>{% csrf_token %}
+    <div class="panel panel-default" id="reservations">
+   <div class="panel-heading">
+       <i class="fa fa-calendar-check-o fa-fw"></i> Reservations in the queue
+       <i class="fa fa-square pull-right" style="color: #8674A6"></i>
+   </div>
+           <!-- /.panel-heading -->
+           <div class="panel-body">
+               <div class="table-responsive">
+
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Select to delete</th>
+                            <th>Created</th>
+                            <th>Reservation id</th>
+                            <th>Reservation description</th>
+                            <th>Experiment id</th>
+                            <th>Network configuration id</th>
+                            <th>Readback profile name</th>
+                            <th>Status</th>
+                            <th>Admin Updates (If ERROR happened)</th>
+                            <th>Creator</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reservation in reservations %}
+                           {% for creator in reservation.creator.all %}
+                              {% if creator == request.user %}
+                                 <tr>
+                                      <td><input type="checkbox" name="reservationDelete" value="{{ reservation.pk }}" />    </td>
+                                      <td>{{reservation.created}}</td>
+                                      <td><span class="uuid">{{reservation.uuid }}</span></td>
+                                      <td><span class="uuid">{{ reservation.description }}</span></td>
+                                      <td><a href="{% url 'experimentDefinition' %}#/experiment/{{reservation.experiment.uuid}}"><span class="uuid">{{reservation.experiment.uuid}}</span></a></td>
+                                      <td><a href="{% get_cenet_url reservation.worm_conf %}#nav=2.94,0,5">{% get_cenet_id reservation.worm_conf %}</a></td>
+                                      <td><a href="{% get_RTWCONF_url reservation.worm_conf %}">{% get_RTWCONF_name reservation.worm_conf %}</a></td>
+                                      <td>{{reservation.status}}</td>
+                                      <td>{{reservation.error_admin_updates}}</td>
+                                      <td>
+                                      {% for creator2 in reservation.creator.all %}
+                                         {{creator2}},
+                                      {% endfor %}
+                                      </td>
+
+                                  </tr>
+                              {% endif %}
+                           {% endfor %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+               </div>
+           </div>
+ </div>
+    <div class="col-xs-6 col-xs-offset-6" >
+                    <div class="input-group">
+                        <div class="input-group-btn">
+                              <button type="submit" name="deleteReservation" class="btn btn-primary">Delete Reservation</button>
+                        </div>
+                    </div>
+            </div>
+ </form>
+<div style="clear:both; font-size:1px;"></div>
+<div class="page-header">
+   <h1>Create a new reservation</h1>
+   <h1><small> Select one (behavioural experiment and worm configuration) from each of the tables below</small></h1>
+</div>
+<form action='/booking/reserve' method='post'>{% csrf_token %}
+   <div class="row col-lg-12">
+      <div class="pull-left"><h4 class="pull-left">Description:<small>Fill this to help you track reservation later on</small>
+       </h4></div><br>
+   </div>
+    <div class="row col-lg-12">
+      <input class="input-lg col-lg-6" type="text" name="description" >
+   </div>
+    <div class="row col-lg-12 pull-right" style="margin-bottom: 20px; margin-right: 20px">
+       <button type="submit" class="btn btn-primary pull-right" name="addReservation"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>&nbsp;&nbsp;Add Reservation</button>
+   </div>
+
+   <div class="col-lg-6">
+
+       <!-- Behavioural experiments -->
+       <div class="panel panel-default" id="behavioural_experiments">
+           <div class="panel-heading">
+               <i class="fa fa-calendar-check-o fa-fw"></i> Behavioural Experiments
+               <i class="fa fa-square pull-right" style="color: #8674A6"></i>
+           </div>
+           <!-- /.panel-heading -->
+           <div class="panel-body">
+               <div class="table-responsive">
+                   <table class="table table-striped">
+                       <tr>
+                           <th>Select to Add</th>
+                           <th>Behavioural id</th>
+                           <th>Description</th>
+                           <th><span class="pull-right">Owner</span></th>
+                       </tr>
+                       {% for behaviourExperiment in behaviourExperiments %}
+                           {% if behaviourExperiment.creator == request.user or request.user in behaviourExperiment.users_with_access.all %}
+                           <tr>
+                               <td><input id="be_{{ behaviourExperiment.pk }}" type="radio" name="behavExpAdd" value="{{ behaviourExperiment.pk }}" />    </td>
+                               <td><span class="uuid"><a href="{% url 'experimentDefinition' %}#/experiment/{{behaviourExperiment.uuid}}">{{behaviourExperiment.uuid}}</span></a></td>
+                               <td><span class="uuid">{{behaviourExperiment.description}}</span></td>
+                               <td><span class="pull-right">{{behaviourExperiment.creator}}</span></td>
+                           </tr>
+                           {% endif %}
+                       {% endfor %}
+
+                   </table>
+               </div>
+           </div>
+       </div>
+   </div>
+       <!-- LAST SHARED WITH ME -->
+   <div class="col-lg-6">
+       <div class="panel panel-default" id="recently_shared">
+           <div class="panel-heading">
+               <i class="fa fa-share fa-fw"></i> Worm Configurations (Network configuration and neuron result recording profile)
+               <i class="fa fa-square pull-right" style="color: #578EBE"></i>
+           </div>
+           <!-- /.panel-heading -->
+           <div class="panel-body">
+               <div class="table-responsive">
+                   <table class="table table-striped">
+                       <tr>
+                           <th>Select to add</th>
+                           <th>Network configuration id</th>
+                           <th>Network configuration id</th>
+                           <th>Description</th>
+                           <th><span class="pull-right">Status</span></th>
+
+                       </tr>
+                       {% for worm_conf_user in worm_confs_user %}
+                        {% if worm_conf_user.status == 'not ready' %}
+                           <tr>
+                               <td><input id="wc_{{ worm_conf_user.worm_conf }}" type="radio" name="wormConfAdd" value="{{ worm_conf_user.worm_conf }}" disabled/>    </td>
+                               <td style="color:grey;"><a href="{% url 'worm_conf_details' worm_conf_user.network_id %}#nav=2.94,0,5">{{worm_conf_user.network_id}}</a></td>
+                               <td style="color:grey;"><span class="uuid"><a href="{% url 'rtw_by_name' worm_conf_user.name %}">{{worm_conf_user.name}}</a></span></td>
+                               <td style="color:grey;" ><span class="uuid">Network name: {{worm_conf_user.network_name}}, Recording Profile: {{worm_conf_user.name}}</span></td>
+                               <td style="color:grey;" ><span class="pull-right">{{worm_conf_user.status}}</span></td>
+                           </tr>
+                        {% else %}
+                            <tr>
+                               <td><input id="wc_{{ worm_conf_user.worm_conf }}" type="radio" name="wormConfAdd" value="{{ worm_conf_user.worm_conf }}" />    </td>
+                               <td><a href="{% url 'worm_conf_details' worm_conf_user.worm_conf %}#nav=2.94,0,5">{{worm_conf_user.worm_conf}}</a></td>
+                               <td><span class="uuid"><a href="{% url 'rtw_by_name' worm_conf_user.name %}">{{worm_conf_user.name}}</a></span></td>
+                               <td><span class="uuid">Network name: {{worm_conf_user.network_name}}, Recording Profile: {{worm_conf_user.name}}</span></td>
+                               <td><span class="pull-right">{{worm_conf_user.status}}</span></td>
+                           </tr>
+                        {% endif %}
+                       {% endfor %}
+                   </table>
+               </div>
+           </div>
+       </div>
+
+
+
+   </div> <!-- /.col-lg-6 -->
+
+ </form>
+
+ <!--<div>-->
+ <!--   {% for behaviourExperiment in behaviourExperiments %}               -->
+ <!--               <ul>-->
+ <!--                   <li>pk=>{{ behaviourExperiment.pk }}</li>-->
+ <!--                   <li>creator=>{{behaviourExperiment.creator}}</li>-->
+ <!--                   <li>users_with_access=>{{behaviourExperiment.users_with_access.all}}</li> -->
+ <!--               </ul>-->
+ <!--               -->
+ <!--   {% endfor %}-->
+ <!--</div>-->
+
+
+
+{% endblock %}

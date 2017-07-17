@@ -1,0 +1,20 @@
+<div class="row">
+    <div class="col-sm-12">
+        <div class=" title">Experiment type</div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 block"> 
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                Point Source Light <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li><a href="#">Point Source Light</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+{{#if isPoint}}
+{{render "pointSourceLight" pointSourceLightConf}}
+{{/if}}

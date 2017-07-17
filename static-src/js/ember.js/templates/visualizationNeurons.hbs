@@ -1,0 +1,24 @@
+<div class="row">
+    <div class="col-sm-12">
+        <div class=" title">Neurons and muscles</div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="neurons">
+            {{#each neuron in neurons}}
+            <button  {{bind-attr class="neuron.isSpiking:btn-naranja:btn-turquesa3"}} {{bind-attr id="neuron.name"}}>{{neuron.name}}</button>
+            {{/each}}
+        </div>
+    </div>
+</div>
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+    {{#each neuron in neurons}}
+    {{#if neuron.selected}}
+  <div class="">
+    {{collapse1 neuron.name}}
+    {{collapse2 neuron}}
+  </div>
+    {{/if}}
+    {{/each}}
+</div>

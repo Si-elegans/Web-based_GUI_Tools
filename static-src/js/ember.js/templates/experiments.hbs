@@ -1,0 +1,22 @@
+<div class="col-sm-12">
+	<div class="row">
+		<div class="col-sm-12">
+			<div class=" title">My Experiments</div>
+		</div>
+	</div>
+	<ul>
+	  {{#each experiment in model.content}}
+		<li>{{#link-to 'experiment' experiment class="whitefont"}}{{experiment.about}}{{/link-to}}</li>
+	  {{/each}}
+	</ul>
+	<div class="row">
+		<div class="col-sm-12">
+			<div class=" title">Experiments Shared With Me</div>
+		</div>
+	</div>
+	<ul>
+	  {{#each experiment in model.content}}
+		<li>{{#link-to 'experiment' experiment class="whitefont"}}{{experiment.about}}{{/link-to}}</li>
+	  {{/each}}
+	</ul>
+</div>

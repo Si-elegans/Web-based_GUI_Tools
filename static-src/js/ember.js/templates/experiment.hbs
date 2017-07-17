@@ -1,0 +1,109 @@
+<div class="col-sm-8 wrap" >
+    <div id="visor" class="row hvisor">
+    </div>
+    {{outlet "timeline"}}
+	<div class="helpText1" >
+	<b>Left Click:</b> rotate; <b>Center Click:</b> zoom in/out; <b>Center Scroll:</b> zoom in/out; <b>Right Click:</b> translate    
+
+	</div>
+	</div>
+{{#if showButtons}}
+	<div class="col-sm-4 wrap" >
+		{{#if hasToBeCloned}}
+		<div class="color row">This experiment cannot be modified, you can view it or clone it to modify</div>
+		{{/if}}
+		<div class="color row wrap">
+			<div class="col-sm-2 wrap" >
+			</div>
+			{{#if hasToBeCloned}}
+				<div class="col-sm-10 wrap" >
+					<button {{action 'goToDefinitionClone'}} class="btn btn-turquesa" style="margin: 5px"> Clone </button>
+					<button {{action 'goToDefinitionView'}} class="btn btn-turquesa" style="margin: 5px"> View </button>
+				</div>
+			{{else}}
+				<div class="col-sm-10 wrap" >
+					<button {{action 'goToDefinitionModify'}} class="btn btn-turquesa" style="margin: 5px"> Modify </button>
+				</div>
+			{{/if}}
+				
+			</div>
+		</div>
+	</div>
+{{else}}
+<div class="col-sm-4 wrap color scrolly" >
+<div class="row">
+    <div class="col-sm-12">
+        <div class=" title">Experiment</div>
+    </div>
+</div>
+<div class="row">
+	<div class="col-sm-12">
+		<div class="whitefont">Description</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12 block">
+		<div>
+			{{input id="experimentDescription" class="" value=model.description }}
+		</div>
+	</div>
+</div>
+	{{outlet "properties"}}
+	</div>
+{{/if}}
+
+<div class="modal fade" id="modalWaiting" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content color saving">
+			<div class="modal-header">
+				<h4 class="modal-title" id="myModalLabel">Saving</h4>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="modalSaved" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content color saving">
+			<div class="modal-header">
+				<h4 class="modal-title" id="myModalLabel">Saved</h4>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-turquesa" data-dismiss="modal">OK</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="modalNotPossible" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content color saving">
+			<div class="modal-header">
+				<h4 class="modal-title" id="myModalLabel">There already exists a permanent chemotaxis event</h4>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-turquesa" data-dismiss="modal">OK</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="modalCreating" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content color saving">
+			<div class="modal-header">
+				<h4 class="modal-title" id="myModalLabel">Creating</h4>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="modalLoading" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content color saving">
+			<div class="modal-header">
+				<h4 class="modal-title" id="myModalLabel">Loading</h4>
+			</div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,638 @@
+{% extends 'base-with-login.html' %}
+{% load staticfiles %}
+{%block extra_header %}
+<script src="{% static "js/jquery.matchHeight-min.js"%}"></script>
+
+<!-- Custom Fonts -->
+<link rel="stylesheet" href="{% static "css/font-awesome.min.css" %}">
+
+<script type="text/javascript">
+    
+(function() {
+      $(function() {
+            $('.thumbnail').matchHeight({
+                    byRow: true,
+                    property: 'height',
+                    target: null,
+                    remove: false
+            });
+      });
+ })();
+$(document).ready(function() {
+    $('#popoverReservationPosition').popover({ trigger: "hover" });
+});
+$(document).ready(function() {
+    $('#popoverResultsType').popover({ trigger: "hover" });
+});
+$(document).ready(function() {
+    $('#popoverSharedType').popover({ trigger: "hover" });
+});
+$(document).ready(function() {
+    $('#popoverPublicType').popover({ trigger: "hover" });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+
+    <div id="container-fluid" style="padding: 15px">
+
+        <div class="row">
+
+            <div class="col-lg-1 col-md-1">
+            </div>
+
+            <div class="col-lg-2 col-md-2">
+                <div class="panel panel-purple">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <i class="fa fa-calendar-check-o fa-3x"></i>
+                            </div>
+                            <div class="col-xs-9 text-right">
+                                <div class="huge">{{dashboard_number.pending_reservation}}</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div>Your pending reservations </div>
+                            </div>
+                        </div>
+                    </div>
+                        <a href="#pending_reservations">
+                              <div class="panel-footer">
+                                  <span class="pull-left">View Details</span>
+                                  <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                  <div class="clearfix"></div>
+                              </div>
+                        </a>
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-2">
+                <div class="panel panel-green">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <i class="fa fa-sticky-note-o fa-3x"></i>
+                            </div>
+                            <div class="col-xs-9 text-right">
+                                <div class="huge">{{dashboard_number.last_results}}</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div>Last obtained results (last 2 weeks)</div>
+                            </div>
+                        </div>
+                    </div>
+                        <a href="#recently_results">
+                              <div class="panel-footer">
+                                  <span class="pull-left">View Details</span>
+                                  <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                  <div class="clearfix"></div>
+                              </div>
+                        </a>                    
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-2">
+                <div class="panel panel-blue">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <i class="fa fa-share fa-3x"></i>
+                            </div>
+                            <div class="col-xs-9 text-right">
+                                <div class="huge">{{dashboard_number.last_shared_me}}</div>                                
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div>Last shared with me (last 2 weeks)</div>
+                            </div>
+                        </div>
+                    </div>
+                        <a href="#recently_shared">
+                              <div class="panel-footer">
+                                  <span class="pull-left">View Details</span>
+                                  <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                  <div class="clearfix"></div>
+                              </div>
+                        </a>
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-2">
+                <div class="panel panel-yellow">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <i class="fa fa-globe fa-3x"></i>
+                            </div>
+                            <div class="col-xs-9 text-right">
+                                <div class="huge">{{dashboard_number.last_made_public}}</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div>Recently made public (last 2 weeks)</div>
+                            </div>
+                        </div>
+                    </div>
+                        <a href="#recently_public">
+                              <div class="panel-footer">
+                                  <span class="pull-left">View Details</span>
+                                  <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                  <div class="clearfix"></div>
+                              </div>
+                        </a>
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-2">
+                <div class="panel panel-red">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <i class="fa fa-users fa-3x"></i>
+                            </div>
+                            <div class="col-xs-9 text-right">
+                                <div class="huge">{{dashboard_number.social_len}}</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div>Last social entries (last 2 week)</div>
+                            </div>
+                        </div>
+                    </div>
+                        <a href="#last_social_entries">
+                              <div class="panel-footer">
+                                  <span class="pull-left">View Details</span>                            
+                                  <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                  <div class="clearfix"></div>
+                              </div>
+                        </a>
+                </div>
+            </div>
+
+            <div class="col-lg-1 col-md-1">
+            </div>
+<!--
+            <div class="col-lg-2 col-md-2">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <i class="fa fa-comments fa-3x"></i>
+                            </div>
+                            <div class="col-xs-9 text-right">
+                                <div class="huge">13</div>
+                                <div>New entries in the forum</div>
+                            </div>
+                        </div>
+                    </div>
+                        <a href="#new_entries_forum">
+                              <div class="panel-footer">
+                                  <span class="pull-left">View Details</span>
+                                  <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                  <div class="clearfix"></div>
+                              </div>
+                        </a>
+                </div>
+            </div>
+-->
+        </div> <!-- /.row -->
+
+            
+        
+        <div class="row">
+
+            <div class="col-lg-6">
+                  
+                <!-- PENDING RESERVATIONS -->
+                <div class="panel panel-default" id="pending_reservations">
+                    <div class="panel-heading">
+                        <i class="fa fa-calendar-check-o fa-fw"></i>
+                        Pending Reservations
+                   
+                        <i class="fa fa-square pull-right" style="color: #8674A6"></i>
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <tr>
+                                    <th>id Reservation</th>
+                                    <th><span class="pull-right"><a id="popoverReservationPosition" class="btn" href="#" data-content=" {%if user.is_superuser %}As superuser, your reservations have priority over regular users{% else %}Position after superuser reservations, reservation co-owned with superusers are not shown{% endif %}" rel="popover" data-placement="bottom" data-original-title="Reservation position">Position in the queue</a></span></th>
+                                          
+                                </tr>
+                                {% for reservation in reservations %}
+                                <tr>
+                                    {% if reservation.uuid == -1 %}
+                                          <td><i class="fa fa-sticky-note-o fa-fw"></i>No more reservations waiting</td>
+                                          <td><span class="pull-right text-muted small"><em>no pos</em></span></td>
+                                    {% else %}
+                                          <td> <span class="uuid"><i class="fa fa-sticky-note-o fa-fw"></i><a href="{%  url 'reserve' %}">{{reservation.uuid}}</a></span></td>
+                                          <td><span class="pull-right text-muted small"><em>{{reservation.position}}</em></span></td>
+                                    {% endif %}
+                                    
+                                    
+                                </tr>
+                                {% endfor %}                                
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LAST SHARED WITH ME -->
+                <div class="panel panel-default" id="recently_shared">
+                    <div class="panel-heading">
+                        <i class="fa fa-share fa-fw"></i> Last shared with me 
+                        <i class="fa fa-square pull-right" style="color: #578EBE"></i>
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                               <tr>
+                                    <th>id Shared</th>
+                                    <th> <a id="popoverSharedType" class="btn" href="#" data-content="PE RESULT refers to worm's locomotion results, BE EXP refers to a behavioural experiment definition" rel="popover" data-placement="bottom"
+    data-original-title="Type explanation">Type</a></th>
+                                    <th><span class="pull-right">When</span></th>
+                                </tr>
+                                 {% for shared in shared_me %}
+                                  {% if shared.uuid == -1 %}
+                                <tr>
+                                    <td><i class="fa fa-sticky-note-o fa-fw"></i>No more shared available</td>
+                                    <td>NOT SHARED</td>
+                                    <td><span class="pull-right text-muted small"><em>0000-00-00</em></span></td>
+                                </tr>
+                               {% else %}
+                                  {% if shared.type == 'NCS' %}
+                                     <tr>
+                                        <td><span class="uuid"><i class="fa fa-sticky-note-o fa-fw"></i><a href="{% url 'worm_conf_details' shared.uuid %}">{{shared.uuid}}</a></span></td>
+                                        <td>NET CONF</td>
+                                        <td><span class="pull-right text-muted small"><em>{{shared.created}}</em></span></td>
+                                    </tr>
+                                  {% elif shared.type == 'NMS' %}
+                                     <tr>
+                                        <td><span class="uuid"><i class="fa fa-sticky-note-o fa-fw"></i><a href="{% url 'neuron_model_by_name' shared.uuid %}">{{shared.uuid}}</a></span></td>
+                                        <td>NEURON MODEL</td>
+                                        <td><span class="pull-right text-muted small"><em>{{shared.created}}</em></span></td>
+                                    </tr>
+                                  {% elif shared.type == 'BES' %}
+                                     <tr>
+                                        <td><span class="uuid"><i class="fa fa-sticky-note-o fa-fw"></i><a href="{% url 'experimentDefinition' %}#/experiment/{{shared.uuid}}">{{shared.uuid}}</a></span></td>
+                                        <td>BE EXP</td>
+                                        <td><span class="pull-right text-muted small"><em>{{shared.created}}</em></span></td>
+                                    </tr>
+                                   {% elif shared.type == 'PERS' %}
+                                        <tr>
+                                            <td><span class="uuid"><i class="fa fa-sticky-note-o fa-fw"></i><a href="{% url 'experimentReview' shared.uuid  %}">{{shared.uuid}}</a></span></td>
+                                            <td>PE RESULT</td>
+                                            <td><span class="pull-right text-muted small"><em>{{shared.created}}</em></span></td>
+                                        </tr>
+                                   {% elif shared.type == 'RBRS' %}
+                                       {% if shared.uuid == 0 %}
+                                        <tr>
+                                            <td><span class="uuid"><i class="fa fa-sticky-note-o fa-fw"></i>No reservation for this RB Results</span></td>
+                                            <td>RB RESULT</td>
+                                            <td><span class="pull-right text-muted small"><em>{{shared.created}}</em></span></td>
+                                        </tr>
+                                        {% else %}
+                                           <tr>
+                                            <td><span class="uuid"><i class="fa fa-sticky-note-o fa-fw"></i><a href="{% url 'result_viewer' %}?sim_id={{shared.uuid}}">{{shared.uuid}}</a></span></td>
+                                            <td>RB RESULT</td>
+                                            <td><span class="pull-right text-muted small"><em>{{shared.created}}</em></span></td>
+                                            </tr>
+                                       {% endif %}
+                                   {% endif %}
+                               {% endif %}
+                                {% endfor %}
+                               
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- NEW ENTRIES IN THE WIKI 
+                <div class="panel panel-default" id="new_entries_wiki">
+                    <div class="panel-heading">
+                        <i class="fa fa-wikipedia-w fa-fw"></i> New entries in the wiki
+                        <i class="fa fa-square pull-right" style="color: #B18904"></i>
+                    </div>
+                    <!-- /.panel-heading 
+                    <div class="panel-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <tr>
+                                    <th>id Result</th>
+                                    <th>Type</th>
+                                    <th><span class="pull-right">When</span></th>
+                                </tr>
+                                <tr>
+                                    <td><i class="fa fa-sticky-note-o fa-fw"></i>4</td>
+                                    <td>PE</td>
+                                    <td><span class="pull-right text-muted small"><em>11/10/15-15:05:44</em></span></td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fa fa-sticky-note-o fa-fw"></i>2</td>
+                                    <td>RB</td>
+                                    <td><span class="pull-right text-muted small"><em>10/10/15-23:27:54</em></span></td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fa fa-sticky-note-o fa-fw"></i>9</td>
+                                    <td>RB</td>
+                                    <td><span class="pull-right text-muted small"><em>10/10/15-19:25:04</em></span></td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fa fa-sticky-note-o fa-fw"></i>45</td>
+                                    <td>PE</td>
+                                    <td><span class="pull-right text-muted small"><em>10/10/15-18:05:25</em></span></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div> -->
+
+    
+
+            </div> <!-- /.col-lg-6 -->
+
+
+            <div class="col-lg-6">
+
+                <!-- RECENTLY OBTAINED RESULTS -->
+                <div class="panel panel-default" id="recently_results">
+                    <div class="panel-heading">
+                        <i class="fa fa-sticky-note-o fa-fw"></i> Last obtained results 
+                        <i class="fa fa-square pull-right" style="color: #43B5AD"></i>
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <tr>
+                                    <th>id Result</th>
+                                    <th><a id="popoverResultsType" class="btn" href="#" data-content="RESULT refers to worm's (locomotion + readback) results" rel="popover" data-placement="bottom"
+    data-original-title="Type explanation">Type</a></th>
+                                    <th><span class="pull-right">When</span></th>
+                                </tr>
+                                 {% for pe_results_file in pe_results_files %}
+                                  {% if pe_results_file.uuid == -1 %}
+                                <tr>
+                                    <td><i class="fa fa-sticky-note-o fa-fw"></i>No more results available</td>
+                                    <td>NO RESULT</td>
+                                    <td><span class="pull-right text-muted small"><em>0000-00-00</em></span></td>
+                                </tr>
+                               {% else %}
+                                <tr>
+                                    <td><span class="uuid"><i class="fa fa-sticky-note-o fa-fw"></i><a href="{% url 'jointExperimentReview' pe_results_file.uuid  %}">{{pe_results_file.uuid}}</a></span></td>
+                                    <td>RESULT</td>
+                                    <td><span class="pull-right text-muted small"><em>{{pe_results_file.created}}</em></span></td>
+                                </tr>
+                               {% endif %}
+                                {% endfor %}
+                               
+                            </table>
+                        </div>
+                    </div>
+                </div>                
+
+                <!-- RECENTLY MADE PUBLIC -->
+                <div class="panel panel-default" id="recently_public">
+                    <div class="panel-heading">
+                        <i class="fa fa-globe fa-fw"></i> Recently made public
+                        <i class="fa fa-square pull-right" style="color: #DEB948"></i>
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <tr>
+                                    <th>id made public</th>
+                                    <th> <a id="popoverPublicType" class="btn" href="#" data-content="PE RESULT refers to worm's locomotion results, BE EXP refers to a behavioural experiment definition" rel="popover" data-placement="bottom"
+    data-original-title="Type explanation">Type</a></th>
+                                    <th><span class="pull-right">When</span></th>
+                                </tr>
+                                 {% for public in public_made %}
+                                  {% if public.uuid == -1 %}
+                                <tr>
+                                    <td><i class="fa fa-sticky-note-o fa-fw"></i>No more public available</td>
+                                    <td>NOT PUBLIC</td>
+                                    <td><span class="pull-right text-muted small"><em>0000-00-00</em></span></td>
+                                </tr>
+                               {% else %}
+
+                                   {% if public.type == 'NCP' %}
+                                     <tr>
+                                        <td><span class="uuid"><i class="fa fa-sticky-note-o fa-fw"></i><a href="{% url 'worm_conf_details' public.uuid %}">{{public.uuid}}</a></span></td>
+                                        <td>NET CONF</td>
+                                        <td><span class="pull-right text-muted small"><em>{{public.last_modified}}</em></span></td>
+                                    </tr>
+                                  {% elif public.type == 'NMP' %}
+                                     <tr>
+                                        <td><span class="uuid"><i class="fa fa-sticky-note-o fa-fw"></i><a href="{% url 'neuron_model_by_name' public.uuid %}">{{public.uuid}}</a></span></td>
+                                        <td>NEURON MODEL</td>
+                                        <td><span class="pull-right text-muted small"><em>{{public.last_modified}}</em></span></td>
+                                    </tr>
+                                   {% elif public.type == 'BEP' %}
+                                     <tr>
+                                        <td><span class="uuid"><i class="fa fa-sticky-note-o fa-fw"></i><a href="{% url 'experimentDefinition' %}#/experiment/{{public.uuid}}">{{public.uuid}}</a></span></td>
+                                        <td>BE EXP</td>
+                                        <td><span class="pull-right text-muted small"><em>{{public.last_modified}}</em></span></td>
+                                    </tr>
+                                  {% elif public.type == 'PERP' %}
+                                    <tr>
+                                        <td><span class="uuid"><i class="fa fa-sticky-note-o fa-fw"></i><a href="{% url 'experimentReview' public.uuid  %}">{{public.uuid}}</a></span></td>
+                                        <td>PE RESULT</td>
+                                        <td><span class="pull-right text-muted small"><em>{{public.last_modified}}</em></span></td>
+                                    </tr>
+                                    {% elif public.type == 'RBRP' %}
+                                       {% if public.uuid == 0 %}
+                                           <tr>
+                                            <td><span class="uuid"><i class="fa fa-sticky-note-o fa-fw"></i>No reservation for this RB result</span></td>
+                                            <td>RB RESULT</td>
+                                            <td><span class="pull-right text-muted small"><em>{{public.last_modified}}</em></span></td>
+                                            </tr>
+                                        {% else %}
+                                        <tr>
+                                            <td><span class="uuid"><i class="fa fa-sticky-note-o fa-fw"></i><a href="{% url 'result_viewer' %}?sim_id={{public.uuid}}">{{public.uuid}}</a></span></td>
+                                            <td>RB RESULT</td>
+                                            <td><span class="pull-right text-muted small"><em>{{public.last_modified}}</em></span></td>
+                                        </tr>
+                                        {% endif %}
+
+                                  {% endif %}
+                               {% endif %}
+                                {% endfor %}
+                               
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NEW ENTRIES IN THE FORUM 
+                <div class="panel panel-default" id="new_entries_forum">
+                    <div class="panel-heading">
+                        <i class="fa fa-comments fa-fw"></i> New entries in the forum
+                        <i class="fa fa-square pull-right" style="color: #E84DF0"></i>
+                    </div>
+                    <!-- /.panel-heading 
+                    <div class="panel-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <tr>
+                                    <th>Author</th>
+                                    <th>Title</th>
+                                    <th><span class="pull-right">When</span></th>
+                                </tr>
+                                <tr>
+                                    <td><i class="fa fa-sticky-note-o fa-fw"></i>4</td>
+                                    <td>PE</td>
+                                    <td><span class="pull-right text-muted small"><em>11/10/15-15:05:44</em></span></td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fa fa-sticky-note-o fa-fw"></i>2</td>
+                                    <td>RB</td>
+                                    <td><span class="pull-right text-muted small"><em>10/10/15-23:27:54</em></span></td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fa fa-sticky-note-o fa-fw"></i>9</td>
+                                    <td>RB</td>
+                                    <td><span class="pull-right text-muted small"><em>10/10/15-19:25:04</em></span></td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fa fa-sticky-note-o fa-fw"></i>45</td>
+                                    <td>PE</td>
+                                    <td><span class="pull-right text-muted small"><em>10/10/15-18:05:25</em></span></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>-->
+
+
+
+
+            </div> <!-- /.col-lg-6 -->
+        </div>
+
+<div class="row">
+
+
+        
+            <div class="col-lg-12">
+
+                <!-- LAST SOCIAL ENTRIES -->
+
+                        <div class="panel panel-default" id="last_social_entries">
+                              <div class="panel-heading">
+                                    <i class="fa fa-users fa-fw"></i> Last wiki/forum entries
+                                    <i class="fa fa-square pull-right" style="color: #DF4F47"></i>
+                              </div>
+                              
+                              <!-- /.panel-heading -->
+                              <div class="panel-body">
+                                  <div class="table-responsive">
+                                      <table class="table table-striped">
+                                          <tr>
+                                              <th>Title</th>
+                                              <th>Modified by</th>
+                                              <th><span class="pull-right">When</span></th>
+                                          </tr>
+                                          {% for social in social_dashboard %}
+                                                {% if social.topic == -1 %}
+                                                <tr>
+                                                    <td><i class="fa fa-sticky-note-o fa-fw"></i> No entry</td>                                    
+                                                    <td>No user</td>
+                                                    <td><span class="pull-right text-muted small"><em>0000-00-00</em></span></td>
+                                                </tr>
+                                                {% elif social.social_type == 'forum' %}                                                                   
+                                                     <tr>
+                                                        <td><i class="fa fa-comment fa-fw"></i><a href="{% url 'spirit:topic-detail' pk=social.topic slug=social.topic_slug %}"> {{social.topic_slug}}</a></td>                                        
+                                                        <td>{{social.username}}</td>
+                                                        <td><span class="pull-right text-muted small"><em>{{social.last_modified}}</em></span></td>
+                                                    </tr>
+                                                {% elif social.social_type == 'wiki' %}                                                                   
+                                                     <tr>
+                                                        <td><i class="fa fa-wikipedia-w fa-fw"></i><a href="{% url 'wiki:get' social.topic %}"> {{social.title}}</a></td>                                        
+                                                        <td>{{social.username}}</td>
+                                                        <td><span class="pull-right text-muted small"><em>{{social.last_modified}}</em></span></td>
+                                                    </tr>
+                                               {% endif %}
+                                          {% endfor %}                                         
+                                      </table>
+                                  </div>
+                              </div>                        
+                        </div>
+                         
+            </div>
+            {% comment %}
+            <div class="col-lg-12">
+                  <div class="table-responsive">
+                            <table class="table table-striped">
+                                <tr>
+                                    <th>Topic</th>                                    
+                                    <th>Comment text</th>
+                                    <th><span class="pull-right">When</span></th>
+                                </tr>
+                                 {% for forum in forum_dashboard %}
+                                  {% if forum.topic == -1 %}
+                                <tr>
+                                    <td><i class="fa fa-sticky-note-o fa-fw"></i>0</td>                                    
+                                    <td>No more comment available</td>
+                                    <td><span class="pull-right text-muted small"><em>0000-00-00</em></span></td>
+                                </tr>
+                               {% else %}                                                                   
+                                     <tr>
+                                        <td><i class="fa fa-sticky-note-o fa-fw"></i><a href="{% url 'spirit:topic-detail' pk=forum.topic slug=forum.topic_slug %}">{{forum.topic_slug}}</a></td>                                        
+                                        <td>{{forum.comment_content | safe}}</td>
+                                        <td><span class="pull-right text-muted small"><em>{{forum.last_modified}}</em></span></td>
+                                    </tr>                                  
+                               {% endif %}
+                                {% endfor %}
+                               
+                            </table>
+                        </div>
+
+            </div>
+            <div class="col-lg-12">
+                  <div class="table-responsive">
+                            <table class="table table-striped">
+                                <tr>
+                                    <th>Wiki title</th>                                    
+                                    <th>Modified by</th>
+                                    <th><span class="pull-right">When</span></th>
+                                </tr>
+                                 {% for wiki in wiki_dashboard %}
+                                  {% if wiki.article == -1 %}
+                                <tr>
+                                    <td><i class="fa fa-sticky-note-o fa-fw"></i>No entry</td>                                    
+                                    <td>No user</td>
+                                    <td><span class="pull-right text-muted small"><em>0000-00-00</em></span></td>
+                                </tr>
+                               {% else %}                                                                   
+                                     <tr>
+                                        <td><i class="fa fa-sticky-note-o fa-fw"></i><a href="{% url 'wiki:get' wiki.article %}">{{wiki.title}}</a></td>                                        
+                                        <td>{{wiki.username}}</td>
+                                        <td><span class="pull-right text-muted small"><em>{{wiki.last_modified}}</em></span></td>
+                                    </tr>                                  
+                               {% endif %}
+                                {% endfor %}
+                               
+                            </table>
+                        </div>
+
+            </div>
+            {% endcomment %}
+            
+
+</div><!-- /.row -->
+
+     
+
+    </div> <!-- /#container -->
+
+{% endblock %}

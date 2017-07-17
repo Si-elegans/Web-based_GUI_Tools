@@ -1,0 +1,85 @@
+<div class="row">
+    <div class="col-sm-12">
+        <div class=" title">Experiment type</div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 block"> 
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                touch <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li><a href="#">touch</a></li>
+                <li><a href="#">plate tap</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="row">
+	<div class="col-sm-12">
+		<div class=" title">Time</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12 block">
+		<div>
+			{{input id="exactTimeInput" type="number" action="updateEventTime" min="0" step="0.1" class="inline xyzinput" value=eventTime}}
+			{{input id="exactTimeSlider" class="simpleSlider" data-slider-id='exactTimeSlider' type="text" data-slider-min="0" data-slider-step="0.1" data-slider-value=eventTime }}
+		</div>
+	</div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class=" title">Force</div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 block">
+        <div>
+            <input type="text" class="inline xyzinput" placeholder="x"/>
+            <input id="forceSlider" class='simpleSlider' data-slider-id='forceSlider' type="text" data-slider-min="0" data-slider-max="100" data-slider-step="0.1" data-slider-value="14"/>     
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class=" title">Instrument</div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 block">
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                hair <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li><a href="#">hair</a></li>
+                <li><a href="#">xxx</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class=" title">Location</div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 block">
+        <div>
+            <div class="whitefont">Location angle</div>
+            <input type="text" class="inline xyzinput" placeholder="&omicron;"/>
+            <input id="locationAngleSlider" class="simpleSlider slider-selection" data-slider-id='locationAngleSlider' type="text" data-slider-min="0" data-slider-max="20" data-slider-step="1" data-slider-value="14"/>     
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 block">
+        <div>
+            <div class="whitefont">Location length</div>
+            <input type="text" class="inline xyzinput" placeholder="mm"/>
+            <input id="locationLengthSlider" class="simpleSlider slider-selection" data-slider-id='locationLengthSlider' type="text" data-slider-min="0" data-slider-max="20" data-slider-step="1" data-slider-value="14"/>     
+        </div>
+    </div>
+</div>

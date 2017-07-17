@@ -1,0 +1,41 @@
+<div class="row">
+	<div class="col-sm-8">
+		<div class="title2">{{shapeName}}</div>
+	</div>
+	<div class="col-sm-4">
+		<button class="btn btn-turquesa"><span class="glyphicon glyphicon-minus" aria-hidden="true" {{action 'removeObstacle' id}}></span>&nbsp</button>
+	</div>
+</div>
+<div class="row">
+    <div class="col-sm-12 block">
+        <div>
+            <div class="whitefont">Distance to Plate Centre X</div>
+            {{input id=distanceXId class="simpleSlider" data-slider-id=distanceXId type="text" data-slider-min="0" data-slider-step="0.1" data-slider-value=xCoordFromPlateCentre }}   
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 block">
+        <div>
+            <div class="whitefont">Distance to Plate Centre Y</div>
+            {{input id=distanceYId class="simpleSlider" data-slider-id=distanceYId type="text" data-slider-min="0" data-slider-step="0.1" data-slider-value=yCoorDFromPlateCentre }}     
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 block">
+        <div>
+            <div class="whitefont">Stiffness</div>
+            {{input id=stiffnessId class="simpleSlider" data-slider-id=stiffnessId type="text" data-slider-min="0" data-slider-step="0.1" data-slider-value=Stiffness }}      
+        </div>
+    </div>
+</div>
+{{#if isCylinder}}
+{{render "cylinder" Cylinder}}
+{{/if}}
+{{#if isCube}}
+{{render "cube" Cube}}
+{{/if}}
+{{#if isHexagon}}
+{{render "hexagon" Hexagon}}
+{{/if}}

@@ -1,0 +1,70 @@
+{% extends 'base-with-login.html' %}
+{% load staticfiles %}
+{% block content %}
+<div class="container">
+    <div class="row">    
+       <div class="col-md-2"></div>       
+      <div class="col-md-8">
+        {%if messages %}
+        <div class='row'>
+            <div class='col-xs-12'>
+                <ul class="messages">
+                    {% for message in messages %}
+                    <p{% if message.tags == "success" %} class="alert alert-success"{%endif%}>{{message}}</p>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+        <div class="page-header" style="margin-bottom: 20px !important;">
+            <h2 style="margin-bottom: 0px !important;">Contact support</h2>
+        </div>
+        
+                
+        <p>We're here to help in any way we can. Please submit your request below and we'll get back to you shortly. You may also be able to find the answer in the <a href="/forum" target="_none">discussion forum</a>.</p>
+            
+        <p><b>All fields are required.</b></p>
+    
+        {{ form.non_field_errors }}
+        <form action="/support" method="post">{% csrf_token %}
+            <fieldset>
+                <div id="field_wrapper_name" class="clearfix">                    
+                    <label for="{{form.name.}}"><span>Name:</span></label>
+                    <div class="input">
+                        {{form.name}}
+                    </div>
+                    {{ form.name.errors }}
+                </div>
+                <div id="field_wrapper_email" class="clearfix">                   
+                    <label for="{{form.email.id_for_label}}"><span>Email:</span></label>
+                    <div class="input">
+                        {{form.email}}
+                    </div>
+                     {{ form.email.errors }}
+                </div>
+                <div id="field_wrapper_subject" class="clearfix">                    
+                    <label for="{{form.subject.id_for_label}}"><span>Subject:</span></label>
+                    <div class="input">
+                        {{form.subject}}
+                    </div>
+                    {{ form.subject.errors }}
+                </div>
+                <div id="field_wrapper_message" class="clearfix">                    
+                    <label for="{{form.body.id_for_label}}"><span>Message:</span></label>
+                    <div class="input">
+                        {{form.body}}
+                    </div>
+                    {{ form.body.errors }}
+                </div>
+                <div class="actions">
+                        <input name="support_request" type="submit" class="btn primary large" value="Send message">
+                        <!--<p style="margin-top: 15px;">Type any note here</p>-->
+                </div>
+            </fieldset>
+        </form>
+       </div>   
+      <div class="col-md-2"></div>
+</div>
+</div>
+    
+{% endblock %}

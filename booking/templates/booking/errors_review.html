@@ -1,0 +1,109 @@
+{% extends 'base-with-login.html' %}
+{% load js %}
+{% load staticfiles %}
+{% load get_reservation_attr from booking_extras %}
+
+{% block extra_header %}
+    
+    {% comment %}
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+    {% endcomment %}
+    <script type="text/javascript" src="{% static "js/jquery.tokeninput.js" %}"></script>
+    <link rel="stylesheet" href="{% static "css/token-input.css" %}" type="text/css" />
+    <link rel="stylesheet" href="{% static "css/token-input-facebook.css" %}" type="text/css" />
+     
+{% endblock%}
+
+{% block content %}
+
+    
+    <div class="container-fluid">
+    <!--<form action='{% url 'errors_review' %}' method='post'>{% csrf_token %}-->
+        <div class="page-header">
+            <h1>Error Review by the Admin </h1>
+        </div>
+        
+        <div class="panel panel-primary">
+
+            <div class="panel-heading"><span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>&nbsp;&nbsp;ERRORS REVISION </div>
+    
+            <div class="panel-body">
+                <p>Here the admin will be able to review emulation errors. <span style="background-color: #FFFF00">Check error codes <a href="https://docs.google.com/document/d/1kB6mM0F6wwjXKipJKfMUSH3Lc9UYLm3NVYeSPYEHSvA/edit">here</a></span></p>
+            </div> <!-- div panel body -->
+
+            {% for form in forms %}
+                {% if form.errors %}
+                    <p style="color: red;">
+                        Please correct the error{{ form.errors|pluralize }} below.
+                    </p>
+                {% endif %}
+            {% endfor %}
+    
+            <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Reservation id</th>
+                            <th>Experiment id</th>
+                            <th>Worm configuration id</th>
+                            <th>Status</th>
+                            <th>Error Code</th>
+                            <th>Admin Updates (If ERROR happened)</th>
+                            <th>Submit Changes</th>
+                        </tr>
+                    </thead>
+
+                   <tbody>
+                        {% for form in forms %}
+                            <tr>
+                                <form action="" method="post"> {% csrf_token %}
+                                    <input type="hidden" name="uuid" value="{{form.uuid.value}}" />
+                                    <td id="uuid"><span class="uuid"> {{form.uuid.value}}</span></td>
+                                    <td><a href="{% url 'experimentDefinition' %}#/experiment/{% get_reservation_attr form.uuid.value "experiment" %}"><span class="uuid">{% get_reservation_attr form.uuid.value "experiment" %}</span></a></td>
+{#                                    <td><a href="{% url 'worm_conf_details' get_reservation_attr form.uuid.value "worm_conf" %} #nav=2.94,0,5">{% get_reservation_attr form.uuid.value "worm_conf" %}</a></td>#}
+{#                                TODO: get concatenated django templatetags #}
+                                    <td>{% get_reservation_attr form.uuid.value "worm_conf" %}</a></td>
+                                    <td>
+                                      <select id="id_status" name="status">
+                                          {% for id, name in status_choices %}
+                                            <option value="{{ id }}"
+                                            {% if form.status.value == name %}selected="selected"{% endif %}>{{ name }}</option>
+                                          {% endfor %}{#
+                                      </select>
+                                    </td>
+                                     <td>{% get_reservation_attr form.uuid.value "error_code" %}</a></td>
+                                    <td><textarea style="width:100%;resize: vertical;" class="form-control" rows=1 name="error_admin_updates">{{form.error_admin_updates.value}}</textarea></td>
+                                    <td>
+                                        <input type="submit" class="btn btn-primary" value="Submit">
+                                    </td>
+                                </form>
+                            </tr>
+                       {% endfor %}
+                    </tbody>
+            </table>
+            </div>
+
+
+    <!--</form>-->
+        <div class="row">
+            <div class="col-md-12" style="padding: 20px;">
+                {%if messages %}
+                    <div class='row'>
+                        <div class='col-xs-12'>
+                            <ul class="messages">
+                                {% for message in messages %}
+                                    <p{% if message.tags == "success" %} class="alert alert-success"
+                                        {% elif  message.tags == "error" %} class="alert alert-danger"
+                                        {% elif  message.tags == "warning" %} class="alert alert-warning"
+                                        {%endif%}>{{message}}</p>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div> <!-- div container-fluid-->
+
+
+{% endblock %}

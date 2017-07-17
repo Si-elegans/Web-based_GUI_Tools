@@ -1,0 +1,52 @@
+<div class="row">
+    <div class="col-sm-12">
+        <div class=" title">Force</div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 block">
+        <div>
+            <input id="touchForceSlider" class='simpleSlider' data-slider-id='touchForceSlider' type="text" data-slider-min="0" data-slider-max="100" data-slider-step="0.1" data-slider-value="14"/>     
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class=" title">Instrument</div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 block">
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                {{typeName}}<span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li id="directEyebrow" class="btn">Eyebrow</li>
+                <li id="directVonfrey" class="btn">Von Frey hair</li>
+				<li id="directPlatinium" class="btn">Platinium wire</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class=" title">Location</div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 block">
+        <div>
+            <div class="whitefont">Location Angle</div>
+            {{input id="touchLocationAngleSlider" class="simpleSlider" data-slider-id='touchLocationAngleSlider' type="text" data-slider-min="0" data-slider-step="0.1" data-slider-value=eventTime }}   
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 block">
+        <div>
+            <div class="whitefont">Location Length</div>
+            {{input id="touchLocationLengthSlider" class="simpleSlider" data-slider-id='touchLocationLengthSlider' type="text" data-slider-min="0" data-slider-step="0.1" data-slider-value=eventTime }}     
+        </div>
+    </div>
+</div>

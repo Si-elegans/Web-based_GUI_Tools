@@ -1,0 +1,193 @@
+{% load staticfiles %}
+ <div class="navbar navbar-inverse navbar-fixed-top" role="navigation" id="main-navbar">
+    <div class="container">
+          <div class="navbar-header">
+               <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                 <span class="sr-only">Toggle navigation</span>
+                 <span class="icon-bar"></span>
+                 <span class="icon-bar"></span>
+                 <span class="icon-bar"></span>
+               </button>
+               <a class="navbar-brand" href="/">Si elegans</a>
+          </div>
+          <div class="navbar-collapse collapse" role="navigation">
+               <ul class="nav navbar-nav ">                  
+                   <li class="enabled"><a href="/wiki">Wiki</a></li>
+                  <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Help <b class="caret"></b></a>
+                    <ul class="dropdown-menu">            
+                      <li><a href="{% url 'support-without-login' %}">Report a problem</a></li>
+                      <li class="divider"></li>
+                      <li><a href="/about">About</a></li>
+                    </ul>
+                  </li>
+                </ul>      
+               <ul class="nav navbar-nav navbar-right">
+                    {% if user.is_authenticated %} 
+                      <li class="enabled"><a>logged as: {{user.username}} </a></li>
+                      <li>
+                              <form class="navbar-form navbar-right" role="form" action="/dashboard">
+                                   {% csrf_token %}
+                                   <button type="submit" class="btn btn-primary">Dashboard</button>
+                              </form>
+                      </li>
+                       {% if backends.associated %}
+                         {% comment %}
+                         GE: backends is passed through  'social.apps.django_app.context_processors.backends' template context processor					
+                         Disconnect is commented => see reasons in navbar-with-login.html
+                           <li>
+                                <form class="navbar-form navbar-right" role="form" action="/disconnectSocial">
+                                                {% csrf_token %}
+                                     <button type="submit" class="btn btn-danger" >Disconnect from social auth {{ name }}</button>
+                                </form>
+                           </li>
+                         {% endcomment%}
+                          
+                           <li class="navbar-form navbar-right">                                     					 
+                               <button type="submit" class="btn btn-success" id="google-plus-button" >Log Out</button>                              
+                           </li>
+                              
+                              <script src="https://apis.google.com/js/api:client.js"></script>
+                              <script type="text/javascript">
+                                  gapi.load('auth2', function () {
+                                    var auth2;
+                                
+                                    auth2 = gapi.auth2.init({
+                                      client_id: "{{ plus_id }}",
+                                      scope: "{{ plus_scope }}"
+                                    });
+                                
+                                    auth2.then(function () {
+                                      if (auth2.isSignedIn.get()) {
+                                        $('#google-plus-button').on('click', function (event) {
+                                          event.preventDefault();
+                                          auth2.signOut().then(function () {
+                                            console.log("Logged out from Google+ platform");
+                                            document.location = "/logout";
+                                          });
+                                        });
+                                      }
+                                      {% comment %}
+                                      Just in case, I'll add a /logout call when the gapi (isSignedIn) for google-plus fails (when other social auth is used)
+                              This requires to have client_id filled, which means having always filled google_plus keys on the settings file, even if google-plus is not used otherwhise onClick event will not be added
+                                      {% endcomment %}
+                                      else {
+                                          $('#google-plus-button').on('click', function (event) {							
+                                          document.location = "/logout";
+                                          });
+                                      }
+                                    });						  
+                                  });
+                                </script>     
+                               <div style="clear: both;"></div>
+                         {% else %}
+                                   <li>
+                                        <form class="navbar-form navbar-right" role="form" action="/logout">
+                                                {% csrf_token %}
+                                         <button type="submit" class="btn btn-success" >Log out</button>
+                                        </form>
+                                   </li>
+                         {% endif %}
+                         
+                    {% else %}         
+                         <li class="dropdown" id="menuLogin">
+                              <a class="dropdown-toggle" href="#" data-toggle="dropdown" id="navLogin">Login <b class="caret"></b></a>
+                              <ul class="dropdown-menu" style="padding:17px;">
+                                      <form class="form" role="form" action="/login/" method="post">
+                                        {% csrf_token %}
+                                        {% if next %}                    
+                                        <input type="hidden" name="next" value="{{ next }}" />
+                                        {% endif %}
+                                        <label>Login</label>
+                                         <input class="form-control" name="username" id="username" type="text" placeholder="Username" title="Enter your username" required="">
+                                         <input  class="form-control" name="password" id="password" type="password" placeholder="Password" title="Enter your password" required="">                    
+                                         <button type="submit" id="btnLogin" class="btn">Login</button>
+                                       </form>
+                                      <li role="presentation" class="divider"></li>                                      
+                                      {% comment%}
+                                      Take the comment lines below out to activate google-oauth2 authentication
+                                      {% endcomment%}
+                                      {% comment%}
+                                      <li role="presentation">                                     					  
+                                          <form role="form" action="/login/google-oauth2/">
+                                                   {% csrf_token %}
+                                            <button type="submit" class="btn btn-success" >Login with google-oauth2</button>
+                                          </form>                                                                             
+                                      </li>
+                                      <li role="presentation" class="divider"></li>
+                                      {% endcomment%}
+                                      <li role="presentation">                                     					 
+						<button type="submit" class="btn btn-success" id="google-plus-button" style="float: right;">Google sign in</button>
+						<div style="clear: both;"></div>						
+				      </li>
+                                      <li role="presentation"><a href="/accounts/register" title="Fast and free sign up!" role="menuitem" tabindex="-1" href="#">New User? Sign-up..</a></li>
+                                       <li role="presentation"><a href="/user/password/reset" title="Forgot username or password?" role="menuitem" tabindex="-1" href="#">Forgot username or password?</a></li>
+                                       <li role="presentation"><a href="#" title="Need help? Contact us" role="menuitem" tabindex="-1" href="#">Need help? Contact us</a></li>
+                                       <li role="presentation" class="divider"></li>                                      
+                              </ul>
+			 </li>
+			<script src="https://apis.google.com/js/api:client.js"></script>
+                        <script type="text/javascript">
+                          gapi.load('auth2', function () {
+                            var auth2;
+                        
+                            auth2 = gapi.auth2.init({
+                              client_id: "{{ plus_id }}",
+                              scope: "{{ plus_scope }}"
+                            });
+                        
+                            auth2.then(function () {
+                              var button = document.getElementById("google-plus-button");
+                              console.log("User is signed-in in Google+ platform?", auth2.isSignedIn.get() ? "Yes" : "No");
+                        
+                              auth2.attachClickHandler(button, {}, function (googleUser) {
+                                // Send access-token to backend to finish the authenticate
+                                // with your application
+                        
+                                var authResponse = googleUser.getAuthResponse();
+                                var $form;
+                                var $input;
+                        
+                                $form = $("<form>");
+                                $form.attr("action", "{% url "social:complete" backend="google-plus" %}");
+                                $form.attr("method", "post");
+                                $input_access_token = $("<input>");
+                                 $input_access_token.attr("name", "access_token");
+                                 $input_access_token.attr("value", authResponse.access_token);
+                                 $form.append($input_access_token);                                
+                                // Add csrf-token if needed
+                                $(document.body).append($form);
+                                $form.submit();
+                              });
+                              var button = document.getElementById("google-plus-button-jumbotron");
+{#                              console.log("User is signed-in in Google+ platform?", auth2.isSignedIn.get() ? "Yes" : "No");#}
+
+                              auth2.attachClickHandler(button, {}, function (googleUser) {
+                                // Send access-token to backend to finish the authenticate
+                                // with your application
+
+                                var authResponse = googleUser.getAuthResponse();
+                                var $form;
+                                var $input;
+
+                                $form = $("<form>");
+                                $form.attr("action", "{% url "social:complete" backend="google-plus" %}");
+                                $form.attr("method", "post");
+                                $input_access_token = $("<input>");
+                                 $input_access_token.attr("name", "access_token");
+                                 $input_access_token.attr("value", authResponse.access_token);
+                                 $form.append($input_access_token);
+                                // Add csrf-token if needed
+                                $(document.body).append($form);
+                                $form.submit();
+                              });
+                            });
+                          });
+                        </script>              
+                    {% endif %}     
+                  
+                </ul>
+          </div><!--/.navbar-collapse -->         
+         
+    </div>
+</div>

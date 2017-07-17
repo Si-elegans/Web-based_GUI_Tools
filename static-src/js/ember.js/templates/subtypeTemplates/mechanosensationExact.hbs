@@ -1,0 +1,24 @@
+<div class="row">
+    <div class="col-sm-12">
+        <div class=" title">Experiment type</div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 block"> 
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                {{typeName}}<span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li id="mechanoTouch" class="btn">Direct Touch</li>
+				<li id="mechanoPlate" class="btn">Plate Tap</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{{#if isTouch}}
+{{render "directTouch" directTouch}}
+{{/if}}
+{{#if isPlate}}
+{{render "plateTap" plateTap}}
+{{/if}}

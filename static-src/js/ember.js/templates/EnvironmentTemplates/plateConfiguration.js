@@ -1,0 +1,8 @@
+Ember.TEMPLATES["plateConfiguration"] = Ember.Handlebars.template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+  var stack1, buffer = '';
+  data.buffer.push("<div class=\"row\">\r\n    <div class=\"col-sm-12 block\"> \r\n        <div class=\"btn-group\">\r\n			<div class=\"whitefont\">Lid (not implemented)</div>\r\n        </div>\r\n    </div>\r\n</div>\r\n<div class=\"row\">\r\n    <div class=\"col-sm-12 block\">\r\n        <div>\r\n            <div class=\"whitefont\">Dryness(not implemented)</div> \r\n        </div>\r\n    </div>\r\n</div>\r\n<div class=\"row\">\r\n    <div class=\"col-sm-12 block\"> \r\n        <div class=\"btn-group\">\r\n			<div class=\"whitefont\">Bottom Material (not implemented)</div>\r\n        </div>\r\n    </div>\r\n</div>\r\n<div class=\"row\">\r\n    <div class=\"col-sm-12 block\"> \r\n        <div class=\"btn-group\">\r\n			<div class=\"whitefont\">Shape</div>\r\n            <button type=\"button\" class=\"btn btn-default dropdown-toggle\" data-toggle=\"dropdown\" aria-expanded=\"false\">\r\n                ");
+  stack1 = helpers._triageMustache.call(depth0, "shapeName", {"name":"_triageMustache","hash":{},"hashTypes":{},"hashContexts":{},"types":["ID"],"contexts":[depth0],"data":data});
+  if (stack1 != null) { data.buffer.push(stack1); }
+  data.buffer.push("<span class=\"caret\"></span>\r\n            </button>\r\n            <ul class=\"dropdown-menu\" role=\"menu\">\r\n                <li id=\"shapeCylinder\" class=\"btn\">Cylinder</li>\r\n				<li id=\"shapeCube\" class=\"btn\">Cube</li>\r\n				<li id=\"shapeHexagon\" class=\"btn\">Hexagon</li>\r\n            </ul>\r\n        </div>\r\n    </div>\r\n</div>");
+  return buffer;
+},"useData":true});

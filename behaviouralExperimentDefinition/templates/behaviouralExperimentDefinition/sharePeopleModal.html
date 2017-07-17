@@ -1,0 +1,184 @@
+<!-- Modal -->
+
+{% load staticfiles %}
+
+
+<script type="text/javascript">
+
+  var id_exp;
+
+  function unique(list) {
+    var result = [];
+    $.each(list, function(i, e) {
+      if ($.inArray(e, result) == -1) result.push(e);
+    });
+    return result;
+  }
+
+  $(document).ready(function() {
+    $("#btn_share").click(function () {
+            var csrftoken = $.cookie('csrftoken');
+            console.log($('#token-input-body').val());
+            var user_ids = $('#token-input-body').val();
+            var list_user_ids = user_ids.split(",");
+            list_user_ids = unique(list_user_ids);
+
+            for (var user_id in list_user_ids){
+              var sendInfo = { "user": list_user_ids[user_id] , "behaviouralExperiment": id_exp };
+              console.log('sendInfo: ' + JSON.stringify(sendInfo));
+              $.ajax({
+                url: "/restAPI/shareBehaviouralExperiment/",
+                cache: false,
+                type:"POST",
+                data: JSON.stringify(sendInfo),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (msg) {
+                  $('#token-input-body').tokenInput('destroy')
+                  if (msg) {
+                      console.log("Element" + " was added in rest !");
+                      location.reload(true);
+                  } else {
+                      console.log("Cannot add to rest !");
+                  }
+                },
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-CSRFToken',csrftoken);
+                    //xhr.setRequestHeader('X-CSRFToken', $('meta[name="csrf-token"]').attr('content'));
+                    //xhr.setRequestHeader("Authorization", "Basic " + btoa("admin" + ":" + "admin"));
+                    //xhr.setRequestHeader("Content-Type", "application/json");
+                    },
+              });
+
+            }
+
+        });
+
+  });
+
+  function sharePeopleModal(id){
+    var allUsersModified = [];
+    id_exp=id;
+    console.log('sharePeopleModal');
+
+
+    var users_with_access = ($("#be_"+id).text()).replace(/\s+/g, '');
+    var emails_of_shared = users_with_access.split(">");
+
+    for (email in emails_of_shared){
+      var index = emails_of_shared[email].indexOf("<");
+      if (index!==-1) {
+        var size = emails_of_shared[email].length;
+        emails_of_shared[email] = emails_of_shared[email].slice(index+1,size);
+      }
+    }
+
+    $("#modal-title").text("Share Behavioural Experiment with id: " + id);
+
+    var caption_users_with_access = ($("#be_"+id).text()).replace(/>/g,"><br/>");
+    $("#info-modal-users").html(
+      "<p>" + caption_users_with_access + "</p>"
+    );
+
+    for (var user in allUsers){
+      if (emails_of_shared.indexOf(allUsers[user].email) == -1){
+        var the_user = allUsers[user];
+        the_user.search = the_user.first_name + ' ' + the_user.last_name + ' ' + the_user.email;
+        console.log('the_user: ' + the_user.search);
+        allUsersModified.push(allUsers[user]);
+      }
+    }
+
+    $("#token-input-body").tokenInput(
+      allUsersModified,
+      {
+        zindex: 1052,
+        theme: "facebook",
+        propertyToSearch: "search",
+        resultsFormatter: function(item){ return "<li>" + item.first_name + " " + item.last_name + " \< " + item.email + " \></li>" },
+        tokenFormatter: function(item) { return "<li><p><b>" + item.first_name + " " + item.last_name + "</b></p></li>" },
+        //onAdd: function (item) { alert("Added " + item.name); },
+      }
+    );
+    $("#myModal").modal({backdrop: 'static',keyboard: false});
+  };
+
+</script>
+
+
+
+<div id="myModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h4 class="modal-title" id="modal-title">Modal Header</h4>
+      </div>
+
+      <div class="modal-body" id="modal_body">
+        <h3> Users with access</h3>
+        <div id='info-modal-users'></div>
+        <h3> Share with more users</h3>
+        <div style="margin-top: 15px">
+          <input type="text" id="token-input-body"/>
+        </div>
+      </div>
+
+
+      <div class="modal-footer">
+        <button id='btn_share' type="button" class="btn btn-success">Submit</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="$('#token-input-body').tokenInput('destroy')";>Close</button>
+      </div> <!-- Modal footer -->
+
+    </div> <!-- Modal content -->
+
+  </div> <!-- Modal dialog -->
+ 
+</div> <!-- myModal -->
+    
+
+
+
+<!-- Modal -->
+  <div class="modal fade" id="modalPublic" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Modal Header</h4>
+        </div>
+        <div class="modal-body" id="modalPublic-body">
+          <p>Some text in the modal.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+ <div class="modal fade" id="modalForceClone" role="dialog">
+    <div class="modal-dialog">
+
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Modal to Confirm BehavExp Non-Editable</h4>
+        </div>
+        <div class="modal-body" id="modalPublic-body">
+          <p>You as an author have not shared this behavioural experiment before, if you share it you will not be able to edit it again, you'll be forced to edit a cloned version of it.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-success" data-dismiss="modal" id="modalForceCloneContinue">Continue</button>
+          <button type="button" class="btn btn-danger" data-dismiss="modal" id="modalForceCloneCancel">Cancel</button>
+        </div>
+      </div>
+
+    </div>
+  </div>

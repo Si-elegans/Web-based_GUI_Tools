@@ -1,0 +1,27 @@
+{% extends 'base-with-login.html' %}
+
+{% block content %}
+
+
+<h1>Define new experimental behaviour</h1>
+<form action='{% url 'fillExperimentBehaviour' %}' method='post'>{% csrf_token %}
+    {{ form.as_p }}
+    <input type='submit' value='Submit' />
+</form>
+
+<div class="container">
+    {%if messages %}
+    <div class='row'>
+        <div class='col-xs-12'>
+            <ul class="messages">
+                {% for message in messages %}
+                <p{% if message.tags == "success" %} class="alert alert-success"{%endif%}>{{message}}</p>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+
+{% endblock %}

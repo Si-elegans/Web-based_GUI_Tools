@@ -1,0 +1,48 @@
+<div class="row">
+	<div class="col-sm-12">
+		<div class="hcontrols">
+			{{#if isModifiable}}
+			<button {{action 'deleteEvent'}} class="btn btn-turquesa" style="margin: 5px">Delete This Event</button>
+			{{/if}}
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12">
+		<div class=" title">Description</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12 block">
+		<div>
+			{{input id="exactDescription" class="" value=model.description }}
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12">
+		<div class=" title">Time</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12 block">
+		<div>
+			{{input id="exactTimeSlider" class="simpleSlider" data-slider-id='exactTimeSlider' type="text" data-slider-min="0" data-slider-step="0.1" data-slider-value=eventTime }}
+		</div>
+	</div>
+</div>
+{{#if isMechano}}
+{{ render "mechanosensationExact" mechanosensation}}
+{{/if}}
+{{#if isPhoto}}
+{{ render "phototaxisExact" phototaxis}}
+{{/if}}
+{{#if isChemo}}
+{{ render "chemotaxisExact" chemotaxis}}
+{{/if}}
+{{#if isGalvano}}
+{{ render "galvanotaxisExact" galvanotaxis}}
+{{/if}}
+{{#if isTermo}}
+{{ render "termotaxisExact" termotaxis}}
+{{/if}}

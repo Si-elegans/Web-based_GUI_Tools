@@ -1,0 +1,986 @@
+{% extends 'base-with-login.html' %}
+{% block content %}
+
+<!-- this is in bootstrap css, but is overridden in siElegans.css,
+     so setting it back to the bootstrap value here -->
+<style> .form-control { width : 100% } </style>
+
+<form class="form-horizontal" id="comp-form" action="{{ dest }}" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+	    {% csrf_token %}
+            <input type="hidden" name="source_model_name" value="{{ source_model_name }}" />
+	    <label class="control-label col-sm-1 col-md-1" for="comp-name">Name</label>
+	    <div class="col-sm-11 col-md-11"><input class="form-control" id="comp-name" type="text" name="name"/></div>
+	    <label class="control-label col-sm-1 col-md-1" for="description">Description</label>
+	    <div class="col-sm-11 col-md-11"><textarea class="form-control" id="description" name="description" rows="5"></textarea></div>
+        
+
+	    <label class="control-label col-sm-1 col-md-1" for="extends">Parent</label>
+    	<div class="col-sm-8">
+            <select id="extends" class="form-control" name="extends">
+            </select>
+        </div>
+    	<div style="margin-top:10px" class="col-sm-3 col-md-3">
+            <a id='toggle-hier-details'>Show Inherited Fields</a>
+        </div>
+        <div id='hier-details' style="margin-top:20px; display:none"></div>
+    </div>
+
+    <center>
+    <button class="btn btn-info btn-med" id="add-parameter">Add Parameter</button>
+    <button class="btn btn-info btn-med" id="add-constant">Add Constant</button>
+    <button class="btn btn-info btn-med" id="add-exposure">Add Exposure</button>
+    <button class="btn btn-info btn-med" id="add-child">Add Child</button>
+    <button class="btn btn-info btn-med" id="add-attachment">Add Attachment</button>
+    <button type="button" class="btn btn-info btn-med" data-toggle="modal" data-target="#dynModal">Dynamic Behaviour</button>
+    </center>
+
+    <div class="form-group" style="display:none" id="parameters">
+        <h5><center>--- Parameters ---</center></h4>
+    </div>
+
+    <div class="form-group" style="display:none" id="constants">
+        <h5><center>--- Constants ---</center></h4>
+    </div>
+
+    <div class="form-group" style="display:none" id="exposures">
+        <h5><center>--- Exposures ---</center></h4>
+    </div>
+
+    <div class="form-group" style="display:none" id="children">
+        <h5><center>--- Children ---</center></h4>
+    </div>
+
+    <div class="form-group" style="display:none" id="attachments">
+        <h5><center>--- Attachments ---</center></h4>
+    </div>
+
+    <div id="dynModal" class="modal fade" role="dialog">
+        <div class="modal-dialog" style="width:95%">
+
+        <!-- Modal content-->
+        <div class="modal-content" >
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title"><center>Dynamic Behaviour</center></h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group"><center>
+                    <button class="btn btn-info btn-med" id="add-state-var">Add State Variable</button>
+                    <button class="btn btn-info btn-med" id="add-derived-var">Add Derived Variable</button>
+                    <button class="btn btn-info btn-med" id="add-time-deriv">Add Time Derivative</button>
+                    <button class="btn btn-info btn-med enabled" id="set-on-start">On Start</button>
+                    <button class="btn btn-info btn-med" id="add-on-condition">On Condition</button>
+
+                    <div class="form-group" style="display:none" id="statevars">
+                        <h5><center>--- State Variables ---</center></h4>
+                    </div>
+
+                    <div class="form-group" style="display:none" id="derivedvars">
+                        <h5><center>--- Derived Variables ---</center></h4>
+                    </div>
+
+                    <div class="form-group" style="display:none" id="timederivs">
+                        <h5><center>--- Time Derivatives ---</center></h4>
+                    </div>
+
+                    <div class="form-group" style="display:none" id="on-start">
+                        <h5><center>--- On Start ---</center></h4>
+                        <button class="btn btn-info btn-med" id="add-start-assign">Assignment</button>
+                        <button class="btn btn-info btn-med" id="add-start-event">Event Out</button>
+                    </div>
+
+                    <div class="form-group" style="display:none" id="on-condition">
+                    </div>
+                </center></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Back</button>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <div class="form-group"><br>
+	    <input class="form-control" type="submit" value="Save Component" />
+    </div>
+
+</div>
+</form>
+
+<script>
+
+function on_load() {
+    window.param_idx = 0
+    window.const_idx = 0
+    window.exp_idx = 0
+    window.child_idx = 0
+    window.attach_idx = 0
+
+    window.statevar_idx = 0
+    window.derivedvar_idx = 0
+    window.timederiv_idx = 0
+
+    window.onstartassign_idx = 0
+    window.onstartevent_idx = 0
+
+    window.oncond_idx = 0
+
+    window.editing = {{ edit }}
+
+    window.all_names = {{all_comp_type_names | safe}}
+    all_names.unshift('none')
+    for(i=0; i<window.all_names.length; ++i){
+        html = '<option value="' + all_names[i] + '" '
+        if(all_names[i] == "{{parent}}"){
+            html += ' selected '
+        }
+
+        html +=  '>' + all_names[i] + '</option>'
+        $('#extends').append(html)
+    }
+
+    $('#extends').change(update_curr_hier_details)
+    update_curr_hier_details()
+
+    $('#comp-name').change(validate_name)
+
+    $('#add-parameter').click(add_parameter)
+    $('#add-constant').click(add_constant)
+    $('#add-exposure').click(add_exposure)
+    $('#add-child').click(add_child)
+    $('#add-attachment').click(add_attachments)
+
+    $('#add-state-var').click(add_state_var)
+    $('#add-derived-var').click(add_derived_var)
+    $('#add-time-deriv').click(add_time_deriv)
+    $('#set-on-start').click(set_on_start)
+
+    $('#add-start-assign').click(add_start_assign)
+    $('#add-start-event').click(add_start_event)
+
+    $('#add-on-condition').click(add_on_condition)
+
+    $('#comp-form').submit(on_submit)
+
+    $('#toggle-hier-details').click(function(){
+        $('#hier-details').toggle()
+        if($('#hier-details').is(':visible')){
+            $('#toggle-hier-details').text('Hide Inherited Fields')
+        }
+        else {
+            $('#toggle-hier-details').text('Show Inherited Fields')
+        }
+    })
+
+    if(window.editing){
+        load_from_xml("{{parent}}")
+    }
+}
+
+function load_from_xml(comp_name) {
+    $.ajax({
+        url: "{% url 'lems_ui.views.comp_details' %}/?name=" + comp_name
+    })
+    .done(function (data) {
+        console.log(data)
+        comp_details = JSON.parse(data)
+        handle_xml(comp_details)
+    })
+}
+
+function handle_xml(comp_details){
+    $xml = $( $.parseXML( comp_details.xml ) )
+
+    // handle name, description, extends
+    var comp_type = $xml.find('ComponentType')[0]
+
+    // when editing add timestamp to name to clone previous item
+    $('#comp-name').val(comp_type.attributes['name'].value + '_' +
+                        (Date.now() / 1000 | 0))
+
+    $('#description').text(comp_type.attributes['description'].value)
+    $('#extends').val(comp_type.attributes['extends'].value)
+    update_curr_hier_details( finish_xml )
+}
+
+function finish_xml(){
+
+    // handle parameters
+    $xml.find('Parameter').each(function(index, elem) {
+        var param_id = add_parameter()
+        $('#param_' + param_id).val(elem.attributes['name'].value)
+        $('#param_' + param_id + '_dim').val(elem.attributes['dimension'].value)
+    })
+
+    // handle constants
+    $xml.find('Constant').each(function(index, elem) {
+        var const_id = add_constant()
+        $('#const_' + const_id).val(elem.attributes['name'].value)
+        $('#const_' + const_id + '_value').val(elem.attributes['value'].value)
+        $('#const_' + const_id + '_dim').val(elem.attributes['dimension'].value)
+    })
+
+    // handle exposures
+    $xml.find('Exposure').each(function(index, elem) {
+        var exp_id = add_exposure()
+        $('#exp_' + exp_id).val(elem.attributes['name'].value)
+        $('#exp_' + exp_id + '_dim').val(elem.attributes['dimension'].value)
+    })
+
+    // handle children
+    $xml.find('Children').each(function(index, elem) {
+        var child_id = add_child()
+        $('#child_' + child_id).val(elem.attributes['name'].value)
+        $('#child_' + child_id + '_type').val(elem.attributes['type'].value)
+        $('#child_' + child_id + '_multi').attr('checked', true)
+    })
+
+    // handle child
+    $xml.find('Child').each(function(index, elem) {
+        var child_id = add_child()
+        $('#child_' + child_id).val(elem.attributes['name'].value)
+        $('#child_' + child_id + '_type').val(elem.attributes['type'].value)
+    })
+
+    // handle attachments
+    $xml.find('Attachments').each(function(index, elem) {
+        var attach_id = add_attachments()
+        $('#attach_' + attach_id).val(elem.attributes['name'].value)
+        $('#attach_' + attach_id + '_type').val(elem.attributes['type'].value)
+    })
+
+    // handle dynamics state variable
+    $xml.find('Dynamics').find('StateVariable').each(function(index, elem) {
+        var svar_id = add_state_var()
+        $('#statevar_' + svar_id).val(elem.attributes['name'].value)
+        $('#statevar_' + svar_id + '_dim').val(elem.attributes['dimension'].value)
+
+        if( elem.attributes['exposure'] != undefined ) {
+            $('#statevar_' + svar_id + '_exp').val(elem.attributes['exposure'].value)
+        }
+    })
+
+    // handle dynamics derived variable
+    $xml.find('Dynamics').find('DerivedVariable').each(function(index, elem) {
+        var deriv_id = add_derived_var()
+        $('#derivedvar_' + deriv_id).val(elem.attributes['name'].value)
+        $('#derivedvar_' + deriv_id + '_dim').val(elem.attributes['dimension'].value)
+
+        if( elem.attributes['exposure'] != undefined ) {
+            $('#derivedvar_' + deriv_id + '_exp').val(elem.attributes['exposure'].value)
+        }
+
+        if( elem.attributes['value'] != undefined ) {
+            $('#derivedvar_' + deriv_id + '_selval').val('value')
+            $('#derivedvar_' + deriv_id + '_selvaleqn').val(elem.attributes['value'].value)
+        }
+        else if( elem.attributes['select'] != undefined ) {
+            $('#derivedvar_' + deriv_id + '_selval').val('select')
+            $('#derivedvar_' + deriv_id + '_selvaleqn').val(elem.attributes['select'].value)
+        }
+
+        if( elem.attributes['reduce'] != undefined ) {
+            $('#derivedvar_' + deriv_id + '_selvalred').val(elem.attributes['reduce'].value)
+        }
+    })
+
+    // handle dynamics time derivative
+    $xml.find('Dynamics').find('TimeDerivative').each(function(index, elem) {
+        var tderiv_id = add_time_deriv()
+        $('#timederiv_' + tderiv_id).val(elem.attributes['variable'].value)
+        $('#timederiv_' + tderiv_id + '_eqn').val(elem.attributes['value'].value)
+    })
+
+    // handle dynamics onstart
+    $xml.find('Dynamics').find('OnStart').each(function(index, elem) {
+        set_on_start()
+        $(this).find('StateAssignment').each(function(index, elem2) {
+            var stass_id = add_start_assign()
+            $('#onstartassign_' + stass_id + '.form-control').val(elem2.attributes['variable'].value)
+            $('#onstartassign_' + stass_id + '_param').val(elem2.attributes['value'].value)
+        })
+
+        $(this).find('EventOut').each(function(index, elem2) {
+            var stevt_id = add_start_event()
+            $('#onstartevent_' + stevt_id + '.form-control').val(elem2.attributes['port'].value)
+        })
+    })
+    
+    // handle dynamics oncond
+    $xml.find('Dynamics').find('OnCondition').each(function(index, elem) {
+        var oncond_id = add_on_condition()
+        var test = elem.attributes['test'].value.replace(new RegExp('.gt.', 'g'), '>')
+        test = test.replace(new RegExp('.lt.', 'g'), '<')
+
+        $('#oncond_' + oncond_id + '_cond').val(test)
+
+        $(this).find('StateAssignment').each(function(index, elem2) {
+            var condass_id = add_cond_assign.call($('#oncond_' + oncond_id + '_cond'))
+
+            $('#' + oncond_id + '_assign_' + condass_id + '.form-control').val(elem2.attributes['variable'].value)
+            $('#' + oncond_id + '_assign_' + condass_id + '_param').val(elem2.attributes['value'].value)
+        })
+
+        $(this).find('EventOut').each(function(index, elem2) {
+            var condevt_id = add_cond_event.call($('#oncond_' + oncond_id + '_cond'))
+            $('#' + oncond_id + '_event_' + condevt_id + '.form-control').val(elem2.attributes['port'].value)
+        })
+    })
+
+}
+
+function validate_name(){
+
+    if($('#comp-name').val() == '' ||
+       window.all_names.indexOf($('#comp-name').val()) >= 0){
+        console.log('error, name taken')
+        $('#comp-name').css('border-color', 'red')
+        return false
+    }
+    else {
+        console.log('name ok')
+        $('#comp-name').css('border-color', '')
+        return true
+    }
+}
+
+function validate_req_names(){
+    retval = true
+
+    $('.req-name').each(function() {
+        if( $(this).val() == '') {
+            console.log('parameter failed')
+            $(this).css('border-color', 'red')
+            retval = false
+        }
+        else {
+            $('#comp-name').css('border-color', '')
+        }
+    })
+    return retval
+}
+
+function update_curr_hier_details( finish_func ){
+    var selected_extends = $('#extends').val()
+
+    window.curr_hier_details = {'params':[],
+                                'exps':[{name:'none', dimension:''}],
+                                'consts':[{name:'none', dimension:'', 'value':''}],
+                                'evnts':[]}
+ 
+    if(selected_extends != 'none') {
+        // retrieve info from server
+        $.ajax({
+            url: "{% url 'lems_ui.views.hier_details' %}?comp_type_name=" + selected_extends
+        })
+	.done(function (data) {
+            data = JSON.parse(data)
+
+            hier_html = ''
+            for(var i=0; i<data.length; ++i){
+                hier_html += '<div class="row"><label class="col-sm-12" style="margin-left:10px; margin-top:30px">Inherited from: ' + data[i].name + '</label>'
+
+                hier_html += '<div class="col-md-3">'
+                if(data[i].parameters.length > 0) {
+                    hier_html += '<label>Parameters</label>'
+                    hier_html += '<table class="table table-bordered"><thead><tr><th>name</th>'
+                    hier_html += '<th>dimension</th></thead>'
+                    for(var j=0; j<data[i].parameters.length; ++j){
+                        hier_html+= '<tr><td>' + data[i].parameters[j].name + '</td>'
+                        hier_html += '<td>' + data[i].parameters[j].dim + '</td></tr>'
+                    
+                        window.curr_hier_details.params.push(data[i].parameters[j])
+                    }
+                    hier_html += '</table>'
+                }
+                else {
+                    hier_html += '<label>No Parameters Defined</label>'
+                }
+                hier_html += '</div>'
+
+                hier_html += '<div class="col-md-3">'
+                if(data[i].exposures.length > 0) {
+                    hier_html += '<label>Exposures</label>'
+                    hier_html += '<table class="table table-bordered"><thead><tr><th>name</th>'
+                    hier_html += '<th>dimension</th></thead>'
+                    for(var j=0; j<data[i].exposures.length; ++j){
+                        hier_html+= '<tr><td>' + data[i].exposures[j].name + '</td>'
+                        hier_html += '<td>' + data[i].exposures[j].dim + '</td></tr>'
+
+                        window.curr_hier_details.exps.push(data[i].exposures[j])
+                    }
+                    hier_html += '</table>'
+                }
+                else {
+                    hier_html += '<label>No Exposures Defined</label>'
+                }
+                hier_html += '</div>'
+
+
+                hier_html += '<div class="col-md-3">'
+                if(data[i].constants.length > 0) {
+                    hier_html += '<label>Constants</label>'
+                    hier_html += '<table class="table table-bordered"><thead><tr><th>name</th>'
+                    hier_html += '<th>value</th><th>dimension</th></thead>'
+                    for(var j=0; j<data[i].constants.length; ++j){
+                        hier_html+= '<tr><td>' + data[i].constants[j].name + '</td>'
+                        hier_html += '<td>' + data[i].constants[j].value + '</td>'
+                        hier_html += '<td>' + data[i].constants[j].dim + '</td></tr>'
+
+                        window.curr_hier_details.consts.push(data[i].constants[j])
+                    }
+                    hier_html += '</table>'
+                }
+                else {
+                    hier_html += '<label>No Constants Defined</label>'
+                }
+                hier_html += '</div>'
+
+
+                hier_html += '<div class="col-md-3">'
+                if(data[i].event_ports.length > 0) {
+                    hier_html += '<label>Event Ports</label>'
+                    hier_html += '<table class="table table-bordered"><thead><tr><th>name</th>'
+                    hier_html += '<th>direction</th></thead>'
+                    for(var j=0; j<data[i].event_ports.length; ++j){
+                        hier_html+= '<tr><td>' + data[i].event_ports[j].name + '</td>'
+                        hier_html += '<td>' + data[i].event_ports[j].direction + '</td></tr>'
+
+                        window.curr_hier_details.evnts.push(data[i].event_ports[j])
+                    }
+                    hier_html += '</table></div>'
+                }
+                else {
+                    hier_html += '<label>No Event Ports</label>'
+                }
+                hier_html += '</div>'
+
+
+                hier_html += '</div>'
+            }
+            $('#hier-details').empty()
+            $('#hier-details').append(hier_html)
+
+            if(finish_func) {
+                finish_func()
+            }
+        })
+    }
+}
+
+function add_parameter(event){
+    if(event){
+        event.preventDefault()
+    }
+
+    param_id = 'param_' + window.param_idx
+
+    param_html = name_html(param_id)
+    param_html += dims_select_html(param_id)
+    param_html += removal_html(param_id)
+    param_html += '</div>'
+
+    $('#parameters').append(param_html)
+    $('#parameters').show()
+    finalise_html(param_id)
+
+    window.param_idx += 1
+    return window.param_idx-1
+}
+
+function add_constant(event){
+    if( event ) {
+        event.preventDefault()
+    }
+
+    const_id = 'const_' + window.const_idx
+
+    const_html = name_html(const_id)
+
+    const_html += '<label class="control-label col-sm-1">value</label>'
+    const_html += '<div class="col-sm-2"><input class="form-control req-name" id="' + const_id + '_value'
+    const_html += '" type="text" name="' + const_id + '_value" /></div>'
+    
+    const_html += dims_select_html(const_id)
+    const_html += removal_html(const_id)
+    const_html += '</div>'
+
+    $('#constants').append(const_html)
+    $('#constants').show()
+
+    finalise_html(const_id)
+
+    window.const_idx += 1
+    return window.const_idx - 1
+}
+
+function add_exposure(event){
+    if( event ) {
+        event.preventDefault()
+    }
+
+    exp_id = 'exp_' + window.exp_idx
+
+    exp_html = name_html(exp_id)
+
+    exp_html += dims_select_html(exp_id)
+    exp_html += removal_html(exp_id)
+    exp_html += '</div>'
+
+    $('#exposures').append(exp_html)
+    $('#exposures').show()
+    
+    finalise_html(exp_id)
+
+    window.exp_idx += 1
+    return window.exp_idx - 1
+}
+
+function add_child(event){
+    if(event){
+        event.preventDefault()
+    }
+
+    child_id = 'child_' + window.child_idx
+
+    child_html = name_html(child_id)
+
+    child_html += types_select_html(child_id)
+
+    child_html += '<label class="control-label col-sm-1">multiple</label>'
+    child_html += '<div class="col-sm-1"><input type="checkbox" name="' + child_id + '_multi" id="' + child_id + '_multi"/></div>'
+
+    child_html += removal_html(child_id)
+    child_html += '</div>'
+
+    $('#children').append(child_html)
+    $('#children').show()
+    
+    finalise_html(child_id)
+
+    window.child_idx += 1
+    return window.child_idx-1
+}
+
+function add_attachments(event){
+    if( event ) {
+        event.preventDefault()
+    }
+    attach_id = 'attach_' + window.attach_idx
+
+    attach_html = name_html(attach_id)
+    attach_html += types_select_html(attach_id)
+    attach_html += removal_html(attach_id)
+    attach_html += '</div>'
+
+    $('#attachments').append(attach_html)
+    $('#attachments').show()
+    
+    finalise_html(attach_id)
+
+    window.attach_idx += 1
+    return window.attach_idx - 1
+}
+
+function add_state_var(event){
+    if( event ) {
+        event.preventDefault()
+    }
+
+    statevar_id = 'statevar_' + window.statevar_idx
+
+    statevar_html = name_html(statevar_id)
+    statevar_html += dims_select_html(statevar_id)
+    statevar_html += exp_select_html(statevar_id)
+    statevar_html += removal_html(statevar_id)
+    statevar_html += '</div>'
+
+    $('#statevars').append(statevar_html)
+    $('#statevars').show()
+    
+    finalise_html(statevar_id)
+
+    window.statevar_idx += 1
+    return window.statevar_idx - 1
+}
+
+function add_derived_var(event){
+    if( event ) {
+        event.preventDefault()
+    }
+    derivedvar_id = 'derivedvar_' + window.derivedvar_idx
+
+    derivedvar_html = name_html(derivedvar_id)
+    derivedvar_html += dims_select_html(derivedvar_id)
+    derivedvar_html += exp_select_html(derivedvar_id)
+    derivedvar_html += sel_or_val_html(derivedvar_id)
+    derivedvar_html += removal_html(derivedvar_id)
+    derivedvar_html += '</div>'
+
+    $('#derivedvars').append(derivedvar_html)
+    $('#derivedvars').show()
+    
+    finalise_html(derivedvar_id)
+
+    window.derivedvar_idx += 1
+    return window.derivedvar_idx - 1
+}
+
+function add_time_deriv(event){
+    if( event ) {
+        event.preventDefault()
+    }
+
+    timederiv_id = 'timederiv_' + window.timederiv_idx
+
+    timederiv_html = '<div class="row">'
+    timederiv_html += variable_sel_html(timederiv_id)
+
+    timederiv_html += '<label class="control-label col-sm-1">equation</label>'
+    timederiv_html += '<div class="col-sm-5"><input class="form-control" id="' + timederiv_id + '_eqn'
+    timederiv_html += '" type="text" name="' + timederiv_id + '_eqn" /></div>'
+
+    timederiv_html += removal_html(timederiv_id)
+    timederiv_html += '</div>'
+
+    $('#timederivs').append(timederiv_html)
+    $('#timederivs').show()
+    
+    finalise_html(timederiv_id)
+
+    window.timederiv_idx += 1
+    return window.timederiv_idx - 1
+}
+
+function set_on_start(event){
+    if( event ) {
+        event.preventDefault()
+    }
+
+    $('#set-on-start').attr('disabled', true)
+    $('#on-start').show()
+}
+
+function add_start_assign(event){
+    if( event ) {
+        event.preventDefault()
+    }
+    onstart_assgn_id = 'onstartassign_' + window.onstartassign_idx
+
+    ret_html = '<div class="row" id="' + onstart_assgn_id + '">'
+    ret_html += '<label class="control-label col-sm-2">  Assign</label>'
+    ret_html += variable_sel_html(onstart_assgn_id)
+    ret_html += param_sel_html(onstart_assgn_id)
+
+    ret_html += removal_html(onstart_assgn_id)
+    ret_html += '</div>'
+
+    $('#on-start').append(ret_html)
+    finalise_html(onstart_assgn_id)
+
+    window.onstartassign_idx += 1
+    return window.onstartassign_idx - 1
+}
+
+function add_start_event(event){
+    if( event ) {
+        event.preventDefault()
+    }
+
+    onstart_event_id = 'onstartevent_' + window.onstartevent_idx
+
+    ret_html = '<div class="row"  id="' + onstart_event_id + '">'
+    ret_html += '<label class="control-label col-sm-2">Event</label>'
+    ret_html += port_sel_html(onstart_event_id, 'out')
+
+    ret_html += removal_html(onstart_event_id)
+    ret_html += '</div>'
+
+    $('#on-start').append(ret_html)
+    finalise_html(onstart_event_id)
+
+    window.onstartevent_idx += 1
+    return window.onstartevent_idx - 1
+}
+
+function add_on_condition(event){
+    if( event ) {
+        event.preventDefault()
+    }
+
+    oncond_id = 'oncond_' + window.oncond_idx
+
+    
+    ret_html = '<div id="' + oncond_id + '"><div class="row">'
+    ret_html += '<center><h5>-- On Condition -- </h5></center>'
+    ret_html += '<label class="col-sm-2">Condition</label>'
+    ret_html += '<input class="col-sm-4" type="text" id="' + oncond_id + '_cond" name="' + oncond_id + '" />'
+    ret_html += '<button class="btn btn-info btn-med col-sm-2" id="' + oncond_id + '_assign">Assignment</button>'
+    ret_html += '<button class="btn btn-info btn-med col-sm-2" id="' + oncond_id + '_event">Event Out</button>'
+
+    ret_html += removal_html(oncond_id)
+    ret_html += '</div></div>'
+
+    $('#on-condition').append(ret_html)
+    $('#on-condition').show()
+
+    $('#' + oncond_id + '_remove').click(function(){$(this).parent().parent().remove()})
+
+    $('#' + oncond_id + '_assign').click(add_cond_assign)
+    $('#' + oncond_id + '_event').click(add_cond_event)
+
+    window.oncond_idx += 1
+    return window.oncond_idx - 1
+}
+
+function add_cond_assign(event){
+    if( event ) {
+        event.preventDefault()
+    }
+
+    oncond_assign_id = $(this).attr('id') + '_' + window.onstartassign_idx
+
+    ret_html = '<div class="row" id="' + oncond_assign_id + '">'
+    ret_html += '<label class="control-label col-sm-2">Assign</label>'
+    ret_html += variable_sel_html(oncond_assign_id)
+    ret_html += param_sel_html(oncond_assign_id)
+
+    ret_html += removal_html(oncond_assign_id)
+    ret_html += '</div>'
+
+    $(this).parent().parent().append(ret_html)
+    $('#' + oncond_assign_id + '_remove').click(remove_on_cond)
+
+    window.onstartassign_idx += 1
+    return window.onstartassign_idx - 1
+}
+
+function add_cond_event(event){
+    if( event ) {
+        event.preventDefault()
+    }
+
+    oncond_event_id = $(this).attr('id') + '_' + window.onstartevent_idx
+
+    ret_html = '<div class="row"  id="' + oncond_event_id + '">'
+    ret_html += '<label class="control-label col-sm-2">Event</label>'
+    ret_html += port_sel_html(oncond_event_id, 'out')
+
+    ret_html += removal_html(oncond_event_id)
+    ret_html += '</div>'
+
+    $(this).parent().parent().append(ret_html)
+    $('#' + oncond_event_id + '_remove').click(remove_on_cond)
+
+    window.onstartevent_idx += 1
+    return window.onstartevent_idx - 1
+}
+
+function name_html(item_id){
+    ret_html = '<div class="row"  id="' + item_id + '_div"><br>'
+    ret_html += '<label class="control-label col-sm-1">  name</label>'
+    ret_html += '<div class="col-sm-3"><input class="form-control req-name" id="' + item_id
+    ret_html += '" type="text" name="' + item_id + '" /></div>'
+    return ret_html
+}
+
+function types_select_html(item_id){
+    ret_html = '<label class="control-label col-sm-1">type</label>'
+    ret_html += '<div class="col-sm-3"><select class="form-control" id="' + item_id + '_type" '
+    ret_html += 'name="' + item_id + '_type">'
+    for(i=0; i<all_names.length; ++i) {
+        ret_html += '<option value="' + all_names[i] + '">' + all_names[i] + '</option>'   
+    }
+    
+    ret_html += '</select></div>'
+    return ret_html
+}
+
+function dims_select_html(item_id){
+    ret_html = '<label class="control-label col-sm-1">dim</label>'
+    all_dims = {{all_dim_names | safe}}
+    all_dims.unshift('none')
+
+    ret_html += '<div class="col-sm-3"><select class="form-control" id="' + item_id + '_dim" '
+    ret_html += 'name="' + item_id + '_dim">'
+    for(i=0; i<all_dims.length; ++i) {
+        ret_html += '<option value="' + all_dims[i] + '">' + all_dims[i] + '</option>'   
+    }
+    
+    ret_html += '</select></div>'
+
+    return ret_html
+}
+
+function exp_select_html(item_id){
+    ret_html = '<label class="control-label col-sm-1">exposure</label>'
+
+    ret_html += '<div class="col-sm-2"><select class="form-control" id="' + item_id + '_exp" '
+    ret_html += 'name="' + item_id + '_exp" onchange="select_dim_from_exp(\'' + item_id + '\')">'
+    for(i=0; i<window.curr_hier_details.exps.length; ++i) {
+        ret_html += '<option value="' + window.curr_hier_details.exps[i].name + '">'
+        ret_html += window.curr_hier_details.exps[i].name + '</option>'   
+    }
+
+    $('[id*="exp_"].row').each( function(){
+        ret_html += '<option value="' + $(this).find('input')[0].value + '">'
+        ret_html += $(this).find('input')[0].value + '</option>'   
+    })
+
+    ret_html += '</select></div>'
+
+    return ret_html
+}
+
+function sel_or_val_html(item_id){
+    var ret_html = '<label class="control-label col-sm-2">contents</label>'
+    ret_html += '<div class="col-sm-2"><select class="form-control" id="' + item_id + '_selval" '
+    ret_html += 'name="' + item_id + '_selval" onchange="change_sel_or_val(\'' + item_id + '\')">'
+
+    ret_html += '<option value="select" selected>select</option>'   
+    ret_html += '<option value="value">value</option>'   
+    ret_html += '</select></div>'
+
+    ret_html += '<label class="control-label col-sm-1">equation</label>'
+    ret_html += '<div class="col-sm-3"><input class="form-control" id="' + item_id + '_selvaleqn'
+    ret_html += '" type="text" name="' + item_id + '_selvaleqn" /></div>'
+
+    ret_html += '<label class="control-label col-sm-1 ' + item_id + '_selvalred">reduce</label>'
+    ret_html += '<div class="col-sm-2 ' + item_id + '_selvalred ">'
+    ret_html += '<select class="form-control" id="' + item_id + '_selvalred" '
+    ret_html += 'name="' + item_id + '_selvalred" >'
+
+    ret_html += '<option value="add">add</option>'   
+    ret_html += '<option value="multiply" selected>multiply</option>'   
+    ret_html += '</select></div>'
+    return ret_html
+}
+
+function variable_sel_html(item_id){
+    var ret_html = '<label class="control-label col-sm-1">var</label>'
+    ret_html += '<div class="col-sm-2"><select class="form-control" id="' + item_id + '" '
+    ret_html += 'name="' + item_id + '" >'
+
+    $('#statevars').find('input').each(function(){
+        ret_html += '<option value="' + $(this).val() +'" >' + $(this).val() + '</option>'   
+    })
+
+    ret_html += '</select></div>'
+
+    return ret_html
+}
+
+
+function param_sel_html(item_id){
+    var ret_html = '<label class="control-label col-sm-1">value</label>'
+    ret_html += '<div class="col-sm-3"><select class="form-control" id="' + item_id + '_param" '
+    ret_html += 'name="' + item_id + '_param" >'
+
+    for(var i=0; i<window.curr_hier_details.params.length; ++i){
+        ret_html += '<option value="' + window.curr_hier_details.params[i].name + '" >'
+        ret_html += window.curr_hier_details.params[i].name + '</option>'   
+    }
+
+    ret_html += '</select></div>'
+
+    return ret_html
+}
+
+
+function port_sel_html(item_id, direction){
+    var ret_html = '<label class="control-label col-sm-1">port</label>'
+    ret_html += '<div class="col-sm-3"><select class="form-control" id="' + item_id + '" '
+    ret_html += 'name="' + item_id + '" >'
+
+    for(var i=0; i<window.curr_hier_details.evnts.length; ++i){
+        if(window.curr_hier_details.evnts[i].direction == direction){
+            ret_html += '<option value="' + window.curr_hier_details.evnts[i].name + '" >'
+            ret_html += window.curr_hier_details.evnts[i].name + '</option>'   
+        }
+    }
+
+    ret_html += '</select></div>'
+
+    return ret_html
+}
+
+function removal_html(item_id){
+    ret_html = '<button class="com-sm-1" id="' + item_id
+    ret_html += '_remove">x</button>'
+
+    return ret_html
+}
+
+function finalise_html(item_id){
+    $('#' + item_id + '_remove').click(remove_param)
+    $('#' + item_id ).change(function() {
+        if($(this).val() == ''){
+            $(this).css('border-color', 'red')
+        }
+        else {
+            $(this).css('border-color', '')
+        }
+    })
+}
+
+function select_dim_from_exp(item_id){
+    var exp_name = $('#' + item_id + '_exp').val()
+    for(var i=0; i < window.curr_hier_details.exps.length; ++i){
+        if(window.curr_hier_details.exps[i].name == exp_name){
+            console.log(window.curr_hier_details.exps[i])
+            $('#' + item_id + '_dim').val(window.curr_hier_details.exps[i].dim)
+            break
+        }
+    }
+}
+
+function change_sel_or_val(item_id){
+    if($('#' + item_id + '_selval').val() == 'select'){
+        $('.' + item_id + '_selvalred').show()
+    }
+    else {
+        $('.' + item_id + '_selvalred').hide()
+    }
+}
+
+function remove_param(event){
+    event.preventDefault()
+    console.log('size:')
+    if($(this).parent().parent().children().length <= 2) {
+        $(this).parent().parent().hide()
+    }
+
+    $(this).parent().remove()
+}
+
+function remove_on_cond(event){
+    event.preventDefault()
+    console.log('size:')
+    if($(this).parent().parent().children().length <= 1) {
+        $(this).parent().parent().hide()
+    }
+
+    $(this).parent().remove()
+}
+
+function on_submit(event){
+    retval = true
+
+    retval = retval & validate_name()
+    if(retval) {
+        retval = retval & validate_req_names()
+    }
+
+    console.log(retval)
+    
+    if(retval == false) {
+        event.preventDefault()
+    }
+
+    return retval
+}
+
+window.onload = on_load
+</script>
+{% endblock content %}

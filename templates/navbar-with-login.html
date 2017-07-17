@@ -1,0 +1,198 @@
+{% load backend_utils %}
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation" id="main-navbar">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/dashboard">Dashboard</a>
+        </div>             
+		<div class="navbar-collapse collapse" role="navigation">
+		 <ul class="nav navbar-nav ">
+			  <li class="dropdown">
+				   <a href="#" class="dropdown-toggle" data-toggle="dropdown">Worm Configuration<b class="caret"></b></a>
+				   <ul class="dropdown-menu">            
+					 <li><a href="/booking/view_NeuronModels">Neuron Models</a></li>
+					 <li><a href="/booking/view_NeuralNetworks">Network Configurations</a></li>
+				   </ul>
+			  </li>
+			  <li class="dropdown">
+				   <a href="#" class="dropdown-toggle" data-toggle="dropdown">Experiment Configuration<b class="caret"></b></a>
+				   <ul class="dropdown-menu">            
+					 <li><a href="/djlems/rtw_ui/dashboard/">Result Recording Profiles</a></li>
+                     <li><a href="{% url 'experimentDefinition_Selection' %}">Behavioural Experiment</a></li>
+					 <li><a href="{% url 'reserve' %}">Wizard for Booking</a></li>                      
+				   </ul>
+			  </li>
+			  <li class="dropdown">
+				   <a href="#" class="dropdown-toggle" data-toggle="dropdown">Results<b class="caret"></b></a>
+				   <ul class="dropdown-menu">            
+					 <li><a href="{% url 'view_PE_results' %}">Locomotion Results Visualization</a></li>
+					 <li><a href="{% url 'view_RB_results' %}">Neuron Results Visualization</a></li>
+					 <li><a href="{% url 'view_integrated_results' %}">Integrated Results Visualization</a></li>
+				   </ul>
+			  </li>
+
+
+			  <li class="dropdown">
+				   <a href="#" class="dropdown-toggle" data-toggle="dropdown">Collaborate<b class="caret"></b></a>
+				   <ul class="dropdown-menu">
+						<li class="dropdown-header">Share</li>
+					 <li><a href="/booking/share_NeuronModels">Neuron Models</a></li>
+					 <li><a href="/booking/share_NetworkModels">Neuron Network</a></li>
+					 <li><a href="{% url 'shareExperimentBehaviour' %}">Behavioural Experiment</a></li>					 
+					 <li><a href="/booking/share_RB_results">Readback Results</a></li>
+					 <li><a href="{% url 'share_PE_results' %}">Locomotion Visual Results</a></li>
+					<li role="separator" class="divider"></li>
+					<li class="dropdown-header">Social</li>
+					 <li><a href="/wiki">Sielegans - Wiki </a></li>
+					 <li><a href="/forum">Sielegans - Forum </a></li>                      
+				   </ul>
+			  </li>
+
+                 <li class="enabled"><a href="/wiki">Wiki</a></li>
+
+
+
+			{% comment %}
+			<!--GE: I'm keeping this to have the urls used by Andoni, in case I need them. -->
+			  <li class="dropdown">
+				   <a href="#" class="dropdown-toggle" data-toggle="dropdown">Behavioural Experiment <b class="caret"></b></a>
+				   <ul class="dropdown-menu">            
+					 <li><a href="/experimentDefinition#/experiment/1/definition/event/exact/1">Experiment Definition</a></li>
+					 <li><a href="/experimentDefinition#/experiment/1/visualization">Experiment Result Review</a></li> 
+					 <li class="divider"></li>
+					 <li><a href="{% url 'experimentDefinition-prot' %}">Experiment Definition Prototype Shema Model</a></li>
+					 <!--<li><a href="/fillExperimentBehaviour">Experiment Definition Prototype - Old -</a></li>-->
+					 <li><a href="/shareExperimentBehaviour">Experiment Sharing Prototype</a></li>                                 
+				   </ul>
+			  </li>
+			  {% endcomment %}
+			
+
+			  <li class="dropdown">
+				   <a href="#" class="dropdown-toggle" data-toggle="dropdown">Help<b class="caret"></b></a>
+				   <ul class="dropdown-menu">            
+					 <li><a href="/support">Report a problem</a></li>
+                     <li><a href="/wiki">Platform usage instructions</a></li>
+{#					 <li><a href="#">Something else here</a></li>#}
+					 <li class="divider"></li>
+					 <li><a href="/about">About</a></li>
+				   </ul>
+			  </li>
+		 </ul>      
+		 <ul class="nav navbar-nav navbar-right">
+			  <li class="dropdown">
+				   <a href="#" class="dropdown-toggle" data-toggle="dropdown">{% if user.is_authenticated %} 
+					 <span class="glyphicon glyphicon-user"></span> {{user.username}}{% endif %}
+					 <b class="caret"></b></a>
+				   <ul class="dropdown-menu">
+					<li>
+					     <form role="form" action="/">
+								  {% csrf_token %}
+						       <button type="submit" class="btn btn-primary" style="float: right;">Go to Homepage</button>
+					     </form>
+					</li>
+					 <div style="clear: both;"></div>
+					<li class="divider"></li>					
+					{% comment %}
+					GE: backends is passed through  'social.apps.django_app.context_processors.backends' template context processor					
+					{% endcomment%}
+					     
+					    {% if backends.associated %}
+					    {% comment %}
+					    <!--I've not found a way to see which backend has been used to log-in. backends.associated provides UserSocialAuth instances related with the currently logged in user.-->
+					    <!--So if the user has logged in the past with 2 different social accounts, both of them would be returned.-->
+					    <!--I don't think django or python-social-auth saves the backend used to log-in.-->
+					    <!--Therefore I'll consider only google-plus is being used and will show different log-in buttons: 1 for google-plus (when there is a social backend associated for the active user) and 2 for a local account user.-->
+					    <!--There could be a possible bug when a local account is created the same email used for social accounts. I guess very rare.-->
+					    <!--Just in case, I'll add a /logout call when the gapi (isSignedIn) for google-plus fails (when other social auth is used)-->
+					    <!--This requires to have client_id filled, which means having always filled google_plus keys on the settings file, even if google-plus is not used otherwhise onClick event will not be added-->
+					    {% endcomment %}
+					    {% comment %}
+					    <!--Disconnect deletes the association of the social account with the user account. Since email account is saved in the user account,-->
+					    <!--it gives an error when a social account user with the same email tries to sign-in after a disconnect. To avoid this error,-->
+					    <!--'social.pipeline.social_auth.associate_by_email' is required in the pipeline (defined in local_settings.py), but this is dangerous, since:-->
+					    <!--#Authentication Pipeline =>-->
+					    <!--#Email association (associate_by_email pipeline entry) is disabled by default for security reasons. Take for instance this scenario:-->
+					    <!--#-->
+					    <!--#User A registers using django-social-auth and we get email address foo@bar.com.-->
+					    <!--#User B goes to provider XXX and registers using foo@bar.com (provider XXX doesn't validate emails).-->
+					    <!--#User B goes to your site and logs in using its XXX account using django-social-auth.-->
+					    <!--#User B gets access to User A account.-->
+					    <!--Therefore I've decided to comment disconnect for the moment for now-->
+					    <li>
+						  <form role="form" action="/disconnectSocial">
+								  {% csrf_token %}
+						       <button type="submit" class="btn btn-danger" style="float: right;">Disconnect from social auth {{ name }}</button>
+						  </form>
+					    </li>
+					    {% endcomment %}
+					    <li role="presentation" class="divider"></li>
+					    <li role="presentation">                                     					 
+						<button type="submit" class="btn btn-success" id="google-plus-button" style="float: right;">Log Out</button>
+						<div style="clear: both;"></div>						
+					    </li>
+					    
+					    <script src="https://apis.google.com/js/api:client.js"></script>
+					    <script type="text/javascript">
+						gapi.load('auth2', function () {
+						  var auth2;
+					      
+						  auth2 = gapi.auth2.init({
+						    client_id: "{{ plus_id }}",
+						    scope: "{{ plus_scope }}"
+						  });
+					      
+						  auth2.then(function () {
+						    if (auth2.isSignedIn.get()) {
+						      $('#google-plus-button').on('click', function (event) {
+							event.preventDefault();
+							auth2.signOut().then(function () {
+							  console.log("Logged out from Google+ platform");
+							  document.location = "/logout";
+							});
+						      });
+						    }
+						    {% comment %}
+						    Just in case, I'll add a /logout call when the gapi (isSignedIn) for google-plus fails (when other social auth is used)
+					    This requires to have client_id filled, which means having always filled google_plus keys on the settings file, even if google-plus is not used otherwhise onClick event will not be added
+						    {% endcomment %}
+						    else {
+							$('#google-plus-button').on('click', function (event) {							
+							document.location = "/logout";
+							});
+						    }
+						  });						  
+						});
+					      </script>     
+					     <div style="clear: both;"></div>
+					     {% else %}
+					     <li>						  
+						 <form role="form" action="/logout">
+							  {% csrf_token %}
+						   <button type="submit" class="btn btn-success" style="float: right;">Log out</button>
+						 </form>
+						 <div style="clear: both;"></div>
+					     </li>
+					     {% endif %}
+					
+					
+						
+						<li class="divider"></li>
+						{%if user.is_superuser %}
+                            <li><a href="/forumst/admin">Manage Forum (categories, etc)</a></li>
+						    <li class="divider"></li>
+                            <li><a href="{% url 'errors_review' %}">Manage Errors </a></li>
+                        {% endif %}
+						
+						
+				   </ul>
+			  </li>
+		  </ul>
+    </div>
+	  </div>
+</div>		

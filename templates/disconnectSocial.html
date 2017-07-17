@@ -1,0 +1,24 @@
+{% extends 'base-with-login.html' %}
+
+{% block content %}
+{% load backend_utils %}
+<div id="piecemaker-container">    
+    <h4>Click below to disconnect your social account from the Si elegans platform. If you disconnect your social account, automatic login will be disabled and the next time you try to log with a social account, you will be prompted for giving permission to the Si elegans application</h4>
+    <li>
+            {% for sublist in available_backends|social_backends %}
+                {% comment %} backends template context ('social.apps.django_app.context_processors.backends') cannot be used here since backends.backends only contains the name,
+                thats why the corresponding view fills and passes the available_backend value {% endcomment %}
+              {% for name, backend in sublist %}
+                {% associated backend %}
+                {% if association %}
+                  <form class="disconnect-form" action="{% url "social:disconnect_individual" backend=association.provider association_id=association.id %}" method="post">{% csrf_token %}
+                    <button type="submit" name="{{ backend|backend_class }}" class="btn btn-danger">Disconnect {{ backend|backend_name }}</button>           
+                  </form>
+                {% endif %}
+              {% endfor %}                   
+          {% endfor %}
+    </li>
+</div>
+    
+{% endblock %}
+                    

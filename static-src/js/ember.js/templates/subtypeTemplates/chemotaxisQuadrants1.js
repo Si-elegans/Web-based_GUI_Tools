@@ -1,0 +1,7 @@
+Ember.TEMPLATES["chemotaxisQuadrants1"] = Ember.Handlebars.template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+  var helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = '';
+  data.buffer.push("<div class=\"row\">\r\n    <div class=\"col-sm-12\">\r\n        <div class=\" title\">Concentration</div>\r\n    </div>\r\n</div>\r\n<div class=\"row\">\r\n    <div class=\"col-sm-12 block\">\r\n        <div>\r\n            <input id=\"quad1ConcentrationSlider\" class='simpleSlider' data-slider-id='quad1ConcentrationSlider' type=\"text\" data-slider-min=\"0\" data-slider-max=\"100\" data-slider-step=\"0.1\" data-slider-value=\"14\"/>     \r\n        </div>\r\n    </div>\r\n</div>\r\n<div class=\"row\">\r\n    <div class=\"col-sm-12\">\r\n        <div class=\" title\">Chemical</div>\r\n			<div class=\"col-sm-12\">\r\n				<div class=\"col-sm-12\">\r\n					<div class=\"col-sm-12\">\r\n					<div class=\"col-sm-12\">\r\n						");
+  data.buffer.push(escapeExpression(((helpers.render || (depth0 && depth0.render) || helperMissing).call(depth0, "chemical", "quadrantChemical", {"name":"render","hash":{},"hashTypes":{},"hashContexts":{},"types":["STRING","ID"],"contexts":[depth0,depth0],"data":data}))));
+  data.buffer.push("\r\n					</div>\r\n					</div>\r\n				</div>\r\n			</div>\r\n		</div>\r\n    </div>\r\n</div>\r\n");
+  return buffer;
+},"useData":true});

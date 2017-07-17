@@ -1,0 +1,25 @@
+Ember.TEMPLATES["termotaxisExact"] = Ember.Handlebars.template({"compiler":[6,">= 2.0.0-beta.1"],"main":function(depth0,helpers,partials,data) {
+  var helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, buffer = '';
+  data.buffer.push("<div class=\"row\">\r\n    <div class=\"col-sm-12\">\r\n        <div class=\" title\">Experiment type</div>\r\n    </div>\r\n</div>\r\n<div class=\"row\">\r\n    <div class=\"col-sm-12 block\"> \r\n        <div class=\"btn-group\">\r\n            <button type=\"button\" class=\"btn btn-default dropdown-toggle\" data-toggle=\"dropdown\" aria-expanded=\"false\">\r\n                touch <span class=\"caret\"></span>\r\n            </button>\r\n            <ul class=\"dropdown-menu\" role=\"menu\">\r\n                <li><a href=\"#\">touch</a></li>\r\n                <li><a href=\"#\">plate tap</a></li>\r\n            </ul>\r\n        </div>\r\n    </div>\r\n</div>\r\n<div class=\"row\">\r\n	<div class=\"col-sm-12\">\r\n		<div class=\" title\">Time</div>\r\n	</div>\r\n</div>\r\n<div class=\"row\">\r\n	<div class=\"col-sm-12 block\">\r\n		<div>\r\n			");
+  data.buffer.push(escapeExpression(((helpers.input || (depth0 && depth0.input) || helperMissing).call(depth0, {"name":"input","hash":{
+    'value': ("eventTime"),
+    'class': ("inline xyzinput"),
+    'step': ("0.1"),
+    'min': ("0"),
+    'action': ("updateEventTime"),
+    'type': ("number"),
+    'id': ("exactTimeInput")
+  },"hashTypes":{'value': "ID",'class': "STRING",'step': "STRING",'min': "STRING",'action': "STRING",'type': "STRING",'id': "STRING"},"hashContexts":{'value': depth0,'class': depth0,'step': depth0,'min': depth0,'action': depth0,'type': depth0,'id': depth0},"types":[],"contexts":[],"data":data}))));
+  data.buffer.push("\r\n			");
+  data.buffer.push(escapeExpression(((helpers.input || (depth0 && depth0.input) || helperMissing).call(depth0, {"name":"input","hash":{
+    'data-slider-value': ("eventTime"),
+    'data-slider-step': ("0.1"),
+    'data-slider-min': ("0"),
+    'type': ("text"),
+    'data-slider-id': ("exactTimeSlider"),
+    'class': ("simpleSlider"),
+    'id': ("exactTimeSlider")
+  },"hashTypes":{'data-slider-value': "ID",'data-slider-step': "STRING",'data-slider-min': "STRING",'type': "STRING",'data-slider-id': "STRING",'class': "STRING",'id': "STRING"},"hashContexts":{'data-slider-value': depth0,'data-slider-step': depth0,'data-slider-min': depth0,'type': depth0,'data-slider-id': depth0,'class': depth0,'id': depth0},"types":[],"contexts":[],"data":data}))));
+  data.buffer.push("\r\n		</div>\r\n	</div>\r\n</div>\r\n<div class=\"row\">\r\n    <div class=\"col-sm-12\">\r\n        <div class=\" title\">Force</div>\r\n    </div>\r\n</div>\r\n<div class=\"row\">\r\n    <div class=\"col-sm-12 block\">\r\n        <div>\r\n            <input type=\"text\" class=\"inline xyzinput\" placeholder=\"x\"/>\r\n            <input id=\"forceSlider\" class='simpleSlider' data-slider-id='forceSlider' type=\"text\" data-slider-min=\"0\" data-slider-max=\"100\" data-slider-step=\"0.1\" data-slider-value=\"14\"/>     \r\n        </div>\r\n    </div>\r\n</div>\r\n<div class=\"row\">\r\n    <div class=\"col-sm-12\">\r\n        <div class=\" title\">Instrument</div>\r\n    </div>\r\n</div>\r\n<div class=\"row\">\r\n    <div class=\"col-sm-12 block\">\r\n        <div class=\"btn-group\">\r\n            <button type=\"button\" class=\"btn btn-default dropdown-toggle\" data-toggle=\"dropdown\" aria-expanded=\"false\">\r\n                hair <span class=\"caret\"></span>\r\n            </button>\r\n            <ul class=\"dropdown-menu\" role=\"menu\">\r\n                <li><a href=\"#\">hair</a></li>\r\n                <li><a href=\"#\">xxx</a></li>\r\n            </ul>\r\n        </div>\r\n    </div>\r\n</div>\r\n<div class=\"row\">\r\n    <div class=\"col-sm-12\">\r\n        <div class=\" title\">Location</div>\r\n    </div>\r\n</div>\r\n<div class=\"row\">\r\n    <div class=\"col-sm-12 block\">\r\n        <div>\r\n            <div class=\"whitefont\">Location angle</div>\r\n            <input type=\"text\" class=\"inline xyzinput\" placeholder=\"&omicron;\"/>\r\n            <input id=\"locationAngleSlider\" class=\"simpleSlider slider-selection\" data-slider-id='locationAngleSlider' type=\"text\" data-slider-min=\"0\" data-slider-max=\"20\" data-slider-step=\"1\" data-slider-value=\"14\"/>     \r\n        </div>\r\n    </div>\r\n</div>\r\n<div class=\"row\">\r\n    <div class=\"col-sm-12 block\">\r\n        <div>\r\n            <div class=\"whitefont\">Location length</div>\r\n            <input type=\"text\" class=\"inline xyzinput\" placeholder=\"mm\"/>\r\n            <input id=\"locationLengthSlider\" class=\"simpleSlider slider-selection\" data-slider-id='locationLengthSlider' type=\"text\" data-slider-min=\"0\" data-slider-max=\"20\" data-slider-step=\"1\" data-slider-value=\"14\"/>     \r\n        </div>\r\n    </div>\r\n</div>");
+  return buffer;
+},"useData":true});

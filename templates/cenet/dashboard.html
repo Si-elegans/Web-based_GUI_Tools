@@ -1,0 +1,262 @@
+{% extends 'base-with-login.html' %}
+
+{% block content %}
+
+<div class="row">
+    <div id="col_0" class="col-lg-12 col-md-12 col-sm-12">
+        <h3>Neuron Models</h3>
+        <a href="/djlems/neuron_model/">New Neuron Model</a>
+        <table class="table">
+            <thead>
+                <th>Model Name</th>
+                <th>Owner</th>
+                <th>Simulate Model</th>
+                <th>{%if jobs_found%}Simulation Results{%endif%}</th>
+                <th></th>
+            </thead>
+            {% for model,jobs in models %}
+            <tr>
+                <td><a href="/djlems/neuron_model/{{ model.name }}/">{{ model.name }}</a></td>
+                <td>{{ model.owner }}</td>
+                <td><select id="run_job_select_{{model.id}}">
+                    <option value="0" id="job_jlems">jlems</option>
+                    {% if user.is_superuser %}
+                    <option value="1" id="job_isim">isim</option>
+                    <option value="2" id="job_fpga">fpga</option>
+                    {% endif %}
+                </select>
+                <button onclick="sel_syn_for_job({{model.id}})" id="sched_btn_{{model.id}}">Queue Job</button>
+                </td>
+                <td>
+                    {% if jobs %}
+                    <select onchange="handle_btns()" class="res_sel" id="prev_jobs_select_{{model.id}}">
+                    {% for job in jobs %}
+                        <option value="{{job.status}}" lems2fpga_id="{{job.lems2fpga_job_id}}" job_id="{{job.id}}">
+                            {{job.created}} : {{job.sim_type_str}} : {{job.status_str}}
+                        </option>
+                    {% endfor %}
+                    </select>
+                    <button id="res_btn_{{model.id}}" class="res_btn" onclick="show_results({{model.id}})">view</button>
+                    {% endif %}
+                </td>
+                <td>
+                    <button onclick="view_lems('{{model.name}}')" id="model_xml_{{model.id}}" >View LEMS</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+
+
+<div class="row">
+    <div id="col_0" class="col-lg-12 col-md-12 col-sm-12">
+        <h3>Synapse Models</h3>
+        <a href="/djlems/syn_model/">New Synapse Model</a>
+        <table class="table">
+            <thead>
+                <th>Model Name</th>
+                <th>Owner</th>
+                <th></th>
+            </thead>
+            {% for model in syn_models %}
+            <tr>
+                <td><a href="/djlems/syn_model/{{ model.name }}/">{{ model.name }}</a></td>
+                <td>{{ model.owner }}</td>
+                <td>
+                    <button onclick="view_lems('{{model.name}}')" id="model_xml_{{model.id}}" >View LEMS</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+
+<div class="row">
+    <div id="col_0" class="col-lg-12 col-md-12 col-sm-12">
+        <h3>LEMS Network Models</h3>
+        <a href="/djlems/net_model/">New Network Model</a>
+        <table class="table">
+            <thead>
+                <th>Model Name</th>
+                <th>Owner</th>
+                <th></th>
+            </thead>
+            {% for model in net_models %}
+            <tr>
+                <td><a href="/djlems/net_model/{{ model.name }}/">{{ model.name }}</a></td>
+                <td>{{ model.owner }}</td>
+                <td>
+                    <button onclick="view_lems('{{model.name}}')" id="model_xml_{{model.id}}" >View LEMS</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+
+
+<div class="row">
+    <div id="col_1" class="col-lg-12 col-md-12 col-sm-12">
+        <h3>Configured Networks</h3>
+        <a href="/djlems/cenet/#nav=2.94,0,5">New Network</a>
+        <table class="table">
+            <thead>
+                <th>Model Name</th>
+                <th>Owner</th>
+                <th>Status</th>
+                <th></th>
+            </thead>
+            {% for net in nets %}
+            <tr>
+                <td>{{ net.name }}</td>
+                <td>{{ net.owner }}</td>
+                <td id="{{net.name}}">{{ net.status }}</td>
+                <td><a href="/djlems/cenet/{{ net.name }}/#nav=2.94,0,5">edit</a>
+                {% if net.status == "Under Development" %}
+                , <a href="#" onclick="build_net('{{net.name}}')">build</a>
+                {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+
+
+    <div id="synSelModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content" >
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title"><center>Select Synapse Model</center></h4>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    {% for model in syn_models %}
+                    <tr>
+                        <td><input class="syncheck" type="checkbox" {% if forloop.counter == 1 %}checked{% endif %} value="{{model.id}}"/></td>
+                        <td>{{ model.name }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" onclick="sched_job()">Run Job</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Back</button>
+            </div>
+        </div>
+        </div>
+    </div>
+<div class="row">
+    <div id="col_2" class="col-lg-12 col-md-12 col-sm-12">
+        <h3>RTW Configurations</h3>
+        <a href="/djlems/rtw_ui/">New RTW</a>
+        <table class="table">
+            <thead>
+                <th>RTW Configuration Name</th>
+                <th>Owner</th>
+                <th>Network Configuration</th>
+                <th></th>
+            </thead>
+            {% for rtw_conf in rtw_confs %}
+            <tr>
+                <td>{{ rtw_conf.name }}</td>
+                <td>{{ rtw_conf.owner }}</td>
+                <td>{{ rtw_conf.network.name }}</td>
+                <td><a href="/djlems/rtw_ui/{{ rtw_conf.name }}/">edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+
+
+
+
+<script>
+    window.onload = function(){
+        window.refresh_timer = null
+        handle_btns()
+    }
+
+    function handle_btns(){
+        $('.res_btn').hide()
+
+        var refreshing = false
+        $('.res_sel').each(function(){
+            if($(this).val() == 2){
+                $(this).next('button').show()
+            }
+            else if($(this).val() == 0 || $(this).val() == 1){
+                refreshing = true
+            }
+        })
+
+        if(refreshing == true && window.refreshing_timer == null) {
+            console.log('starting auto reload')
+            window.refreshing_timer = setInterval("location.reload()", 10000)
+        }
+        if(refreshing == false && window.refreshing_timer != null) {
+            console.log('stopping auto reload')
+            clearInterval(window.refreshing_timer)
+            window.refreshing_timer = null
+        }
+    }
+
+    function build_net(net_name){
+        $('#' + net_name).text('Queued for build')
+    }
+
+    function sel_syn_for_job(model_id){
+        window.curr_model_id = model_id
+
+        $('#synSelModal').modal()
+    }
+
+    function sched_job(){
+        var syn_ids = ""
+        $('.syncheck:checked').each(function(){
+            syn_ids += $(this).val() + "_"
+        })
+
+        model_id = window.curr_model_id
+        var sim_type = $('#run_job_select_' + model_id).val()
+
+        var url = '/djlems/sched_job/?model_id=' + model_id + '&sim_type=' + sim_type
+        if(syn_ids != ""){
+            url += "&syn_ids=" + syn_ids
+        }
+
+        $.get(url,
+                function(data) {
+                    console.log(data)
+                    if(data.indexOf('<error>') >= 0){
+                        alert(data)
+                    }
+                    location.reload(true)
+                }
+        )
+    }
+
+    function show_results(model_id) {
+        sim_id = $('#prev_jobs_select_' + model_id).find('option:selected').attr('job_id')
+        console.log('Opening Results for job: ' + sim_id)
+
+        window.open('/djlems/results_viewer/?sim_id=' + sim_id, '_blank')
+    }
+
+    function view_lems(model_name) {
+        var url = "{% url 'lems_ui.views.model_to_lems_xml' %}" +
+                  "?model_name=" + model_name
+
+        console.log("Trying to open url: " + url)
+        window.open(url, '_blank')
+    }
+
+</script>
+{% endblock content  %}
+
