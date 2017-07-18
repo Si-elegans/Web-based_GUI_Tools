@@ -5,7 +5,7 @@ This repository contains the open source code of the web-based GUI tools develop
 
 The web-based GUI tools running instance is available at: [[Si-elegans platform online](https://platform.si-elegans.eu)]
 
-## Local setup instructions
+## Local setup instructions (Tested with python 2.7 in both Windows 10 and Ubuntu 14.04)
 
 0.- Clone repository
 
@@ -23,7 +23,7 @@ The web-based GUI tools running instance is available at: [[Si-elegans platform 
 
 7.- python manage.py createcachetable spirit_cache --settings=mysite.local_settings
 
-8.- python manage.py runserver_plus 0.0.0.0:8000 --cert --threaded --settings=mysite.local_settings
+8.- python manage.py runsslserver --addrport 0.0.0.0:8000 --settings=mysite.local_settings
 
 9.- Open https://127.0.0.1:8000 in your browser. (**https!!**)
 
