@@ -76,7 +76,7 @@ INSTALLED_APPS = (
     'social.apps.django_app.default',
     'registration',
     'storages',
-    'debug_toolbar',
+    # 'debug_toolbar',
     'behaviouralExperimentDefinition',
     'rest_framework',
     'django_extensions',
