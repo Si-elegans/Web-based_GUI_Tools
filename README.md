@@ -1,7 +1,9 @@
 # Si elegans Web-based GUI Tools
 Web-based Interfaces for Virtual C. elegans Neuron Model Definition, Network Configuration, Behavioural Experiment Definition and Experiment Results Visualisation
 
-This repository contains the open source code of the web-based GUI tools developed within the [[FP7 Si-elegans project](https://www.si-elegans.eu)]. Our goal is to open the developed web-tools to the community.
+This repository contains the open source code of the web-based GUI tools developed within the [[FP7 Si-elegans project](https://www.si-elegans.eu)]. 
+
+Our goal is to open the developed web-tools to the community.
 
 The web-based GUI tools running instance is available at: [[Si-elegans platform online](https://platform.si-elegans.eu)]
 
@@ -25,9 +27,10 @@ The web-based GUI tools running instance is available at: [[Si-elegans platform 
 
 8.- python manage.py runsslserver --addrport 0.0.0.0:8000 --settings=mysite.local_settings
 
-9.- Open https://127.0.0.1:8000 in your browser. (**https!!**)
+9.- Open https://127.0.0.1:8000 in your browser. (**https!!**)(user: demo password: demo)
 
 ## Notes:
+* Admin user creation: python manage.py createsuperuser --settings=mysite.local_settings
 * Source code includes examples for Neuron models, Network configuration, Behavioural experiments and results. (See fixtures loaded in local setup instructions).
 * Some external modules had to be fixed / modified during integration within the Web-GUI tools, therefore they are included as folders in the source code.  (i.e. django_notify, django_nyt, registration, spirit and wiki)
 * This development uses [[Spirit forum](http://spirit-project.com/)] user extension of the strandard Django user. 
