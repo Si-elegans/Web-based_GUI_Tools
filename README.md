@@ -9,25 +9,29 @@ The web-based GUI tools running instance is available at: [[Si-elegans platform 
 
 ## Local setup instructions (Tested with python 2.7 in both Windows 10 and Ubuntu 14.04)
 
-0.- Clone repository
+1.- Clone repository
 
-1.- Create & activate virtualenv 
+2.- Create & activate virtualenv 
 
-2.- pip install -r requirements_local.txt
+3.- Run the following commands:
 
-3.- python manage.py migrate --settings=mysite.local_settings
+```bash
+pip install -r requirements_local.txt
 
-4.- python manage.py loaddata sielegans-fixture.json --settings=mysite.local_settings
+python manage.py migrate --settings=mysite.local_settings
 
-5.- python manage.py loaddata cenet-fixture.json --settings=mysite.local_settings
+python manage.py loaddata sielegans-fixture.json --settings=mysite.local_settings
 
-6.- python manage.py loaddata lems_ui-fixture.json --settings=mysite.local_settings
+python manage.py loaddata cenet-fixture.json --settings=mysite.local_settings
 
-7.- python manage.py createcachetable spirit_cache --settings=mysite.local_settings
+python manage.py loaddata lems_ui-fixture.json --settings=mysite.local_settings
 
-8.- python manage.py runsslserver --addrport 0.0.0.0:8000 --settings=mysite.local_settings
+python manage.py createcachetable spirit_cache --settings=mysite.local_settings
 
-9.- Open https://127.0.0.1:8000 in your browser. (**https!!**)(user: demo password: demo)
+python manage.py runsslserver --addrport 0.0.0.0:8000 --settings=mysite.local_settings
+```
+
+4.- Open https://127.0.0.1:8000 in your browser. (**https!!**)(user: demo password: demo)
 
 ## Notes:
 * Admin user creation: python manage.py createsuperuser --settings=mysite.local_settings
@@ -41,6 +45,3 @@ The web-based GUI tools running instance is available at: [[Si-elegans platform 
 
 
 Contact: sielegans.webplatform@gmail.com
-
-
-   
