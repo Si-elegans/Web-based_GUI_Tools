@@ -16,7 +16,7 @@ django-mptt==0.6.1
 django-sekizai==0.7
 django-sslserver==0.15
 django-storages==1.1.8
-djangorestframework==3.2.3
+djangorestframework==3.11.2
 djangorestframework-xml==1.0.1
 enum34==1.0.4
 generateDS==2.14a0
