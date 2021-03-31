@@ -23,7 +23,7 @@ generateDS==2.14a0
 httplib2==0.9
 idna==2.0
 ipaddress==1.0.15
-lxml==3.4.1
+lxml==4.6.3
 Markdown==2.3.1
 oauth2==1.5.211
 oauthlib==0.6.3
