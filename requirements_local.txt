@@ -6,7 +6,7 @@ defusedxml==0.4.1
 Django==1.7.1
 django-annoying==0.8.0
 django-classy-tags==0.5.1
-django-debug-toolbar==1.2.2
+django-debug-toolbar==1.11.1
 django-djconfig==0.1.4
 django-extensions==1.4.9
 django-filter==0.9.2
