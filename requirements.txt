@@ -50,7 +50,7 @@ requests-oauthlib==0.4.1
 six==1.6.1
 sorl-thumbnail==11.12.1b
 sqlparse==0.1.13
-urllib3==1.9.1
+urllib3==1.26.5
 wheel==0.24.0
 wsgiref==0.1.2
 yolk==0.4.3
